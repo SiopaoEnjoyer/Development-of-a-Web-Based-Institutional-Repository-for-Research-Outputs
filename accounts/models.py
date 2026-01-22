@@ -5,7 +5,7 @@ from django.core.validators import FileExtensionValidator
 from datetime import date, timedelta
 from django.utils import timezone
 import random
-#from storage import SupabaseStorage
+from storage import SupabaseStorage
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -94,15 +94,13 @@ class UserProfile(models.Model):
     blank=True,
     validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
     help_text='PDF file, max 10MB',
-    #storage=SupabaseStorage()
+    storage=SupabaseStorage()
 )
 
-    # Email verification fields
     email_verification_code = models.CharField(max_length=6, null=True, blank=True)
     email_verification_code_created = models.DateTimeField(null=True, blank=True)
     email_verified = models.BooleanField(default=False)
 
-    # ✅ NEW: Verification attempt tracking fields
     verification_attempts = models.IntegerField(
         default=0,
         help_text="Number of failed verification attempts"

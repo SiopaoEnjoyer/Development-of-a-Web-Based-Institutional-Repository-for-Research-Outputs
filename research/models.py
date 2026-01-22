@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from datetime import date
 from django.contrib.auth.models import User
-#from storage import SupabaseStorage
+from storage import SupabaseStorage
 
 class Keyword(models.Model):
     word = models.CharField(max_length=100, unique=True)
@@ -163,7 +163,7 @@ class ResearchPaper(models.Model):
 
     pdf_file = models.FileField(
     upload_to="research_papers/",
-    #storage=SupabaseStorage()
+    storage=SupabaseStorage()
 )
 
     awards = models.ManyToManyField(
