@@ -1,0 +1,285 @@
+{% extends "research/base.html" %}
+{% load research_form_tags %}
+{% load static %}
+{% block page_header %}Search{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'research/css/search-filters.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/paper-cards.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/index-strands.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- GREEN HEADER -->
+<div class="section-header fade-up text-center">
+    <h2>Search Research Papers</h2>
+    <p>Find approved research options using keywords and filters</p>
+</div>
+
+<!-- SEARCH & FILTER FORM -->
+<div class="container fade-up mb-4">
+    <div class="filter-card">
+        <form id="filtersForm" method="get" action="{% url 'research:search' %}">
+            <div class="input-group mb-3">
+                <input
+                    type="text"
+                    class="form-control"
+                    name="q"
+                    id="searchQuery"
+                    placeholder="Search by title, author, or keyword"
+                    value="{{ query }}"
+                    style="border-radius: 50px 0 0 50px;"
+                />
+                <button class="btn btn-success" type="submit" style="border-radius: 0 50px 50px 0; padding: 0.7rem 1.5rem;">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+
+            <!-- Advanced Search Toggle Button -->
+            <button class="advanced-search-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false">
+                <i class="bi bi-chevron-down"></i>
+                Advanced Search
+            </button>
+
+            <!-- Advanced Filters (Collapsible) -->
+            <div class="collapse" id="advancedFilters">
+                <div class="advanced-filters">
+                    <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Filters are applied automatically as you make selections. Active filters will appear below.
+                    </p>
+                    
+                    <!-- Filter rows - same as before -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">School Year</label>
+                            <select class="form-select" name="school_year" id="school_year">
+                                <option value="">All</option>
+                                {% for year in school_years %}
+                                    <option value="{{ year }}" {% if school_year == year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Grade Level</label>
+                            <select class="form-select" name="grade_level" id="grade_level">
+                                <option value="">All</option>
+                                <option value="11" {% if grade_level == '11' %}selected{% endif %}>Grade 11</option>
+                                <option value="12" {% if grade_level == '12' %}selected{% endif %}>Grade 12</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Research Design</label>
+                            <select class="form-select" name="research_design" id="research_design">
+                                <option value="">All</option>
+                                <option value="QUALITATIVE" {% if selected_research_design == 'QUALITATIVE' %}selected{% endif %}>Qualitative</option>
+                                <option value="SURVEY" {% if selected_research_design == 'SURVEY' %}selected{% endif %}>Survey</option>
+                                <option value="EXPERIMENTAL" {% if selected_research_design == 'EXPERIMENTAL' %}selected{% endif %}>Experimental</option>
+                                <option value="CAPSTONE" {% if selected_research_design == 'CAPSTONE' %}selected{% endif %}>Capstone</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Strand</label>
+                            <select class="form-select" name="strand" id="strand">
+                                <option value="">All</option>
+                                <option value="STEM" {% if strand == 'STEM' %}selected{% endif %}>STEM</option>
+                                <option value="HUMSS" {% if strand == 'HUMSS' %}selected{% endif %}>HUMSS</option>
+                                <option value="ABM" {% if strand == 'ABM' %}selected{% endif %}>ABM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Second Row -->
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Authors</label>
+                            <div class="dropdown-container">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="authorSearchInput"
+                                    placeholder="Select Grade Level and School Year"
+                                    autocomplete="off"
+                                    disabled
+                                />
+                                <div class="dropdown-menu-custom" id="authorDropdown"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Keywords</label>
+                            <div class="dropdown-container">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="keywordSearchInput"
+                                    placeholder="Search keywords..."
+                                    autocomplete="off"
+                                />
+                                <div class="dropdown-menu-custom" id="keywordDropdown"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Research Award</label>
+                            <select class="form-select" name="award" id="award">
+                                <option value="">All Awards</option>
+                                {% for award in awards %}
+                                    <option value="{{ award.id }}" {% if award.id|stringformat:"s" == selected_award %}selected{% endif %}>
+                                        {{ award.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button class="btn-reset" type="button" id="resetAllBtn">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ACTIVE FILTER SECTION -->
+    <div id="activeFiltersSection" style="display: none;">
+        <div class="filters-active-section">
+            <h6><i class="bi bi-funnel-fill me-2"></i>Active Filters</h6>
+            <div id="active-filters"></div>
+        </div>
+    </div>
+</div>
+
+<!-- SEARCH RESULTS -->
+<div id="search-results">
+{% if papers %}
+<div class="container fade-up">
+    <div class="row g-4 justify-content-center">
+        {% for paper in papers %}
+        <div class="col-lg-10 paper-wrapper">
+            <div class="paper-card" onclick="window.location.href='{% url 'research:detail' paper.id %}'">
+                <!-- Paper content - same as before -->
+                <div class="mb-2">
+                    {% if paper.strand %}
+                        <span class="badge strand-badge">{{ paper.strand }}</span>
+                    {% endif %}
+                    {% if paper.research_design %}
+                        <span class="badge spec-badge">{{ paper.get_research_design_display }}</span>
+                    {% endif %}
+                    {% for award in paper.awards.all %}
+                        <span class="badge award-badge">{{ award.name }}</span>
+                    {% endfor %}
+                </div>
+
+                <h5 class="paper-title">
+                    <a href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                        {{ paper.title|format_italics }}
+                    </a>
+                </h5>
+
+                <p class="pub-date">
+                    <i class="bi bi-calendar3"></i> Finished on {{ paper.publication_date|date:"F d, Y" }}
+                </p>
+
+                {% if paper.author.all %}
+                <p class="authors">
+                    <strong><i class="bi bi-people-fill"></i> Authors:</strong>
+                    {% for author in paper.author.all %}
+                        {{ author.display_name_public }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+
+                {% if paper.abstract %}
+                <p class="abstract-text">
+                    <strong>Abstract:</strong> {{ paper.abstract|truncatewords:30 }}
+                </p>
+                {% endif %}
+
+                {% if paper.keywords.all %}
+                <div class="mb-3">
+                    <strong style="font-size: 0.9rem; color: #475569;">
+                        <i class="bi bi-tags-fill"></i> Keywords:
+                    </strong>
+                    {% for keyword in paper.keywords.all %}
+                        <span class="badge keyword-badge">{{ keyword.word|format_italics }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <a class="read-more" href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                    Read full paper
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- PAGINATION -->
+<div class="d-flex justify-content-center mt-5 mb-4">
+    <nav aria-label="Research pagination">
+        <ul class="pagination pagination-green">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
+                    ‹ Previous
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">‹ Previous</span>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
+                    Next ›
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next ›</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% else %}
+<div class="container text-center">
+    <div class="alert alert-info" style="background: rgba(1, 87, 38, 0.08); border: 2px solid rgba(1, 87, 38, 0.2); color: var(--theme-green); border-radius: 12px;">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>No research papers found.</strong> Try adjusting your search criteria.
+    </div>
+</div>
+{% endif %}
+</div>
+
+<!-- Hidden data attributes for JS configuration -->
+<div style="display: none;"
+     data-reset-url="{% url 'research:search' %}"
+     data-authors-api="{% url 'research:get_authors_by_batch' %}"
+     data-keywords-api="{% url 'research:get_all_keywords' %}">
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load shared filter logic first, then page-specific init -->
+<script src="{% static 'research/js/search-filters-shared.js' %}"></script>
+<script src="{% static 'research/js/search-init.js' %}"></script>
+{% endblock %}

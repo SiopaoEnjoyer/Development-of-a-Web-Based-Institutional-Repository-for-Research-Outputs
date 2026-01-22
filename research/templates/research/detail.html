@@ -1,0 +1,434 @@
+{% extends "research/base_no_header.html" %}
+{% load research_form_tags %}
+{% load static %}
+
+{% block title %}{{ object.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'research/css/detail.css' %}">
+<style>
+  /* Citation Modal Styles */
+  .cite-button {
+    background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(1, 87, 38, 0.2);
+  }
+  
+  .cite-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(1, 87, 38, 0.3);
+    background: linear-gradient(135deg, #018a3d 0%, #015726 100%);
+  }
+  
+  .cite-button i {
+    font-size: 1.1em;
+  }
+  
+  /* Section Header Line Fix */
+  .detail-section h4 {
+    border-bottom: 3px solid #015726;
+  }
+  
+  .detail-section h4::after {
+    display: none;
+  }
+  
+  /* Colored Badges */
+  .school-year-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  }
+  
+  .keyword-badge {
+    background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-weight: 500;
+    display: inline-block;
+    margin: 4px;
+    box-shadow: 0 2px 4px rgba(1, 87, 38, 0.3);
+  }
+  
+/* Citation Modal Styles */
+.citation-modal .modal-dialog {
+  margin-top: 5vh;
+}
+
+.citation-modal .modal-content {
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.citation-modal .modal-header {
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  border: none;
+  padding: 24px 30px;
+  border-radius: 16px 16px 0 0;
+}
+
+.citation-modal .modal-title {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.35rem;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+}
+
+.citation-modal .modal-title i {
+  font-size: 1.5rem;
+}
+
+.citation-modal .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+.citation-modal .modal-content {
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+}
+
+.citation-modal .modal-header {
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  border: none;
+  padding: 20px 24px;
+}
+
+.citation-modal .modal-title {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+}
+
+.citation-modal .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+.citation-modal .modal-body {
+  padding: 30px;
+}
+
+.citation-modal .citation-box {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0;
+  font-family: 'Georgia', serif;
+  line-height: 1.8;
+  color: #1e293b;
+  font-size: 1rem;
+  text-align: left; /* Left align the citation text */
+  padding-left: 20px; /* Base padding */
+  text-indent: -0.5in; /* Hanging indent */
+  padding-left: calc(20px + 0.5in); /* Adjust left padding to accommodate hanging indent */
+}
+
+.citation-modal .citation-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.citation-modal .citation-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.citation-modal .citation-btn-copy {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+}
+
+.citation-modal .citation-btn-copy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(245, 158, 11, 0.4);
+}
+
+.citation-modal .citation-btn-download {
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(1, 87, 38, 0.3);
+}
+
+.citation-modal .citation-btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(1, 87, 38, 0.4);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="particle-bg"></div>
+
+<div class="container my-4" data-paper-id="{{ object.id }}">
+  <!-- Header Section -->
+  <div class="detail-header">
+    <h2>{{ object.title|format_italics }}</h2>
+    
+    <div class="author-list">
+      <i class="bi bi-people-fill"></i>
+      {% for author in object.author.all %}
+        {{ author.display_name_public }}{% if not forloop.last %}, {% endif %}
+      {% empty %}
+        <span class="text-muted">No authors listed</span>
+      {% endfor %}
+    </div>
+    
+    <div class="meta-info">
+      <i class="bi bi-calendar-event"></i>
+      Finished on: {{ object.publication_date|date:"F d, Y" }}
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="card shadow-sm detail-content">
+    <div class="card-body p-4 p-md-5">
+      
+      <!-- Research Information -->
+<div class="detail-section">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 3px solid #015726; padding-bottom: 0.75rem;">
+    <h4 style="margin: 0; border: none; padding: 0;"><i class="bi bi-info-circle"></i>Research Information</h4>
+    <div style="display: flex; gap: 12px;">
+      <button class="cite-button" data-bs-toggle="modal" data-bs-target="#citationModal" style="padding: 8px 20px;">
+        <i class="bi bi-quote"></i>
+        Cite This Work
+      </button>
+      
+      {% if object.pdf_file %}
+        {% if user.is_authenticated %}
+          {% if user.userprofile.is_approved %}
+            <!-- Approved users can view PDF -->
+            <a href="{{ object.pdf_file.url }}" class="pdf-button" target="_blank" style="padding: 8px 20px;">
+              <i class="bi bi-download"></i>
+              View PDF
+            </a>
+          {% else %}
+            <!-- Unapproved users see lock button -->
+            <button type="button" class="pdf-button" data-bs-toggle="modal" data-bs-target="#pendingModal" style="padding: 8px 20px;">
+              <i class="bi bi-lock-fill"></i>
+              View PDF
+            </button>
+          {% endif %}
+        {% else %}
+          <!-- Not logged in users see lock button -->
+          <button type="button" class="pdf-button" data-bs-toggle="modal" data-bs-target="#loginModal" style="padding: 8px 20px;">
+            <i class="bi bi-lock-fill"></i>
+            View PDF
+          </button>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+        
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-bookmark-star"></i> Strand:</span>
+            <div>
+              <span class="info-pill strand-{{ object.strand|lower }}">{{ object.get_strand_display }}</span>
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-mortarboard"></i> Grade Level:</span>
+            <span class="info-pill grade grade-{{ object.grade_level }}">{{ object.get_grade_level_display }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-clipboard-data"></i> Research Design:</span>
+            <div>
+              {% if object.research_design %}
+                <span class="info-pill research-{{ object.research_design|lower }}">{{ object.get_research_design_display }}</span>
+              {% else %}
+                <span class="text-muted">Not specified</span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-calendar3"></i> School Year:</span>
+            <span class="school-year-badge">
+              <i class="bi bi-calendar-range"></i>
+              {{ object.school_year }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="info-row">
+          <span class="info-label"><i class="bi bi-tags"></i> Keywords:</span>
+          <div>
+            {% for keyword in object.keywords.all %}
+              <span class="keyword-badge">{{ keyword.name|format_italics }}</span>
+            {% empty %}
+              <span class="text-muted">No keywords</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Abstract -->
+      <div class="detail-section">
+        <h4><i class="bi bi-file-text"></i>Abstract</h4>
+        <p>{{ object.abstract }}</p>
+      </div>
+
+      <!-- Awards (if any) -->
+      {% if object.awards.all %}
+      <div class="detail-section">
+        <h4><i class="bi bi-trophy"></i>Awards & Recognition</h4>
+        <div class="info-row">
+          {% for award in object.awards.all %}
+            <span class="info-pill award">
+              <i class="bi bi-award-fill"></i>{{ award.name }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="mt-4">
+        <a href="#" class="back-button" id="backButton">
+          <i class="bi bi-arrow-left"></i>
+          Back
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Citation Modal -->
+<div class="modal fade citation-modal" id="citationModal" tabindex="-1" aria-labelledby="citationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="citationModalLabel">
+          <i class="bi bi-quote"></i>
+          Cite This Work (APA 7th Edition)
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="citation-box" id="citationText">
+          <!-- Citation will be generated by JavaScript -->
+        </div>
+        <div class="citation-actions">
+          <button class="citation-btn citation-btn-copy" id="copyCitation">
+            <i class="bi bi-clipboard-check"></i>
+            Copy Citation
+          </button>
+          <button class="citation-btn citation-btn-download" id="downloadCitation">
+            <i class="bi bi-download"></i>
+            Download as Text
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Required Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">
+          <i class="bi bi-lock-fill"></i>Authentication Required
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <i class="bi bi-file-pdf" style="color: #015726;"></i>
+        <p><strong>You need to be logged in to view and download research papers.</strong></p>
+        <p>Sign in to access the full research repository.</p>
+      </div>
+      <div class="modal-footer">
+        <div class="w-100">
+          <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-login w-100">
+            <i class="bi bi-box-arrow-in-right"></i>Log In
+          </a>
+          <div class="register-link">
+            Don't have an account? 
+            <a href="{% url 'accounts:register' %}">Register now if you're a BTCSI member!</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pending Approval Modal -->
+<div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pendingModalLabel">
+          <i class="bi bi-hourglass-split"></i>Account Pending Approval
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <i class="bi bi-file-pdf" style="color: #f59e0b;"></i>
+        <p><strong>Your account is awaiting administrator approval.</strong></p>
+        <p>Once approved, you'll have full access to all research papers in our repository.</p>
+      </div>
+      <div class="modal-footer">
+        <div class="w-100">
+          <a href="{% url 'accounts:pending_dashboard' %}" class="btn btn-pending-dashboard w-100">
+            <i class="bi bi-hourglass-split"></i>View Approval Status
+          </a>
+          <div class="register-link">
+            Questions? Contact your administrator for assistance.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'research/js/detail.js' %}"></script>
+{% endblock %}

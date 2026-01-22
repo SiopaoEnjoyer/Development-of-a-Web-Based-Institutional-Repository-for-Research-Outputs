@@ -1,0 +1,407 @@
+{% extends "research/base_no_header.html" %}
+{% load research_form_tags %}
+{% load static %}
+
+{% block title %}
+  {% if page_mode == "edit" %}Edit Research Paper{% else %}Upload Research Paper{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'research/css/paper-form.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/toast_notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-bg-container">
+    <div class="card auth-card shadow-lg" style="max-width: 1000px;">
+        <div class="card-body" style="padding: 2.5rem 2rem;">
+
+<h3 class="auth-title">
+    {% if page_mode == "edit" %}
+        <i class="bi bi-pencil-square"></i> Edit Research Paper
+    {% else %}
+        <i class="bi bi-upload"></i> Upload New Research Paper
+    {% endif %}
+</h3>
+<p class="auth-subtitle">Fill in the details below to {% if page_mode == "edit" %}update{% else %}submit{% endif %} a research paper</p>
+
+  {% if form.errors %}
+  <div class="alert alert-danger" id="djangoErrorAlert" style="display: none;">
+    <strong>Please correct the following errors:</strong>
+    {{ form.errors }}
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="paperForm">
+    {% csrf_token %}
+    <div class="row g-3">
+
+    <!-- Title - Direct Edit -->    
+    <div class="col-md-12">
+        <label class="form-label">Title <span class="required-asterisk">*</span></label>
+        <input type="text" 
+               name="title" 
+               id="titleField"
+               class="form-control" 
+               value="{{ form.instance.title }}"
+               placeholder="Enter research paper title (use *asterisks* for italics)"
+               required>
+        <small class="form-text text-muted">Use *asterisks* around text for italics (e.g., *Escherichia coli*)</small>
+        <small class="text-danger validation-error" id="titleError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <!-- Publication Date -->
+    <div class="col-md-12">
+        <label class="form-label">Publication Date <span class="required-asterisk">*</span></label>
+        <div class="birthdate-group">
+            <select class="form-select" id="pubMonth" name="pub_month" required>
+                <option value="">Month</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+            <select class="form-select" id="pubDay" name="pub_day" disabled required>
+                <option value="">Day</option>
+            </select>
+            <select class="form-select" id="pubYear" name="pub_year" required>
+                <option value="">Year</option>
+            </select>
+        </div>
+        <input type="hidden" name="publication_date" id="pubDateField">
+        <small class="text-danger validation-error" id="pubDateError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <!-- Abstract - Direct Edit -->
+    <div class="col-md-12">
+        <label class="form-label">Abstract <span class="required-asterisk">*</span></label>
+        <textarea name="abstract" 
+                  id="abstractField"
+                  class="form-control" 
+                  rows="6"
+                  placeholder="Enter the research paper abstract..."
+                  required>{{ form.instance.abstract }}</textarea>
+        <small class="text-danger validation-error" id="abstractError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <!-- Grade Level -->
+      <div class="col-md-3">
+        <label class="form-label">Grade Level <span class="required-asterisk">*</span></label>
+        <select name="grade_level" id="id_grade_level" class="form-select">
+        <option value="">Select Grade</option>
+        <option value="11" {% if form.instance.grade_level == 11 %}selected{% endif %}>Grade 11</option>
+        <option value="12" {% if form.instance.grade_level == 12 %}selected{% endif %}>Grade 12</option>
+        </select>
+        <small class="text-danger validation-error" id="gradeError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">School Year <span class="required-asterisk">*</span></label>
+        <input type="text" name="school_year" id="id_school_year" 
+            class="form-control" 
+            placeholder="2024-2025" 
+            value="{{ form.instance.school_year }}"
+            pattern="\d{4}-\d{4}">
+        <small class="text-muted">Format: YYYY-YYYY</small>
+        <small class="text-danger validation-error" id="syError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Strand <span class="required-asterisk">*</span></label>
+        {{ form.strand|add_class:"form-select" }}
+        <small class="text-danger validation-error" id="strandError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Research Design <span class="required-asterisk">*</span></label>
+        <select name="research_design" id="id_research_design" class="form-select" disabled>
+            <option value="">Select Grade & Strand first</option>
+            {% for value, label in form.fields.research_design.choices %}
+                {% if value %}
+                <option value="{{ value }}" data-grade="all" data-strand="all" {% if form.instance.research_design == value %}selected{% endif %}>{{ label }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <small class="text-danger validation-error" id="researchDesignError" style="display: none; font-size: 0.75rem;">This field is required</small>
+    </div>
+
+    <!-- Authors Section -->
+    <div class="col-md-12">
+        <div class="author-header">
+        <label class="form-label">Authors <span class="required-asterisk">*</span></label>
+        <button type="button" 
+                class="btn btn-add-item btn-sm" 
+                id="addAuthorBtn"
+                data-bs-toggle="modal" 
+                data-bs-target="#addAuthorModal"
+                disabled>
+            <i class="bi bi-person-plus"></i> Add New Author
+        </button>
+        </div>
+        <div class="author-dropdown-container">
+        <input
+            type="text"
+            class="form-control"
+            id="authorSearchInput"
+            placeholder="Select Grade Level and School Year first"
+            autocomplete="off"
+            disabled
+        />
+        <div class="author-dropdown" id="authorDropdown"></div>
+        </div>
+        <small class="text-danger validation-error" id="authorError" style="display: none; font-size: 0.75rem;">At least one author is required</small>
+        <div class="selected-items-box mt-3" id="selectedAuthorsBox">
+        <small class="text-muted">No authors selected yet</small>
+        </div>
+    </div>
+
+      <!-- Keywords Section -->
+      <div class="col-md-12">
+        <div class="keyword-section-header">
+          <label class="form-label">Keywords</label>
+          <button type="button" class="btn btn-add-item btn-sm" data-bs-toggle="modal" data-bs-target="#addKeywordModal">
+            <i class="bi bi-tag"></i> Add New Keyword
+          </button>
+        </div>
+        <div class="keyword-dropdown-container">
+          <input
+            type="text"
+            class="form-control"
+            id="keywordSearchInput"
+            placeholder="Search keywords..."
+            autocomplete="off"
+          />
+          <div class="keyword-dropdown" id="keywordDropdown"></div>
+        </div>
+        <div class="selected-items-box mt-3" id="selectedKeywordsBox">
+          <small class="text-muted">No keywords selected yet</small>
+        </div>
+      </div>
+
+      <!-- Awards Section -->
+        <div class="col-md-12">
+        <div class="author-header">
+            <label class="form-label">Awards</label>
+            <button type="button" class="btn btn-add-item btn-sm" data-bs-toggle="modal" data-bs-target="#addAwardModal">
+            <i class="bi bi-trophy"></i> Add New Award
+            </button>
+        </div>
+        <div class="award-dropdown-container">
+            <input
+            type="text"
+            class="form-control"
+            id="awardSearchInput"
+            placeholder="Search awards..."
+            autocomplete="off"
+            />
+            <div class="award-dropdown" id="awardDropdown"></div>
+        </div>
+        <div class="selected-items-box mt-3" id="selectedAwardsBox">
+            <small class="text-muted">No awards selected yet</small>
+        </div>
+        </div>
+
+    <!-- PDF File -->
+    <div class="col-md-12">
+        <label class="form-label">PDF File <span class="required-asterisk">*</span></label>
+        
+        {% if form.instance.pdf_file %}
+        <!-- Current PDF Display -->
+        <div class="mb-3 p-3" style="background: linear-gradient(135deg, #f0f7f4 0%, #e8f5e9 100%); border: 2px solid #c8e6c9; border-radius: 12px; box-shadow: 0 2px 4px rgba(1, 87, 38, 0.08);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="flex-shrink-0" style="width: 48px; height: 48px; background: var(--primary-green); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-file-pdf-fill" style="font-size: 24px; color: white;"></i>
+                </div>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <small class="text-muted d-block mb-1" style="font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Current File</small>
+                    <span id="currentFileName" style="font-family: 'Montserrat', sans-serif; font-weight: 600; color: #2d5a3d; font-size: 0.95rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ form.instance.pdf_file.name|slice:"16:"|truncatechars:60 }}
+                    </span>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    {% if form.instance.pdf_file %}
+                    <a href="{{ form.instance.pdf_file.url }}" target="_blank" class="btn btn-success" style="width: 110px; padding: 8px 16px;">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    {% endif %}
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#changePdfModal" style="width: 110px; padding: 8px 16px;">
+                        <i class="bi bi-arrow-repeat"></i> Change
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- No PDF uploaded yet -->
+        <div class="mb-3 p-3" style="background: linear-gradient(135deg, #f0f7f4 0%, #e8f5e9 100%); border: 2px solid #c8e6c9; border-radius: 12px; box-shadow: 0 2px 4px rgba(1, 87, 38, 0.08);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="flex-shrink-0" style="width: 48px; height: 48px; background: var(--primary-green); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-file-pdf-fill" style="font-size: 24px; color: white;"></i>
+                </div>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <small class="text-muted d-block mb-1" style="font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Current File</small>
+                    <span id="currentFileName" style="font-family: 'Montserrat', sans-serif; font-weight: 600; color: #6c757d; font-size: 0.95rem; display: block;">
+                        No PDF uploaded yet
+                    </span>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#changePdfModal" style="width: 110px; padding: 8px 16px;">
+                        <i class="bi bi-upload"></i> Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Hidden file input -->
+        <input type="file" name="pdf_file" id="id_pdf_file" style="display: none;" accept="application/pdf">
+        <small class="text-danger validation-error" id="pdfError" style="display: none; font-size: 0.75rem;">PDF file is required</small>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-between">
+        <a href="{% url 'research:admin_dashboard' %}" class="btn btn-danger">
+            <i class="bi bi-x-circle"></i> Cancel
+        </a>
+        <button type="button" class="btn btn-success" id="previewBtn">
+            <i class="bi bi-check-circle"></i> {% if page_mode == "edit" %}Save Changes{% else %}Upload Paper{% endif %}
+        </button>
+    </div>
+  </form>
+</div>
+</div>
+</div>
+
+<!-- === MODALS === -->
+
+<!-- Add Author Modal -->
+{% include "research/partials/author_modals.html" %}
+<!-- Add Keyword Modal -->
+{% include "research/partials/keyword_modals.html" %}
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewLabel">
+          <i class="bi bi-eye"></i> Review Your Changes
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="previewContent">
+        <p>Loading preview...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="confirmSaveBtn">
+          <i class="bi bi-check-circle"></i> Confirm & Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change PDF Modal -->
+<div class="modal fade" id="changePdfModal" tabindex="-1" aria-labelledby="changePdfModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePdfModalLabel">
+          <i class="bi bi-file-pdf"></i> {% if form.instance.pdf_file %}Change PDF File{% else %}Upload PDF File{% endif %}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="pdfModalErrors" style="display: none;" class="alert alert-danger"></div>
+        
+        <label class="form-label">Select PDF File <span class="text-danger">*</span></label>
+        <input type="file" id="modalPdfInput" class="form-control" accept="application/pdf">
+        <small class="text-muted mt-2 d-block">Maximum file size: 50MB</small>
+        
+        <div id="selectedFilePreview" class="mt-3" style="display: none;">
+          <div class="p-2" style="background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+            <small class="text-muted d-block mb-1">Selected file:</small>
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-file-pdf-fill" style="color: var(--primary-green); font-size: 1.2rem;"></i>
+              <span id="selectedFileNameDisplay" style="font-weight: 600; font-size: 0.9rem;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="savePdfBtn">
+          <i class="bi bi-check-circle"></i> Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Award Modal -->
+<div class="modal fade" id="addAwardModal" tabindex="-1" aria-labelledby="addAwardModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAwardModalLabel">
+          <i class="bi bi-trophy"></i> Add New Award
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="awardModalErrors" style="display: none;" class="alert alert-danger"></div>
+        <label class="form-label">Award Name <span class="text-danger">*</span></label>
+        <input type="text" id="award_name" class="form-control" placeholder="Enter award name" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="saveAwardBtn">
+          <i class="bi bi-plus-circle"></i> Add Award
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Store existing data in hidden div for JavaScript -->
+<div id="existingData" style="display: none;" 
+     data-mode="{{ page_mode }}"
+     data-pub-date="{% if form.instance.publication_date %}{{ form.instance.publication_date|date:'Y-m-d' }}{% endif %}"
+     data-pdf-url="{% if form.instance.pdf_file %}{{ form.instance.pdf_file.url }}{% endif %}"
+     data-pdf-name="{% if form.instance.pdf_file %}{{ form.instance.pdf_file.name|slice:'16:' }}{% endif %}"
+     data-authors='[{% if form.instance.id %}{% for author in form.instance.author.all %}{"id": {{ author.id }}, "name": "{{ author.display_name_public|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}]'
+     data-awards='[{% if form.instance.id %}{% for award in form.instance.awards.all %}{"id": {{ award.id }}, "name": "{{ award.name|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}]'
+     data-keywords='[{% if form.instance.id %}{% for keyword in form.instance.keywords.all %}{"id": {{ keyword.id }}, "name": "{{ keyword.name|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}{% endif %}]'>
+</div>
+
+<!-- Store all available keywords -->
+<div id="allKeywordsData" style="display: none;">
+  [{% for keyword in form.fields.keywords.queryset %}{"id": {{ keyword.id }}, "name": "{{ keyword.name|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</div>
+
+<!-- Store all available awards -->
+<div id="allAwardsData" style="display: none;">
+  [{% for award in form.fields.awards.queryset %}{"id": {{ award.id }}, "name": "{{ award.name|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'research/js/toast_notifications.js' %}"></script>
+<script src="{% static 'research/js/paper-form.js' %}"></script>
+{% endblock %}

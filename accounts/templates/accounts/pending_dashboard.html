@@ -1,0 +1,158 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+
+{% block title %}Pending Approval{% endblock %}
+{% block page_header %}Account Pending Approval{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard-common.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Background Image -->
+<div class="dashboard-background">
+    <img src="{% static 'research/img/trinity.jpg' %}" alt="Background">
+</div>
+
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="mb-5 animate-fade-down">
+        <div class="page-header-box">
+            <h1 class="display-5 fw-bold mb-2">Welcome, {{ profile.pending_first_name }}!</h1>
+            <p class="text-muted fs-5 mb-0">Your account is being reviewed</p>
+        </div>
+    </div>
+
+    <!-- Pending Approval Card -->
+    <div class="pending-card">
+        <!-- Animated Icon -->
+        <div class="pending-icon">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+
+        <h3>Account Pending Administrator Approval</h3>
+
+        <p class="text-center">
+            Thank you for registering! Your account has been successfully created and is currently awaiting approval from an administrator.
+        </p>
+
+        <!-- Status Info -->
+        <div class="status-info">
+            <h5>
+                <i class="bi bi-info-circle-fill"></i>
+                What happens next?
+            </h5>
+            <ul>
+                <li><strong>Review Process:</strong> An administrator will review your registration details</li>
+                <li><strong>Email Notification:</strong> You'll receive an email once your account is approved</li>
+                <li><strong>Access Granted:</strong> After approval, you'll gain full access to your dashboard and research papers</li>
+                <li><strong>Estimated Time:</strong> Reviews typically take 1-2 business days</li>
+            </ul>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info">
+            <h5>
+                <i class="bi bi-person-circle"></i>
+                Your Registration Details
+            </h5>
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ profile.display_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Role:</span>
+                <span class="info-value">{{ user.get_role_display }}</span>
+            </div>
+            {% if profile.pending_G11 or profile.pending_G12 %}
+            <div class="info-row">
+                <span class="info-label">Batch:</span>
+                <span class="info-value">
+                    {% if profile.pending_G11 %}G11: {{ profile.pending_G11 }}{% endif %}
+                    {% if profile.pending_G11 and profile.pending_G12 %} | {% endif %}
+                    {% if profile.pending_G12 %}G12: {{ profile.pending_G12 }}{% endif %}
+                </span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                    <span class="badge" style="background: #ffc107; color: #000;">
+                        <i class="bi bi-clock-history"></i> Pending Approval
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button onclick="location.reload();" class="btn-refresh">
+                <i class="bi bi-arrow-clockwise"></i>
+                Refresh Status
+            </button>
+            <a href="{% url 'accounts:logout' %}" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </div>
+
+        <!-- Additional Help -->
+        <div class="text-center mt-4">
+            <p class="text-muted mb-0">
+                <i class="bi bi-question-circle"></i>
+                Need help? Contact your administrator or check your email for updates.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Pending approval page loaded.');
+    
+    // Check approval status when refresh button is clicked
+    const refreshButtons = document.querySelectorAll('.btn-refresh');
+    refreshButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            this.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Checking...';
+            this.disabled = true;
+            
+            // Check approval status
+            fetch(window.location.href, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.approved) {
+                    // User is now approved! Redirect to dashboard
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Still pending, show message
+                    this.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Still Pending';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Status';
+                        this.disabled = false;
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking status:', error);
+                this.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Status';
+                this.disabled = false;
+            });
+        });
+    });
+});
+</script>
+
+{% endblock %}

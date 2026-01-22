@@ -1,0 +1,251 @@
+/* ==============================
+   Animations
+================================*/
+.fade-up {
+    opacity: 0;
+    animation: fadeUp .8s ease-out forwards;
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==============================
+   GREEN SECTION HEADERS
+================================*/
+.choose-header,
+.section-header {
+    background: #0b4d26;
+    padding: 30px 20px;
+    border-radius: 18px;
+    text-align: center;
+    margin: 40px auto 35px;
+    max-width: 1100px;
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.choose-header h2,
+.section-header h2 {
+    color: #ffffff;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+.section-header p {
+    color: #d9efe4;
+    font-size: .9rem;
+    margin-top: 6px;
+    margin: 0;
+}
+
+/* ==============================
+   Strand Cards
+================================*/
+.strand-card {
+    border: 2px solid #0b4d26;
+    padding: 38px 26px;
+    border-radius: 14px;
+    background: #ffffff;
+    transition: .25s ease;
+    text-align: center;
+    height: 100%;
+}
+
+.strand-card h2,
+.strand-card h5 {
+    color: #0b4d26;
+    font-weight: 700;
+}
+
+.strand-card small {
+    color: #5f7f6c;
+}
+
+.strand-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 26px rgba(0,0,0,.15);
+}
+
+/* ==============================
+   Paper Card
+================================*/
+.paper-card {
+    border: 2.5px solid #06361b;
+    background: #ffffff;
+    padding: 28px 34px;
+    border-radius: 16px;
+    transition: .25s ease;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+.paper-card:hover {
+    border-color: #0b4d26;
+    box-shadow: 0 16px 36px rgba(0,0,0,.25);
+}
+
+.paper-wrapper {
+    transition: transform .25s ease;
+}
+
+.paper-wrapper:hover {
+    transform: translateY(-12px); /* realistic lift */
+}
+
+/* ==============================
+   Badges
+================================*/
+.strand-badge,
+.spec-badge {
+    background: #0b4d26;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: .7rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.badge.keyword-badge {
+    background-color: var(--bs-badge-bg, #0b4d26) !important;
+    color: var(--bs-badge-color, #ffffff) !important;
+
+    font-size: .7rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.award-badge {
+    background: linear-gradient(135deg, #f4c430, #d4a017);
+    color: #ffffff;
+    padding: 6px 12px;
+    font-size: .7rem;
+    border-radius: 20px;
+    font-weight: 700;
+    margin-right: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.25);
+}
+
+/* ==============================
+   Typography
+================================*/
+.paper-title a {
+    color: #0b4d26;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.paper-title a:hover {
+    text-decoration: underline;
+}
+
+.pub-date {
+    color: #6b7c8f;
+    font-size: .82rem;
+}
+
+.authors {
+    font-size: .85rem;
+}
+
+.abstract-text {
+    font-size: .95rem;
+}
+
+/* ==============================
+   Read More
+================================*/
+.read-more {
+    color: #0b4d26;
+    font-weight: 600;
+    text-decoration: underline;
+    font-size: .9rem;
+}
+
+.read-more:hover {
+    text-decoration-thickness: 2px;
+}
+
+/* ==============================
+   Back Button
+================================*/
+.back-btn {
+    background: transparent;
+    border: 1.5px solid #ffffff;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: .8rem;
+    margin-bottom: 10px;
+}
+
+.back-btn:hover {
+    background: #ffffff;
+    color: #0b4d26;
+}
+
+.back-outside {
+    border: 1.5px solid #0b4d26;
+    color: #0b4d26;
+    background: transparent;
+}
+
+.back-outside:hover {
+    background: #0b4d26;
+    color: #ffffff;
+}
+
+.pagination-green .page-link {
+    background-color: #198754;        
+    color: #ffffff;
+    border: none;
+    margin: 0 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.pagination-green .page-link:hover {
+    background-color: #157347;
+    transform: translateY(-1px);
+}
+
+.pagination-green .page-item.active .page-link {
+    background-color: #146c43;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+}
+
+.pagination-green .page-item.disabled .page-link {
+    background-color: #a3cfbb;
+    color: #ffffff;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.filter-token {
+    display: inline-flex;
+    align-items: center;
+    background-color: #198754; /* bootstrap green */
+    color: white;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    margin: 4px 6px 4px 0;
+}
+
+.filter-token button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    margin-left: 6px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.filter-token button:hover {
+    color: #ffd966;
+}
+
+

@@ -1,0 +1,380 @@
+/* ==============================
+   SHARED DASHBOARD STYLES
+   Location: static/accounts/css/dashboard-common.css
+   Used by: Teacher, Student, Admin, Pending dashboards
+================================*/
+
+/* ==============================
+   Dashboard Background
+================================*/
+.dashboard-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.dashboard-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    filter: brightness(0.75);
+}
+
+.dashboard-background::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(1, 87, 38, 0.85) 0%, rgba(1, 61, 28, 0.9) 100%);
+}
+
+/* ==============================
+   Animations
+================================*/
+.animate-fade-down {
+    animation: fadeDown 0.8s ease-out forwards;
+}
+
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+    }
+}
+
+/* ==============================
+   Page Header with White Background
+================================*/
+.page-header-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(1, 87, 38, 0.3);
+    backdrop-filter: blur(10px);
+    animation: fadeDown 0.8s ease-out forwards;
+    margin-bottom: 30px;
+}
+
+.page-header-box h1 {
+    color: #0b4d26;
+    margin: 0;
+}
+
+.page-header-box p {
+    color: #666;
+    margin: 0;
+}
+
+/* ==============================
+   Icon Circle
+================================*/
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==============================
+   Card Styles
+================================*/
+.dashboard-card {
+    animation: fadeDown 0.6s ease forwards;
+    opacity: 0;
+    border-radius: 12px;
+    transition: all 0.4s ease;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(1, 87, 38, 0.2);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3) !important;
+    border-color: #0b4d26;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+/* ==============================
+   Pending Approval Card (Specific)
+================================*/
+.pending-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(1, 87, 38, 0.3);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    max-width: 700px;
+    margin: 0 auto;
+    animation: fadeDown 0.8s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+.pending-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.pending-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.pending-card h3 {
+    color: #0b4d26;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.pending-card p {
+    color: #333;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+/* ==============================
+   Status Info Box
+================================*/
+.status-info {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+}
+
+.status-info h5 {
+    color: #856404;
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-info ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.status-info li {
+    margin-bottom: 10px;
+    color: #856404;
+}
+
+/* ==============================
+   User Info Section
+================================*/
+.user-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+}
+
+.user-info h5 {
+    color: #0b4d26;
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.info-value {
+    color: #212529;
+}
+
+/* ==============================
+   Action Buttons
+================================*/
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn-logout {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-logout:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    color: white;
+}
+
+.btn-refresh {
+    background: #0b4d26;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.btn-refresh:hover {
+    background: #0d6633;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(11, 77, 38, 0.3);
+}
+
+/* ==============================
+   Dashboard Button Styles
+================================*/
+/* Base button styles - EXCLUDE dropdown toggle */
+.auth-bg-container .btn-success:not(.dropdown-toggle),
+.auth-bg-container .btn-outline-primary,
+.auth-bg-container .btn-outline-secondary,
+.auth-bg-container .btn-add-item {
+    background-color: var(--primary-green) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 8px 20px !important;
+    border-radius: 20px !important;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+    font-size: 0.9rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+}
+
+/* Hover states - NO TRANSFORM */
+.auth-bg-container .btn-success:not(.dropdown-toggle):hover,
+.auth-bg-container .btn-outline-primary:hover,
+.auth-bg-container .btn-outline-secondary:hover,
+.auth-bg-container .btn-add-item:hover {
+    background-color: var(--primary-green-hover) !important;
+    box-shadow: 0 2px 6px rgba(11, 77, 38, 0.25) !important;
+}
+
+/* ==============================
+   Footer Override
+================================*/
+.site-footer {
+    position: relative;
+    z-index: 100 !important;
+    background: linear-gradient(135deg, #013d1c 0%, var(--theme-green) 50%, #013d1c 100%) !important;
+}
+
+/* ==============================
+   Stagger Animation Delays
+================================*/
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+.dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* ==============================
+   Responsive Media Queries
+================================*/
+@media (max-width: 768px) {
+    .pending-card {
+        padding: 30px 20px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-logout, .btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .page-header-box {
+        padding: 20px 25px;
+    }
+}

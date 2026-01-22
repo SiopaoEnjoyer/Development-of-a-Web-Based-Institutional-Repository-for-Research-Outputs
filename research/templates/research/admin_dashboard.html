@@ -1,0 +1,333 @@
+{% extends "research/base.html" %}
+{% load research_form_tags %}
+{% load static %}
+{% block page_header %}Research Dashboard{% endblock %}
+{% block title %}Research Dashboard{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'research/css/search-filters.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/admin-dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h2 class="mb-2">Research Dashboard</h2>
+      <p>Manage and filter uploaded research papers</p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'research:manage_authors' %}" class="btn btn-light">
+        <i class="bi bi-people"></i> Manage Authors
+      </a>
+      <a href="{% url 'research:manage_keywords' %}" class="btn btn-light">
+        <i class="bi bi-tags"></i> Manage Keywords
+      </a>
+      <a href="{% url 'research:upload_paper' %}" class="btn btn-light">
+        <i class="bi bi-upload"></i> Upload New Paper
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH & FILTER FORM - Same structure as search.html -->
+<div class="filter-card">
+    <form id="filtersForm" method="get" action="{% url 'research:admin_dashboard' %}">
+        <div class="input-group mb-3">
+            <input
+                type="text"
+                class="form-control"
+                name="q"
+                id="searchQuery"
+                placeholder="Search by title, author, or keyword..."
+                value="{{ request.GET.q }}"
+                style="border-radius: 50px 0 0 50px;"
+            />
+            <button class="btn btn-success" type="submit" style="border-radius: 0 50px 50px 0;">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+
+        <!-- Advanced Search Toggle -->
+        <button class="advanced-search-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false">
+            <i class="bi bi-chevron-down"></i>
+            Advanced Search
+        </button>
+
+        <!-- Advanced Filters -->
+        <div class="collapse" id="advancedFilters">
+            <div class="advanced-filters">
+                <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Filters are applied automatically as you make selections. Active filters will appear below.
+                </p>
+                
+                <!-- First Row -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">School Year</label>
+                        <select class="form-select" name="school_year" id="school_year">
+                            <option value="">All</option>
+                            {% for year in school_years %}
+                                <option value="{{ year }}" {% if selected_school_year == year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Grade Level</label>
+                        <select class="form-select" name="grade_level" id="grade_level">
+                            <option value="">All</option>
+                            {% for grade in grade_levels %}
+                                <option value="{{ grade }}" {% if selected_grade_level == grade|stringformat:"s" %}selected{% endif %}>Grade {{ grade }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Research Design</label>
+                        <select class="form-select" name="research_design" id="research_design">
+                            <option value="">All</option>
+                            <option value="QUALITATIVE" {% if selected_research_design == 'QUALITATIVE' %}selected{% endif %}>Qualitative</option>
+                            <option value="SURVEY" {% if selected_research_design == 'SURVEY' %}selected{% endif %}>Survey</option>
+                            <option value="EXPERIMENTAL" {% if selected_research_design == 'EXPERIMENTAL' %}selected{% endif %}>Experimental</option>
+                            <option value="CAPSTONE" {% if selected_research_design == 'CAPSTONE' %}selected{% endif %}>Capstone</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Strand</label>
+                        <select class="form-select" name="strand" id="strand">
+                            <option value="">All</option>
+                            {% for strand in strands %}
+                                <option value="{{ strand }}" {% if selected_strand == strand %}selected{% endif %}>{{ strand }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Second Row -->
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Authors</label>
+                        <div class="dropdown-container">
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="authorSearchInput"
+                                placeholder="Select Grade Level and School Year first"
+                                autocomplete="off"
+                                disabled
+                            />
+                            <div class="dropdown-menu-custom" id="authorDropdown"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Keywords</label>
+                        <div class="dropdown-container">
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="keywordSearchInput"
+                                placeholder="Search keywords..."
+                                autocomplete="off"
+                            />
+                            <div class="dropdown-menu-custom" id="keywordDropdown"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Research Award</label>
+                        <select class="form-select" name="award" id="award">
+                            <option value="">All Awards</option>
+                            {% for award in awards %}
+                                <option value="{{ award.id }}" {% if award.id|stringformat:"s" == selected_award %}selected{% endif %}>
+                                    {{ award.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn-reset" type="button" id="resetAllBtn">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ACTIVE FILTER TOKENS -->
+<div id="activeFiltersSection" style="display: none;">
+    <div class="filters-active-section">
+        <h6><i class="bi bi-funnel-fill me-2"></i>Active Filters</h6>
+        <div id="active-filters"></div>
+    </div>
+</div>
+
+<!-- TABLE -->
+<div class="card shadow-sm">
+  <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="mb-0 fw-bold" style="color: #2d5a3d; font-family: 'Montserrat', sans-serif;">
+        <i class="bi bi-database"></i> Research Database
+      </h5>
+      <small class="text-muted" style="font-family: 'Montserrat', sans-serif;">
+        Browse and manage all uploaded research papers
+      </small>
+    </div>
+    
+    <div class="sort-control">
+      <label for="sort_by">Sort by:</label>
+      <select id="sort_by" name="sort_by">
+        <option value="alphabetical" {% if request.GET.sort_by == 'alphabetical' %}selected{% endif %}>A-Z</option>
+        <option value="reverse_alphabetical" {% if request.GET.sort_by == 'reverse_alphabetical' %}selected{% endif %}>Z-A</option>
+        <option value="latest" {% if request.GET.sort_by == 'latest' or not request.GET.sort_by %}selected{% endif %}>Newest First</option>
+        <option value="oldest" {% if request.GET.sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+      </select>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Authors</th>
+          <th>Keywords</th>
+          <th>Strand</th>
+          <th>Research Design</th>
+          <th>Grade</th>
+          <th>School Year</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for paper in papers %}
+        <tr>
+          <td>
+            <strong>{{ paper.title|format_italics }}</strong>
+          </td>
+        <td>
+            <ul class="author-list" style="list-style: disc; padding-left: 20px; margin: 0; text-align: left;">
+                {% for author in paper.author.all %}
+                <li>{{ author }}</li>
+                {% endfor %}
+            </ul>
+        </td>
+        <td>
+            <ul class="keywords-list" style="list-style: disc; padding-left: 20px; margin: 0; text-align: left; max-width: 250px;">
+                {% for keyword in paper.keywords.all %}
+                <li>{{ keyword.name|format_italics }}</li>
+                {% empty %}
+                <li class="text-muted" style="list-style: none;">—</li>
+                {% endfor %}
+            </ul>
+        </td>
+        <td>
+            <span class="mini-badge strand-{{ paper.strand|lower }}">{{ paper.strand }}</span>
+        </td>
+          <td>
+            {% if paper.research_design %}
+              <span class="research-design-text">{{ paper.get_research_design_display }}</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+        <td>
+            <span class="mini-badge grade-badge grade-{{ paper.grade_level }}">Grade {{ paper.grade_level }}</span>
+        </td>
+          <td>
+            {{ paper.school_year }}
+          </td>
+          <td>
+            <div class="action-buttons">
+                <a href="{% url 'research:edit_paper' paper.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil-fill"></i> Edit
+                </a>
+                <a href="{% url 'research:delete_paper' paper.pk %}" class="btn btn-danger" onclick="return confirm('Delete this paper?')">
+                    <i class="bi bi-trash-fill"></i> Delete
+                </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-4 text-muted">
+            No papers found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  {% if is_paginated %}
+  <div class="card-footer bg-white border-0 py-3">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center mb-0">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+              <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+              <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+    
+    <p class="text-center text-muted mt-2 mb-0" style="font-size: 0.9rem;">
+      Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} papers
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Hidden data attributes for JS configuration -->
+<div style="display: none;"
+     data-reset-url="{% url 'research:admin_dashboard' %}"
+     data-authors-api="{% url 'research:get_authors_by_batch' %}"
+     data-keywords-api="{% url 'research:get_all_keywords' %}">
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load shared filter logic first, then page-specific init -->
+<script src="{% static 'research/js/search-filters-shared.js' %}"></script>
+<script src="{% static 'research/js/admin-dashboard-init.js' %}"></script>
+{% endblock %}

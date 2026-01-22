@@ -1,0 +1,569 @@
+/* ===== Shared Styles for Terms of Service & Privacy Policy ===== */
+
+.terms-container,
+.privacy-container {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Header Section */
+.terms-header,
+.privacy-header {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.terms-header-flex,
+.privacy-header-flex {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.terms-icon-box,
+.privacy-icon-box {
+    background: var(--theme-green);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+.terms-icon,
+.privacy-icon {
+    width: 2rem;
+    height: 2rem;
+    color: white;
+    display: block;
+}
+
+.terms-title,
+.privacy-title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-subtitle,
+.privacy-subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+}
+
+/* Notice Box */
+.terms-notice,
+.privacy-notice {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.terms-notice-icon,
+.privacy-notice-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.terms-notice-date,
+.privacy-notice-date {
+    font-size: 0.875rem;
+    color: #1e40af;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-notice-text,
+.privacy-notice-text {
+    font-size: 0.875rem;
+    color: #1e3a8a;
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+}
+
+/* Section Containers */
+.terms-section,
+.privacy-section {
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.terms-section:hover,
+.privacy-section:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Headers */
+.terms-section-header,
+.privacy-section-header {
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+    background: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s;
+    text-align: left;
+}
+
+.terms-section-header:hover,
+.privacy-section-header:hover {
+    background: #f9fafb;
+}
+
+.terms-section-header:focus,
+.privacy-section-header:focus {
+    outline: 2px solid var(--theme-green);
+    outline-offset: -2px;
+}
+
+.terms-section-header-content,
+.privacy-section-header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.terms-section-icon,
+.privacy-section-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--theme-green);
+    flex-shrink: 0;
+}
+
+.terms-section-title,
+.privacy-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-chevron,
+.privacy-chevron {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.terms-chevron.active,
+.privacy-chevron.active {
+    transform: rotate(180deg);
+}
+
+/* Section Content */
+.terms-section-content,
+.privacy-section-content {
+    display: none;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+}
+
+.terms-section-content.active,
+.privacy-section-content.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Text Content */
+.terms-text,
+.privacy-text {
+    color: #374151;
+    line-height: 1.7;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-text p,
+.privacy-text p {
+    margin-bottom: 1rem;
+}
+
+.terms-text p:last-child,
+.privacy-text p:last-child {
+    margin-bottom: 0;
+}
+
+.terms-text ul,
+.privacy-text ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.terms-text ul:last-child,
+.privacy-text ul:last-child {
+    margin-bottom: 0;
+}
+
+.terms-text li,
+.privacy-text li {
+    margin-bottom: 0.5rem;
+}
+
+.terms-text li:last-child,
+.privacy-text li:last-child {
+    margin-bottom: 0;
+}
+
+.terms-text strong,
+.privacy-text strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.terms-subsection,
+.privacy-subsection {
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-subsection:first-child,
+.privacy-subsection:first-child {
+    margin-top: 0;
+}
+
+/* Footer Section */
+.terms-footer,
+.privacy-footer {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.terms-acknowledgment,
+.privacy-acknowledgment {
+    background: #f0fdf4;
+    border-left: 4px solid var(--theme-green);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.terms-acknowledgment-text,
+.privacy-acknowledgment-text {
+    font-size: 0.875rem;
+    color: #166534;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-footer-content,
+.privacy-footer-content {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.terms-footer-content p,
+.privacy-footer-content p {
+    margin-bottom: 0.5rem;
+}
+
+.terms-footer-content p:last-child,
+.privacy-footer-content p:last-child {
+    margin-bottom: 0;
+}
+
+.terms-school-name,
+.privacy-school-name {
+    font-weight: 600;
+    color: var(--theme-green);
+}
+
+/* ===== Responsive Design ===== */
+
+/* Tablet (768px and below) */
+@media (max-width: 768px) {
+    .terms-container,
+    .privacy-container {
+        padding: 0 0.75rem;
+    }
+
+    .terms-header,
+    .privacy-header {
+        padding: 1.5rem;
+    }
+
+    .terms-header-flex,
+    .privacy-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .terms-title,
+    .privacy-title {
+        font-size: 1.5rem;
+    }
+
+    .terms-subtitle,
+    .privacy-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .terms-notice,
+    .privacy-notice {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .terms-notice-icon,
+    .privacy-notice-icon {
+        margin-top: 0;
+    }
+
+    .terms-section-header,
+    .privacy-section-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .terms-section-title,
+    .privacy-section-title {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    .terms-section-content,
+    .privacy-section-content {
+        padding: 1.25rem;
+    }
+
+    .terms-footer,
+    .privacy-footer {
+        padding: 1.5rem;
+    }
+
+    .terms-text,
+    .privacy-text {
+        font-size: 0.9375rem;
+    }
+}
+
+/* Mobile (576px and below) */
+@media (max-width: 576px) {
+    .terms-container,
+    .privacy-container {
+        padding: 0 0.5rem;
+    }
+
+    .terms-header,
+    .privacy-header {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .terms-header-flex,
+    .privacy-header-flex {
+        gap: 0.5rem;
+    }
+
+    .terms-title,
+    .privacy-title {
+        font-size: 1.25rem;
+    }
+
+    .terms-subtitle,
+    .privacy-subtitle {
+        font-size: 0.8125rem;
+    }
+
+    .terms-icon-box,
+    .privacy-icon-box {
+        padding: 0.5rem;
+    }
+
+    .terms-icon,
+    .privacy-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .terms-notice,
+    .privacy-notice {
+        padding: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .terms-notice-date,
+    .terms-notice-text,
+    .privacy-notice-date,
+    .privacy-notice-text {
+        font-size: 0.8125rem;
+    }
+
+    .terms-section,
+    .privacy-section {
+        margin-bottom: 0.75rem;
+    }
+
+    .terms-section-header,
+    .privacy-section-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .terms-section-header-content,
+    .privacy-section-header-content {
+        gap: 0.5rem;
+    }
+
+    .terms-section-icon,
+    .privacy-section-icon {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+
+    .terms-section-title,
+    .privacy-section-title {
+        font-size: 0.9375rem;
+    }
+
+    .terms-chevron,
+    .privacy-chevron {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+
+    .terms-section-content,
+    .privacy-section-content {
+        padding: 1rem;
+    }
+
+    .terms-text,
+    .privacy-text {
+        font-size: 0.875rem;
+    }
+
+    .terms-text ul,
+    .privacy-text ul {
+        padding-left: 1.25rem;
+    }
+
+    .terms-subsection,
+    .privacy-subsection {
+        font-size: 0.9375rem;
+        margin-top: 1rem;
+    }
+
+    .terms-footer,
+    .privacy-footer {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .terms-acknowledgment,
+    .privacy-acknowledgment {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .terms-acknowledgment-text,
+    .terms-footer-content,
+    .privacy-acknowledgment-text,
+    .privacy-footer-content {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Extra Small Mobile (400px and below) */
+@media (max-width: 400px) {
+    .terms-title,
+    .privacy-title {
+        font-size: 1.125rem;
+    }
+
+    .terms-section-title,
+    .privacy-section-title {
+        font-size: 0.875rem;
+    }
+
+    .terms-text,
+    .privacy-text {
+        font-size: 0.8125rem;
+    }
+
+    .terms-section-header,
+    .privacy-section-header {
+        padding: 0.75rem 0.875rem;
+    }
+
+    .terms-section-content,
+    .privacy-section-content {
+        padding: 0.875rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .terms-container,
+    .privacy-container {
+        max-width: 100%;
+    }
+
+    .terms-section,
+    .privacy-section {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+
+    .terms-section-header,
+    .privacy-section-header {
+        background: white !important;
+    }
+
+    .terms-section-content,
+    .privacy-section-content {
+        display: block !important;
+        background: white;
+    }
+
+    .terms-chevron,
+    .privacy-chevron {
+        display: none;
+    }
+}

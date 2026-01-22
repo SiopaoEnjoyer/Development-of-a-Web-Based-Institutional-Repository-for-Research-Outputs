@@ -1,0 +1,155 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+{% block title %}Login{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/auth_common.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/verification_modal.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/password_toggle.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/toast_notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-bg-container">
+    <div class="card auth-card shadow-lg" id="loginCard">
+        <div class="card-body">
+            <div class="auth-logo">
+                <img src="{% static 'research/img/logo.png' %}" alt="Trinity Logo">
+            </div>
+
+            <h3 class="auth-title">Sign In</h3>
+            <p class="auth-subtitle">Access your research account</p>
+
+            <form method="POST" id="loginForm" novalidate>
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">
+                        Email Address<span class="required-asterisk">*</span>
+                    </label>
+                    <input type="email" 
+                           class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                           name="email" 
+                           id="email"
+                           placeholder="your.email@example.com"
+                           value="{{ form.email.value|default:'' }}"
+                           required>
+                    <div class="invalid-feedback" id="emailError">
+                        {% if form.email.errors %}
+                            {{ form.email.errors.0 }}
+                        {% else %}
+                            Please enter a valid email address
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Password<span class="required-asterisk">*</span>
+                    </label>
+                    <input type="password" 
+                           class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                           name="password"
+                           id="password"
+                           placeholder="Enter your password"
+                           required>
+                    <div class="invalid-feedback" id="passwordError">
+                        {% if form.password.errors %}
+                            {{ form.password.errors.0 }}
+                        {% else %}
+                            Please enter your password
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 text-end">
+                    <a href="{% url 'accounts:forgot_password' %}" class="text-decoration-none" style="color: var(--theme-green); font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;">
+                        <i class="bi bi-question-circle me-1"></i>Forgot Password?
+                    </a>
+                </div>
+
+                <div class="required-note">
+                    <i class="bi bi-info-circle"></i>
+                    <span><span class="required-asterisk">*</span> Required field</span>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 mt-3">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                </button>
+
+                <div class="auth-footer">
+                    <p class="auth-footer-text">Don't have an account?</p>
+                    <a href="{% url 'accounts:register' %}" class="auth-footer-link">
+                        Create an account <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Verification Modal -->
+{% include 'accounts/verification_modal.html' %}
+
+<script src="{% static 'research/js/toast_notifications.js' %}"></script>
+<script src="{% static 'accounts/js/auth_common.js' %}"></script>
+<script src="{% static 'accounts/js/login.js' %}"></script>
+<script src="{% static 'accounts/js/verification_modal.js' %}"></script>
+<script src="{% static 'accounts/js/password_toggle.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize toast messages for form errors and Django messages
+        {% if not request.session.show_verification_modal %}
+            {% if form.errors %}
+                var errorCount = 0;
+                
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        showError("{{ error|escapejs }}", 4000);
+                        errorCount++;
+                    {% endfor %}
+                {% endif %}
+                
+                {% for field, errors in form.errors.items %}
+                    {% if field != '__all__' %}
+                        errorCount++;
+                    {% endif %}
+                {% endfor %}
+                
+                if (errorCount > 0 && !{{ form.non_field_errors|length }}) {
+                    showError("Invalid email or password. Please try again.", 4000);
+                }
+            {% endif %}
+            
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                        showError("{{ message|escapejs }}", 4000);
+                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                        showWarning("{{ message|escapejs }}", 3500);
+                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                        showSuccess("{{ message|escapejs }}", 3000);
+                    {% else %}
+                        showInfo("{{ message|escapejs }}", 3000);
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+        
+        // Initialize verification modal if needed
+        var shouldShowModal = ('{{ request.session.show_verification_modal }}' === 'True');
+        var verificationEmail = "{{ request.session.verification_email|default:''|escapejs }}";
+        
+        if (shouldShowModal && verificationEmail) {
+            initVerificationModal({
+                showModal: true,
+                email: verificationEmail,
+                csrfToken: "{{ csrf_token }}",
+                verifyUrl: "{% url 'accounts:verify_email_ajax' %}",
+                resendUrl: "{% url 'accounts:resend_verification' %}",
+                maxAttempts: 10
+            });
+        }
+    });
+</script>
+{% endblock %}

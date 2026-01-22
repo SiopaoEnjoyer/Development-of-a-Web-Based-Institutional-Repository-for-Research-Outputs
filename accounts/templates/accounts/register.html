@@ -1,0 +1,328 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+{% load form_tags %}
+
+{% block title %}Register{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/auth_common.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/verification_modal.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/register.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/password_toggle.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/toast_notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-bg-container">
+    <div class="card auth-card shadow-lg" id="registerCard">
+        <div class="card-body">
+            <div class="auth-logo">
+                <img src="{% static 'research/img/logo.png' %}" alt="Trinity Logo">
+            </div>
+
+            <h3 class="auth-title">Create an Account</h3>
+            <p class="auth-subtitle">Join our research community</p>
+                
+            <form method="POST" novalidate id="registerForm">
+                {% csrf_token %}
+
+                <h6 class="section-title">
+                    <i class="bi bi-shield-lock"></i>Account Information
+                </h6>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Email Address<span class="required-asterisk">*</span>
+                    </label>
+                    {{ form.email|add_class:"form-control" }}
+                    <small class="form-text">Use a valid email you can access</small>
+                    <div class="invalid-feedback" id="emailError">
+                        {% if form.email.errors and request.method == 'POST' %}
+                            {{ form.email.errors.0 }}
+                        {% else %}
+                            Please enter a valid email address
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Password<span class="required-asterisk">*</span>
+                    </label>
+                    {{ form.password|add_class:"form-control" }}
+                    <small class="form-text">Must be 8-20 characters long</small>
+                    <div class="invalid-feedback" id="passwordError">
+                        {% if form.password.errors and request.method == 'POST' %}
+                            {{ form.password.errors.0 }}
+                        {% else %}
+                            Password must be 8-20 characters
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Confirm Password<span class="required-asterisk">*</span>
+                    </label>
+                    {{ form.confirm_password|add_class:"form-control" }}
+                    <small class="form-text">Re-enter your password</small>
+                    <div class="invalid-feedback" id="confirmPasswordError">
+                        {% if form.confirm_password.errors and request.method == 'POST' %}
+                            {{ form.confirm_password.errors.0 }}
+                        {% else %}
+                            Passwords do not match
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">
+                        Role<span class="required-asterisk">*</span>
+                    </label>
+                    {{ form.role|add_class:"form-select" }}
+                    <div class="invalid-feedback" id="roleError">
+                        {% if form.role.errors and request.method == 'POST' %}
+                            {{ form.role.errors.0 }}
+                        {% else %}
+                            Please select a role
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h6 class="section-title">
+                    <i class="bi bi-person"></i>Personal Information
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            First Name<span class="required-asterisk">*</span>
+                        </label>
+                        {{ form.first_name|add_class:"form-control" }}
+                        <div class="invalid-feedback" id="firstNameError">
+                            {% if form.first_name.errors and request.method == 'POST' %}
+                                {{ form.first_name.errors.0 }}
+                            {% else %}
+                                Please enter your first name
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Middle Initial</label>
+                        {{ form.middle_initial|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            {% if form.middle_initial.errors and request.method == 'POST' %}
+                                {{ form.middle_initial.errors.0 }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Suffix</label>
+                        {{ form.suffix|add_class:"form-control" }}
+                        <small class="form-text" style="font-size: 0.75rem;">Jr., Sr., III, etc.</small>
+                        <div class="invalid-feedback">
+                            {% if form.suffix.errors and request.method == 'POST' %}
+                                {{ form.suffix.errors.0 }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label class="form-label">
+                        Last Name<span class="required-asterisk">*</span>
+                    </label>
+                    {{ form.last_name|add_class:"form-control" }}
+                    <div class="invalid-feedback" id="lastNameError">
+                        {% if form.last_name.errors and request.method == 'POST' %}
+                            {{ form.last_name.errors.0 }}
+                        {% else %}
+                            Please enter your last name
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Date of Birth<span class="required-asterisk">*</span>
+                    </label>
+                    <div class="birthdate-group">
+                        <select class="form-select" id="birthMonth" name="birth_month" required>
+                            <option value="">Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <select class="form-select" id="birthDay" name="birth_day" disabled required>
+                            <option value="">Day</option>
+                        </select>
+                        <select class="form-select" id="birthYear" name="birth_year" required>
+                            <option value="">Year</option>
+                        </select>
+                    </div>
+                    <div class="privacy-note">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Required for Data Privacy compliance and age verification</span>
+                    </div>
+                    <div class="invalid-feedback" id="birthdateError">
+                        Please select your complete date of birth
+                    </div>
+                </div>
+
+                <div id="shsCheck" class="form-check mb-3" style="display:none;">
+                    {{ form.took_shs|add_class:"form-check-input" }}
+                    <label class="form-check-label" for="id_took_shs">
+                        I took SHS at BTCS
+                    </label>
+                </div>
+
+                <div id="batchFields" style="display:none;">
+                    <h6 class="section-title">
+                        <i class="bi bi-calendar3"></i>School Batch
+                    </h6>
+                    
+                    <div class="batch-info-note">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Please fill in at least one batch year (Grade 11 or Grade 12, or both if applicable)</span>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Grade 11 Batch Year
+                            </label>
+                            {{ form.g11 }}
+                            <small class="form-text">e.g., 2019-2020</small>
+                            
+                            {% if form.g11.errors and request.method == 'POST' %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.g11.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Grade 12 Batch Year
+                            </label>
+                            {{ form.g12 }}
+                            <small class="form-text">e.g., 2020-2021</small>
+                            
+                            {% if form.g12.errors and request.method == 'POST' %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.g12.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="terms-check">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            I have read and agreed to the <a href="{% url 'research:terms' %}" target="_blank">Terms and Conditions</a> and <a href="{% url 'research:privacy_policy' %}" target="_blank">Privacy Policy</a>
+                        </label>
+                        <div class="invalid-feedback">
+                            {% if form.agree_terms.errors and request.method == 'POST' %}
+                                {{ form.agree_terms.errors.0 }}
+                            {% else %}
+                                You must agree to the terms and conditions
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="required-note mt-4">
+                    <i class="bi bi-info-circle"></i>
+                    <span><span class="required-asterisk">*</span> Required field</span>
+                </div>
+
+                <div class="recaptcha-section">
+                    <label class="recaptcha-label">
+                        <i class="bi bi-shield-check"></i> Security Verification <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="recaptcha-container">
+                        {{ form.captcha }}
+                    </div>
+                    {% if form.captcha.errors and request.method == 'POST' %}
+                        <div class="recaptcha-error">
+                            <i class="bi bi-exclamation-circle"></i> 
+                            <span>{{ form.captcha.errors.0 }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn btn-success w-100 submit-button">
+                    <i class="bi bi-person-plus me-2"></i>Register
+                </button>
+
+                <div class="auth-footer">
+                    <p class="auth-footer-text">Already have an account?</p>
+                    <a href="{% url 'accounts:login' %}" class="auth-footer-link">
+                        Sign in here <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Verification Modal -->
+{% include 'accounts/verification_modal.html' %}
+
+<!-- Pass server-side data to JavaScript -->
+<script id="serverData" type="application/json">
+{
+    "requestMethod": "{{ request.method }}",
+    "hasFormErrors": {{ form.errors|yesno:"true,false" }},
+    "formErrors": {
+        {% for field, errors in form.errors.items %}
+            "{{ field }}": "{{ errors.0|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    },
+    "nonFieldErrors": [
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                "{{ error|escapejs }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+    ],
+    "messages": [
+        {% if messages %}
+            {% for message in messages %}
+                {
+                    "level": "{{ message.level }}",
+                    "text": "{{ message|escapejs }}"
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+    ],
+    "verification": {
+        "showModal": "{{ request.session.show_verification_modal }}",
+        "email": "{{ request.session.verification_email|default:''|escapejs }}"
+    },
+    "urls": {
+        "verifyEmail": "{% url 'accounts:verify_email_ajax' %}",
+        "resendVerification": "{% url 'accounts:resend_verification' %}"
+    },
+    "csrfToken": "{{ csrf_token }}"
+}
+</script>
+
+<script src="{% static 'research/js/toast_notifications.js' %}"></script>
+<script src="{% static 'accounts/js/auth_common.js' %}"></script>
+<script src="{% static 'accounts/js/register.js' %}"></script>
+<script src="{% static 'accounts/js/verification_modal.js' %}"></script>
+<script src="{% static 'accounts/js/password_toggle.js' %}"></script>
+
+{% endblock %}

@@ -1,0 +1,698 @@
+{% extends "research/base.html" %}
+{% load static %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'research/css/terms.css' %}">
+{% endblock %}
+
+{% block page_header %}Privacy Policy{% endblock %}
+
+{% block content %}
+<div class="privacy-container">
+    <!-- Header -->
+    <div class="privacy-header">
+        <div class="privacy-header-flex">
+            <div class="privacy-icon-box">
+                <svg class="privacy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="privacy-title">Privacy Policy</h1>
+                <p class="privacy-subtitle">Bacolod Trinity Christian School, Inc. Research Repository</p>
+            </div>
+        </div>
+        
+        <div class="privacy-notice">
+            <svg class="privacy-notice-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="privacy-notice-date">Effective Date: January 21, 2026</p>
+                <p class="privacy-notice-text">
+                    This Privacy Policy describes how Bacolod Trinity Christian School, Inc. collects, uses, 
+                    and protects your personal information in compliance with the Data Privacy Act of 2012 (RA 10173).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: Introduction -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 class="privacy-section-title">1. Introduction and Scope</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">1.1 Our Commitment to Privacy</p>
+                <p>Bacolod Trinity Christian School, Inc. (BTCSI) is committed to protecting the privacy and security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Institutional Research Repository.</p>
+
+                <p class="privacy-subsection">1.2 Legal Compliance</p>
+                <p>This Privacy Policy complies with:</p>
+                <ul>
+                    <li>Republic Act No. 10173 - Data Privacy Act of 2012</li>
+                    <li>National Privacy Commission (NPC) regulations and circulars</li>
+                    <li>Republic Act No. 10175 - Cybercrime Prevention Act of 2012</li>
+                </ul>
+
+                <p class="privacy-subsection">1.3 Scope of This Policy</p>
+                <p>This Privacy Policy applies to all users of the BTCSI Research Repository, including students, faculty, staff, alumni, and external researchers. By using the Repository, you consent to the data practices described in this policy.</p>
+
+                <p class="privacy-subsection">1.4 Data Controller Information</p>
+                <ul>
+                    <li><strong>Organization:</strong> Bacolod Trinity Christian School, Inc.</li>
+                    <li><strong>Address:</strong> Villa Angela Subd., Phase 3, Bacolod City</li>
+                    <li><strong>Email:</strong> btcsirepository@gmail.com</li>
+                    <li><strong>Phone:</strong> (034) 434-3924 / (034) 434-3925</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Information We Collect -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h2 class="privacy-section-title">2. Information We Collect</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">2.1 Personal Information Collected During Registration</p>
+                <ul>
+                    <li><strong>Full Name:</strong> For identification and authentication</li>
+                    <li><strong>Email Address:</strong> For account verification and communication</li>
+                    <li><strong>Birthdate:</strong> For age verification and consent requirements</li>
+                    <li><strong>Role:</strong> Student, Teacher, Administrator, or Alumni</li>
+                    <li><strong>Academic Information:</strong> Grade level, strand, batch year (for students)</li>
+                </ul>
+
+                <p class="privacy-subsection">2.2 Research Authorship Data</p>
+                <ul>
+                    <li>Author names and affiliations</li>
+                    <li>Research paper metadata (title, abstract, keywords)</li>
+                    <li>Publication year and academic program</li>
+                    <li>Co-author relationships</li>
+                </ul>
+
+                <p class="privacy-subsection">2.3 Consent and Permission Data</p>
+                <ul>
+                    <li>Consent status for public display of full names</li>
+                    <li>Parental/guardian consent forms (for minors)</li>
+                    <li>Permission records for research publication</li>
+                </ul>
+
+                <p class="privacy-subsection">2.4 Information We Do NOT Collect</p>
+                <p>We do not collect:</p>
+                <ul>
+                    <li>Financial information or payment details</li>
+                    <li>Social Security or government ID numbers</li>
+                    <li>Medical or health information</li>
+                    <li>Biometric data</li>
+                    <li>Sensitive personal information beyond what is necessary</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: How We Use Your Information -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                <h2 class="privacy-section-title">3. How We Use Your Information</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">3.1 Primary Purposes</p>
+                <p>We use your personal information for the following purposes:</p>
+                <ul>
+                    <li><strong>Account Management:</strong> Creating, maintaining, and authenticating user accounts</li>
+                    <li><strong>Access Control:</strong> Determining appropriate access levels based on user roles</li>
+                    <li><strong>Research Archival:</strong> Preserving and cataloging student research outputs</li>
+                    <li><strong>Author Attribution:</strong> Properly crediting research authors and contributors</li>
+                    <li><strong>Communication:</strong> Sending important notifications about the Repository</li>
+                </ul>
+
+                <p class="privacy-subsection">3.2 Educational and Institutional Purposes</p>
+                <ul>
+                    <li>Facilitating academic research and reference</li>
+                    <li>Supporting educational instruction and mentoring</li>
+                    <li>Maintaining institutional records and archives</li>
+                    <li>Generating statistical reports and analytics (anonymized)</li>
+                    <li>Improving Repository functionality and user experience</li>
+                </ul>
+
+                <p class="privacy-subsection">3.3 Legal and Compliance Purposes</p>
+                <ul>
+                    <li>Complying with legal obligations and regulatory requirements</li>
+                    <li>Protecting intellectual property rights</li>
+                    <li>Investigating and preventing security incidents</li>
+                    <li>Enforcing Terms of Service and Repository policies</li>
+                </ul>
+
+                <p class="privacy-subsection">3.4 Purpose Limitation Principle</p>
+                <p>We adhere to the principle of purpose limitation: your personal information is used only for the purposes stated in this policy. We will not use your information for unrelated purposes without obtaining your explicit consent.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Legal Basis for Processing -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+                </svg>
+                <h2 class="privacy-section-title">4. Legal Basis for Processing</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p>Under the Data Privacy Act of 2012, we process your personal information based on the following lawful grounds:</p>
+
+                <p class="privacy-subsection">4.1 Consent</p>
+                <ul>
+                    <li>You provide explicit consent during account registration</li>
+                    <li>Consent for public display of full names in research outputs</li>
+                    <li>Parental/guardian consent for users under 18 years old</li>
+                </ul>
+
+                <p class="privacy-subsection">4.2 Legitimate Interest</p>
+                <ul>
+                    <li>Institutional archival and knowledge preservation</li>
+                    <li>Maintaining academic records and research outputs</li>
+                    <li>Ensuring system security and preventing fraud</li>
+                </ul>
+
+                <p class="privacy-subsection">4.3 Compliance with Legal Obligations</p>
+                <ul>
+                    <li>Compliance with educational regulations</li>
+                    <li>Intellectual property protection requirements</li>
+                    <li>Record-keeping obligations under Philippine law</li>
+                </ul>
+
+                <p class="privacy-subsection">4.4 Performance of Contract</p>
+                <ul>
+                    <li>Providing Repository services as outlined in Terms of Service</li>
+                    <li>Fulfilling obligations related to research archival</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Information Sharing and Disclosure -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <h2 class="privacy-section-title">5. Information Sharing and Disclosure</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">5.1 Information Shared Publicly</p>
+                <ul>
+                    <li><strong>Research Metadata:</strong> Title, abstract, keywords, publication year</li>
+                    <li><strong>Author Names:</strong> Displayed based on consent status (full name or initials)</li>
+                    <li><strong>Academic Affiliation:</strong> School name and program</li>
+                    <li><strong>Research PDF:</strong> Accessible to approved users only</li>
+                </ul>
+
+                <p class="privacy-subsection">5.2 Internal Sharing Within BTCSI</p>
+                <ul>
+                    <li><strong>Administrators:</strong> Full access to manage the Repository</li>
+                    <li><strong>Research Teachers:</strong> Access to upload and manage student research</li>
+                    <li><strong>Subject Teachers:</strong> Limited access to relevant student data</li>
+                </ul>
+
+                <p class="privacy-subsection">5.3 We Do NOT Share Your Information With:</p>
+                <ul>
+                    <li>Third-party marketing companies</li>
+                    <li>Data brokers or aggregators</li>
+                    <li>Social media platforms</li>
+                    <li>External organizations without your consent</li>
+                </ul>
+
+                <p class="privacy-subsection">5.4 Legal Disclosure Requirements</p>
+                <p>We may disclose your information if required by law, including:</p>
+                <ul>
+                    <li>Response to valid legal processes (subpoenas, court orders)</li>
+                    <li>Compliance with government investigations</li>
+                    <li>Protection of legal rights and safety</li>
+                    <li>Prevention of fraud or security threats</li>
+                </ul>
+
+                <p class="privacy-subsection">5.5 No Cross-Border Data Transfer</p>
+                <p>Your personal information is stored within the Philippines and is not transferred internationally. If future changes require international data transfer, we will notify you and obtain appropriate consent.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 6: Data Security -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <h2 class="privacy-section-title">6. Data Security Measures</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">6.1 Technical Security Measures</p>
+                <ul>
+                    <li><strong>Encryption:</strong> SSL/TLS encryption for all data transmission</li>
+                    <li><strong>Authentication:</strong> Email verification for account access</li>
+                    <li><strong>Access Control:</strong> Role-based permissions (RBAC)</li>
+                    <li><strong>Password Security:</strong> Hashed and salted password storage</li>
+                    <li><strong>Session Management:</strong> Secure session tokens and timeout mechanisms</li>
+                </ul>
+
+                <p class="privacy-subsection">6.2 Organizational Security Measures</p>
+                <ul>
+                    <li>Limited access to personal data on a need-to-know basis</li>
+                    <li>Regular security training for staff and administrators</li>
+                    <li>Security incident response procedures</li>
+                    <li>Regular backups and disaster recovery plans</li>
+                    <li>Activity logging and audit trails for administrative actions</li>
+                </ul>
+
+                <p class="privacy-subsection">6.3 Physical Security</p>
+                <ul>
+                    <li>Secure server hosting environment</li>
+                    <li>Restricted physical access to infrastructure</li>
+                    <li>Environmental controls and monitoring</li>
+                </ul>
+
+                <p class="privacy-subsection">6.4 Security Breach Notification</p>
+                <p>In the event of a data breach that may affect your rights and freedoms, we will:</p>
+                <ul>
+                    <li>Notify the National Privacy Commission (NPC) within 72 hours</li>
+                    <li>Inform affected individuals without undue delay</li>
+                    <li>Provide details about the nature and extent of the breach</li>
+                    <li>Outline measures taken to address the breach</li>
+                    <li>Recommend actions you can take to protect yourself</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 7: Data Retention -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 class="privacy-section-title">7. Data Retention and Deletion</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">7.1 Retention Periods</p>
+                <ul>
+                    <li><strong>Active User Accounts:</strong> Retained while account remains active</li>
+                    <li><strong>Inactive Accounts:</strong> Reviewed annually; may be deleted after 3 years of inactivity</li>
+                    <li><strong>Research Outputs:</strong> Retained indefinitely for archival purposes</li>
+                    <li><strong>Author Attribution:</strong> Permanently retained with research outputs</li>
+                    <li><strong>Consent Records:</strong> Retained for the duration of research display plus 5 years</li>
+                </ul>
+
+                <p class="privacy-subsection">7.2 Archival Retention</p>
+                <p>Research outputs and associated metadata are retained as part of BTCSI's institutional archive. This serves important educational and historical purposes and is exempt from standard deletion timelines.</p>
+
+                <p class="privacy-subsection">7.3 Account Deletion</p>
+                <p>When you request account deletion:</p>
+                <ul>
+                    <li>Your personal account information will be deleted</li>
+                    <li>Login credentials will be permanently removed</li>
+                    <li>Research outputs you authored will remain in the archive</li>
+                    <li>Author attribution will be preserved for archival integrity</li>
+                    <li>Statistical data (anonymized) may be retained</li>
+                </ul>
+
+                <p class="privacy-subsection">7.4 Legal Retention Requirements</p>
+                <p>Some information must be retained to comply with:</p>
+                <ul>
+                    <li>Educational record-keeping requirements</li>
+                    <li>Intellectual property documentation</li>
+                    <li>Legal proceedings or investigations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 8: Your Rights -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 class="privacy-section-title">8. Your Privacy Rights</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p>Under the Data Privacy Act of 2012, you have the following rights:</p>
+
+                <p class="privacy-subsection">8.1 Right to Be Informed</p>
+                <ul>
+                    <li>You have the right to know what personal information we collect</li>
+                    <li>You can request information about how we use your data</li>
+                    <li>This Privacy Policy serves as our primary disclosure</li>
+                </ul>
+
+                <p class="privacy-subsection">8.2 Right to Access</p>
+                <ul>
+                    <li>You can request a copy of your personal information</li>
+                    <li>We will provide this within 15 business days</li>
+                    <li>Access may be limited if it affects others' privacy or security</li>
+                </ul>
+
+                <p class="privacy-subsection">8.3 Right to Rectification</p>
+                <ul>
+                    <li>You can request correction of inaccurate or incomplete data</li>
+                    <li>Submit correction requests through your account settings or contact us</li>
+                    <li>We will verify and update information promptly</li>
+                </ul>
+
+                <p class="privacy-subsection">8.4 Right to Erasure (Right to be Forgotten)</p>
+                <ul>
+                    <li>You can request deletion of your personal information</li>
+                    <li>Subject to legal retention requirements and archival purposes</li>
+                    <li>Research authorship data must be retained for academic integrity</li>
+                </ul>
+
+                <p class="privacy-subsection">8.5 Right to Object</p>
+                <ul>
+                    <li>You can object to processing of your personal data</li>
+                    <li>We will assess your objection and respond accordingly</li>
+                    <li>Some processing may be required for institutional obligations</li>
+                </ul>
+
+                <p class="privacy-subsection">8.6 Right to Data Portability</p>
+                <ul>
+                    <li>You can request your data in a structured, machine-readable format</li>
+                    <li>We will provide data in CSV, JSON, or PDF format as appropriate</li>
+                </ul>
+
+                <p class="privacy-subsection">8.7 Right to Withdraw Consent</p>
+                <ul>
+                    <li>You can withdraw consent for name display at any time</li>
+                    <li>Withdrawal does not affect prior lawful processing</li>
+                    <li>Your name will revert to initials upon consent withdrawal</li>
+                </ul>
+
+                <p class="privacy-subsection">8.8 How to Exercise Your Rights</p>
+                <p>To exercise any of these rights, contact us at:</p>
+                <ul>
+                    <li><strong>Email:</strong> btcsirepository@gmail.com</li>
+                    <li><strong>Subject Line:</strong> "Privacy Rights Request"</li>
+                    <li><strong>Include:</strong> Your name, email, and specific request</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 9: Children's Privacy -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <h2 class="privacy-section-title">9. Children's Privacy (Minors Under 18)</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">9.2 Enhanced Privacy Protections for Minors</p>
+                <ul>
+                    <li>Stricter access controls for minor student data</li>
+                    <li>Limited sharing with authorized personnel only</li>
+                    <li>Additional safeguards for sensitive information</li>
+                    <li>Regular monitoring of minor data handling practices</li>
+                </ul>
+
+                <p class="privacy-subsection">9.3 Rights of Parents/Guardians</p>
+                <p>Parents or guardians of students under 18 have the right to:</p>
+                <ul>
+                    <li>Access their child's personal information</li>
+                    <li>Request correction or deletion of inaccurate data</li>
+                    <li>Withdraw consent for name display</li>
+                    <li>Object to certain processing activities</li>
+                    <li>Receive notifications about privacy practices</li>
+                </ul>
+
+                <p class="privacy-subsection">9.4 Age Verification</p>
+                <ul>
+                    <li>Birthdate is used to determine if parental consent is required</li>
+                    <li>Students who turn 18 can provide their own consent</li>
+                    <li>System automatically tracks consent requirements based on age</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 10: Cookies and Tracking -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                </svg>
+                <h2 class="privacy-section-title">10. Cookies and Tracking Technologies</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">10.1 Types of Cookies We Use</p>
+                <ul>
+                    <li><strong>Essential Cookies:</strong> Required for login and session management</li>
+                    <li><strong>Functional Cookies:</strong> Remember your preferences and settings</li>
+                    <li><strong>Security Cookies:</strong> Detect and prevent security threats</li>
+                </ul>
+
+                <p class="privacy-subsection">10.2 Session Management</p>
+                <ul>
+                    <li>Session tokens maintain your logged-in state</li>
+                    <li>Sessions expire after a period of inactivity</li>
+                    <li>Secure cookies protect against unauthorized access</li>
+                </ul>
+
+                <p class="privacy-subsection">10.3 We Do NOT Use</p>
+                <ul>
+                    <li>Third-party advertising cookies</li>
+                    <li>Social media tracking pixels</li>
+                    <li>Cross-site tracking technologies</li>
+                    <li>Behavioral profiling tools</li>
+                </ul>
+
+                <p class="privacy-subsection">10.4 Managing Cookies</p>
+                <p>You can control cookies through your browser settings. However, disabling essential cookies may prevent you from using certain Repository features.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 11: Third-Party Services -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                <h2 class="privacy-section-title">11. Third-Party Services and Links</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">11.1 Hosting and Infrastructure</p>
+                <ul>
+                    <li>The Repository is hosted on secure servers within the Philippines</li>
+                    <li>Hosting providers are bound by data protection agreements</li>
+                    <li>Regular security audits are conducted</li>
+                </ul>
+
+                <p class="privacy-subsection">11.2 External Links</p>
+                <ul>
+                    <li>Research papers may contain citations to external sources</li>
+                    <li>We are not responsible for third-party privacy practices</li>
+                    <li>External sites are governed by their own privacy policies</li>
+                    <li>Use caution when clicking external links</li>
+                </ul>
+
+                <p class="privacy-subsection">11.3 Email Services</p>
+                <ul>
+                    <li>Email verification and notifications are sent via secure email services</li>
+                    <li>Email providers comply with data protection standards</li>
+                    <li>Email communications are encrypted in transit</li>
+                </ul>
+
+                <p class="privacy-subsection">11.4 No Third-Party Analytics</p>
+                <p>We do not use third-party analytics services (e.g., Google Analytics) that track user behavior across websites. All usage data is collected and processed internally.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 12: Changes to Privacy Policy -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <h2 class="privacy-section-title">12. Changes to This Privacy Policy</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">12.1 Policy Updates</p>
+                <p>We may update this Privacy Policy from time to time to reflect:</p>
+                <ul>
+                    <li>Changes in legal or regulatory requirements</li>
+                    <li>Updates to our data processing practices</li>
+                    <li>New features or services in the Repository</li>
+                    <li>Feedback from users and stakeholders</li>
+                </ul>
+
+                <p class="privacy-subsection">12.2 Notification of Changes</p>
+                <ul>
+                    <li>Material changes will be announced via email</li>
+                    <li>Notice will be posted on the Repository homepage</li>
+                    <li>Users will have 30 days to review changes before they take effect</li>
+                    <li>Continued use after changes constitutes acceptance</li>
+                </ul>
+
+                <p class="privacy-subsection">12.3 Version History</p>
+                <ul>
+                    <li>Previous versions of this policy are archived</li>
+                    <li>Available upon request for reference</li>
+                    <li>Effective dates clearly indicated</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 13: Contact and Complaints -->
+    <div class="privacy-section">
+        <button class="privacy-section-header" onclick="togglePrivacySection(this)">
+            <div class="privacy-section-header-content">
+                <svg class="privacy-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h2 class="privacy-section-title">13. Contact Information and Complaints</h2>
+            </div>
+            <svg class="privacy-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="privacy-section-content">
+            <div class="privacy-text">
+                <p class="privacy-subsection">13.1 Privacy Questions and Concerns</p>
+                <p>For questions about this Privacy Policy or our data practices, contact:</p>
+                <ul>
+                    <li><strong>Email:</strong> btcsirepository@gmail.com</li>
+                    <li><strong>Subject Line:</strong> "Privacy Inquiry"</li>
+                    <li><strong>Address:</strong> Bacolod Trinity Christian School, Inc., Villa Angela Subd., Phase 3, Bacolod City</li>
+                    <li><strong>Phone:</strong> (034) 434-3924 / (034) 434-3925</li>
+                </ul>
+
+                <p class="privacy-subsection">13.2 Response Time</p>
+                <ul>
+                    <li>We will acknowledge receipt within 3 business days</li>
+                    <li>Full response provided within 15 business days</li>
+                    <li>Complex requests may require additional time</li>
+                </ul>
+
+                <p class="privacy-subsection">13.3 Filing a Complaint</p>
+                <p>If you believe your privacy rights have been violated:</p>
+                <ul>
+                    <li><strong>Internal:</strong> File a complaint with BTCSI administration</li>
+                    <li><strong>External:</strong> Contact the National Privacy Commission</li>
+                    <li><strong>NPC Website:</strong> www.privacy.gov.ph</li>
+                    <li><strong>NPC Email:</strong> info@privacy.gov.ph</li>
+                    <li><strong>NPC Hotline:</strong> (02) 8234-2228</li>
+                </ul>
+
+                <p class="privacy-subsection">13.4 No Retaliation</p>
+                <p>BTCSI will not retaliate against anyone who files a privacy complaint or exercises their data protection rights in good faith.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="privacy-footer">
+        <div class="privacy-acknowledgment">
+            <p class="privacy-acknowledgment-text">
+                <strong>Acknowledgment:</strong> By using the BTCSI Research Repository, you acknowledge 
+                that you have read, understood, and agree to this Privacy Policy and the practices 
+                described herein.
+            </p>
+        </div>
+        
+        <div class="privacy-footer-content">
+            <p class="privacy-school-name">Bacolod Trinity Christian School, Inc.</p>
+            <p>Data Protection Office</p>
+            <p>Villa Angela Subd., Phase 3, Bacolod City</p>
+            <p>© 2024-2026 All rights reserved</p>
+            <p style="margin-top: 1rem; font-size: 0.75rem;">Last Updated: January 21, 2026</p>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'research/js/terms.js' %}"></script>
+{% endblock %}

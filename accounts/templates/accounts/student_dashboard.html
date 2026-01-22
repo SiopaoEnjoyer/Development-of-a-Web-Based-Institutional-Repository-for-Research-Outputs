@@ -1,0 +1,320 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+{% load research_form_tags %}
+
+{% block title %}Student Dashboard{% endblock %}
+{% block page_header %}Student Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard-common.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/student-dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/paper-cards.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Background Image -->
+<div class="dashboard-background">
+    <img src="{% static 'research/img/trinity.jpg' %}" alt="Background">
+</div>
+
+<div class="container py-5">
+    <!-- Page Header with Animation -->
+    <div class="mb-5 animate-fade-down">
+        <div class="page-header-box">
+            <h1 class="display-5 fw-bold mb-2">Student Dashboard</h1>
+            <p class="text-muted fs-5 mb-0">Welcome, {{ user.userprofile.display_name }}</p>
+        </div>
+    </div>
+
+    <!-- Consent Management Banner -->
+    <div class="consent-banner">
+        <h5>
+            <i class="bi bi-shield-check"></i> Privacy & Consent Status
+        </h5>
+        
+        {% if user.userprofile.consent_status == 'consented' %}
+            <span class="consent-status consented">
+                <i class="bi bi-check-circle-fill"></i> Name Visibility: CONSENTED
+            </span>
+            <p>Your full name is visible on published research papers.</p>
+            <button class="btn-consent" data-bs-toggle="modal" data-bs-target="#consentModal">
+                <i class="bi bi-pencil"></i> Manage Consent
+            </button>
+        {% elif user.userprofile.consent_status == 'pending_approval' %}
+            <span class="consent-status pending">
+                <i class="bi bi-clock-fill"></i> Name Visibility: PENDING ADMIN APPROVAL
+            </span>
+            <p>Your parental consent form is being reviewed by an administrator.</p>
+            <button class="btn-consent" data-bs-toggle="modal" data-bs-target="#consentModal">
+                <i class="bi bi-eye"></i> View Status
+            </button>
+        {% else %}
+            <span class="consent-status not-consented">
+                <i class="bi bi-eye-slash-fill"></i> Name Visibility: INITIALS ONLY
+            </span>
+            <p>Your name appears as initials only (e.g., {{ user.userprofile.display_name_public }}). Click below to change this.</p>
+            <button class="btn-consent" data-bs-toggle="modal" data-bs-target="#consentModal">
+                <i class="bi bi-shield-plus"></i> Manage Consent
+            </button>
+        {% endif %}
+    </div>
+
+    {% if papers %}
+        <!-- Research Papers Section Header -->
+        <div class="papers-section-header" style="margin-top: 2rem; margin-bottom: 2rem;">
+            <h4><i class="bi bi-journal-text me-2"></i>My Research Papers</h4>
+        </div>
+
+        <div class="container fade-up">
+            <div class="row g-4 justify-content-center">
+                {% for paper in papers %}
+                <div class="col-lg-10 paper-wrapper">
+                    <div class="paper-card" onclick="window.location.href='{% url 'research:detail' paper.id %}'">
+                        <!-- BADGES -->
+                        <div class="mb-2">
+                            {% if paper.strand %}
+                                <span class="badge strand-badge">{{ paper.strand }}</span>
+                            {% endif %}
+                            {% if paper.research_design %}
+                                <span class="badge spec-badge">{{ paper.get_research_design_display }}</span>
+                            {% endif %}
+                            {% for award in paper.awards.all %}
+                                <span class="badge award-badge">{{ award.name }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <h5 class="paper-title">
+                            <a href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                                {{ paper.title|format_italics }}
+                            </a>
+                        </h5>
+
+                        <p class="pub-date">
+                            <i class="bi bi-calendar3"></i> Published {{ paper.publication_date|date:"F d, Y" }}
+                        </p>
+
+                        {% if paper.author.all %}
+                        <p class="authors">
+                            <strong><i class="bi bi-people-fill"></i> Authors:</strong>
+                            {% for author in paper.author.all %}
+                                {{ author.display_name_public }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        {% endif %}
+
+                        {% if paper.abstract %}
+                        <p class="abstract-text">
+                            <strong>Abstract:</strong> {{ paper.abstract|truncatewords:30 }}
+                        </p>
+                        {% endif %}
+
+                        {% if paper.keywords.all %}
+                        <div class="mb-3">
+                            <strong style="font-size: 0.9rem; color: #475569;">
+                                <i class="bi bi-tags-fill"></i> Keywords:
+                            </strong>
+                            {% for keyword in paper.keywords.all %}
+                                <span class="badge keyword-badge">{{ keyword.word|format_italics }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <a class="read-more" href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                            Read full paper
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="no-papers-message">
+            <i class="bi bi-journal-x"></i>
+            <h5>No Research Papers Yet</h5>
+            <p class="text-muted">You don't have any research papers assigned to you at this time.</p>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Consent Modal -->
+<div class="modal fade" id="consentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-shield-check"></i> Manage Name Visibility Consent
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                
+                {% if user.age %}
+                    {% if user.age >= 18 %}
+                        <!-- 18+ USERS: Terms & Conditions -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            You are {{ user.age }} years old. You can consent to name visibility by accepting the terms below.
+                        </div>
+
+                        <div class="modal-terms">
+                            <h6>Terms and Conditions for Name Visibility</h6>
+                            <p>By consenting to name visibility, you agree to the following:</p>
+                            <ul>
+                                <li>Your full name (first name, middle initial, last name, and suffix if applicable) will be displayed on all research papers you have authored.</li>
+                                <li>Your name will be searchable by other users on the research repository platform.</li>
+                                <li>This information will be publicly accessible to anyone viewing your research papers.</li>
+                                <li>You can revoke this consent at any time by returning to this dashboard.</li>
+                                <li>Revoking consent will change your name display to initials only (e.g., Dela Cruz, J. M.).</li>
+                            </ul>
+                            <p><strong>Data Privacy Notice:</strong> Your personal information is protected under the Data Privacy Act of 2012. We collect and process your data solely for the purpose of managing the research repository.</p>
+                        </div>
+
+                        <form method="post" action="{% url 'accounts:update_consent' %}">
+                            {% csrf_token %}
+                            
+                            {% if user.userprofile.consent_status == 'not_consented' %}
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+                                    <label class="form-check-label" for="agreeTerms">
+                                        I have read and agree to the Terms and Conditions
+                                    </label>
+                                </div>
+                                <button type="submit" name="action" value="consent" class="btn btn-success w-100 rounded-pill">
+                                    <i class="bi bi-check-circle"></i> Grant Consent
+                                </button>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Revoking consent will change your name to initials only on all papers.
+                                </div>
+                                <button type="submit" name="action" value="revoke" class="btn btn-danger w-100 rounded-pill">
+                                    <i class="bi bi-x-circle"></i> Revoke Consent
+                                </button>
+                            {% endif %}
+                        </form>
+
+                    {% else %}
+                        <!-- UNDER 18: Parental Consent Upload -->
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-circle"></i>
+                            You are {{ user.age }} years old. You need parental consent to display your full name.
+                        </div>
+
+                        {% if user.userprofile.consent_status == 'pending_approval' %}
+                            <!-- Pending approval state -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-clock-history"></i>
+                                <strong>Status: Pending Admin Approval</strong>
+                                <p class="mb-0 mt-2">Your parental consent letter has been uploaded and is currently being reviewed by an administrator.</p>
+                            </div>
+                            
+                            {% if user.userprofile.parental_consent_file %}
+                                <div class="current-file">
+                                    <i class="bi bi-file-pdf-fill"></i>
+                                    <div>
+                                        <strong>Submitted File:</strong>
+                                        <a href="{{ user.userprofile.parental_consent_file.url }}" target="_blank">
+                                            View Parental Consent Letter
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <p class="text-muted mt-3 text-center">
+                                <small>You will be notified once your consent has been reviewed.</small>
+                            </p>
+
+                        {% elif user.userprofile.consent_status == 'consented' %}
+                            <!-- Already consented -->
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Your parental consent has been approved!</strong>
+                            </div>
+                            
+                            {% if user.userprofile.parental_consent_file %}
+                                <div class="current-file">
+                                    <i class="bi bi-file-pdf-fill"></i>
+                                    <div>
+                                        <strong>Approved File:</strong>
+                                        <a href="{{ user.userprofile.parental_consent_file.url }}" target="_blank">
+                                            View Parental Consent Letter
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <form method="post" action="{% url 'accounts:update_consent' %}" class="mt-3">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="revoke" class="btn btn-danger w-100 rounded-pill">
+                                    <i class="bi bi-x-circle"></i> Revoke Consent
+                                </button>
+                            </form>
+
+                        {% else %}
+                            <!-- Upload form -->
+                            <h6 class="mb-3" style="color: #0b4d26; font-weight: 700;">Upload Parental Consent Letter</h6>
+                            
+                            <div class="modal-terms">
+                                <h6>Terms and Conditions for Name Visibility</h6>
+                                <p>By uploading parental consent, you agree to the following:</p>
+                                <ul>
+                                    <li>Your full name (first name, middle initial, last name, and suffix if applicable) will be displayed on all research papers you have authored.</li>
+                                    <li>Your name will be searchable by other users on the research repository platform.</li>
+                                    <li>This information will be publicly accessible to anyone viewing your research papers.</li>
+                                    <li>You can revoke this consent at any time by returning to this dashboard.</li>
+                                    <li>Revoking consent will change your name display to initials only (e.g., Dela Cruz, J. M.).</li>
+                                </ul>
+                                <p><strong>Data Privacy Notice:</strong> Your personal information is protected under the Data Privacy Act of 2012. We collect and process your data solely for the purpose of managing the research repository.</p>
+                            </div>
+                            
+                            <form method="post" action="{% url 'accounts:update_consent' %}" enctype="multipart/form-data" id="parentalConsentForm">
+                                {% csrf_token %}
+                                
+                                <div class="upload-area">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <h6>Upload PDF Document</h6>
+                                    <input type="file" name="parental_consent" accept=".pdf" class="form-control mt-3" required>
+                                </div>
+
+                                <div class="file-requirements">
+                                    <strong>Requirements:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>File must be in PDF format</li>
+                                        <li>Maximum file size: 10 MB</li>
+                                        <li>Must include parent/guardian signature</li>
+                                        <li>Must state consent for name visibility on research papers</li>
+                                    </ul>
+                                </div>
+
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" id="agreeTermsMinor" name="agree_terms" required>
+                                    <label class="form-check-label" for="agreeTermsMinor">
+                                        I have read and agree to the Terms and Conditions, and confirm that the uploaded document contains valid parental consent
+                                    </label>
+                                </div>
+
+                                <button type="submit" name="action" value="upload" class="btn btn-success w-100 mt-3 rounded-pill">
+                                    <i class="bi bi-upload"></i> Upload Consent Letter
+                                </button>
+                            </form>
+                        {% endif %}
+
+                    {% endif %}
+                {% else %}
+                    <!-- NO BIRTHDATE SET -->
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Your birthdate is not set. Please contact the administrator to update your account information.
+                        </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'accounts/js/dashboard-common.js' %}"></script>
+{% endblock %}

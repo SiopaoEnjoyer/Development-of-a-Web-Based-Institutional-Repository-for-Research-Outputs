@@ -1,0 +1,119 @@
+<!-- Add Author Modal -->
+<div class="modal fade" id="addAuthorModal" tabindex="-1" aria-labelledby="addAuthorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAuthorModalLabel">
+          <i class="bi bi-person-plus"></i> Add New Author
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="authorModalErrors" style="display: none;" class="alert alert-danger"></div>
+        
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">First Name <span class="text-danger">*</span></label>
+            <input type="text" id="author_first_name" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">M.I.</label>
+            <input type="text" id="author_middle_initial" maxlength="1" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Last Name <span class="text-danger">*</span></label>
+            <input type="text" id="author_last_name" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Suffix</label>
+            <input type="text" id="author_suffix" class="form-control" placeholder="Jr., Sr.">
+          </div>
+          <div class="col-12">
+            <small class="text-muted">
+              <i class="bi bi-info-circle"></i> At least one batch (Grade 11 or Grade 12) is required. You can leave one blank if the student transferred.
+            </small>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Grade 11 Batch</label>
+            <input type="text" id="author_G11_Batch" class="form-control" placeholder="2023-2024">
+            <small class="text-muted">Format: YYYY-YYYY</small>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Grade 12 Batch</label>
+            <input type="text" id="author_G12_Batch" class="form-control" placeholder="2024-2025">
+            <small class="text-muted">Format: YYYY-YYYY</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="saveAuthorBtn">
+          <i class="bi bi-plus-circle"></i> Add Author
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Author Modal -->
+<div class="modal fade" id="editAuthorModal" tabindex="-1" aria-labelledby="editAuthorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editAuthorModalLabel">
+          <i class="bi bi-pencil"></i> Edit Author
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="editAuthorModalErrors" style="display: none;" class="alert alert-danger"></div>
+        
+        <input type="hidden" id="edit_author_id">
+        
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">First Name <span class="text-danger">*</span></label>
+            <input type="text" id="edit_first_name" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">M.I.</label>
+            <input type="text" id="edit_middle_initial" maxlength="1" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Last Name <span class="text-danger">*</span></label>
+            <input type="text" id="edit_last_name" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Suffix</label>
+            <input type="text" id="edit_suffix" class="form-control" placeholder="Jr., Sr.">
+          </div>
+          <div class="col-12">
+            <small class="text-muted">
+              <i class="bi bi-info-circle"></i> At least one batch (Grade 11 or Grade 12) is required. You can leave one blank if the student transferred.
+            </small>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Grade 11 Batch</label>
+            <input type="text" id="edit_G11_Batch" class="form-control" placeholder="2023-2024">
+            <small class="text-muted">Format: YYYY-YYYY</small>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Grade 12 Batch</label>
+            <input type="text" id="edit_G12_Batch" class="form-control" placeholder="2024-2025">
+            <small class="text-muted">Format: YYYY-YYYY</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="updateAuthorBtn">
+          <i class="bi bi-check-circle"></i> Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

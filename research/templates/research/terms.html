@@ -1,0 +1,598 @@
+{% extends "research/base.html" %}
+{% load static %}
+
+{% block title %}Terms of Service{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'research/css/terms.css' %}">
+{% endblock %}
+
+{% block page_header %}Terms of Service{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <!-- Header -->
+    <div class="terms-header">
+        <div class="terms-header-flex">
+            <div class="terms-icon-box">
+                <svg class="terms-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="terms-title">Terms of Service</h1>
+                <p class="terms-subtitle">Bacolod Trinity Christian School, Inc. Research Repository</p>
+            </div>
+        </div>
+        
+        <div class="terms-notice">
+            <svg class="terms-notice-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="terms-notice-date">Effective Date: January 21, 2026</p>
+                <p class="terms-notice-text">
+                    Please read these Terms of Service carefully before using the BTCSI Research Repository. 
+                    By accessing or using this system, you acknowledge that you have read, understood, and 
+                    agree to be bound by these terms.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: General Terms -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <h2 class="terms-section-title">1. General Terms and Acceptance</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">1.1 Agreement to Terms</p>
+                <p>By accessing and using the Bacolod Trinity Christian School, Inc. (BTCSI) Institutional Research Repository (the "Repository" or "System"), you agree to comply with and be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you must not access or use the Repository.</p>
+
+                <p class="terms-subsection">1.2 Eligibility</p>
+                <p>The Repository is primarily intended for members of the BTCSI community, including current students, faculty, staff, alumni, and authorized external researchers. Access to certain features may be restricted based on user role and account approval status.</p>
+
+                <p class="terms-subsection">1.3 Modifications to Terms</p>
+                <p>BTCSI reserves the right to modify these Terms at any time. Users will be notified of significant changes via email or system notification. Continued use of the Repository after such modifications constitutes acceptance of the updated Terms.</p>
+
+                <p class="terms-subsection">1.4 Account Registration and Security</p>
+                <ul>
+                    <li>You must provide accurate, current, and complete information during registration</li>
+                    <li>You are responsible for maintaining the confidentiality of your login credentials</li>
+                    <li>You must notify BTCSI immediately of any unauthorized access to your account</li>
+                    <li>You may not share your account credentials with others</li>
+                    <li>BTCSI reserves the right to suspend or terminate accounts that violate these Terms</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Data Privacy -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                <h2 class="terms-section-title">2. Data Privacy and Protection</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">2.1 Compliance with Data Privacy Act of 2012 (RA 10173)</p>
+                <p>The Repository operates in full compliance with the Data Privacy Act of 2012. Personal information collected and stored includes:</p>
+                <ul>
+                    <li>Name, email address, and birthdate for authentication purposes</li>
+                    <li>Academic information (grade level, strand, batch year)</li>
+                    <li>Authorship and research contribution data</li>
+                    <li>Consent status for public display of full names</li>
+                </ul>
+
+                <p class="terms-subsection">2.2 Data Collection and Usage</p>
+                <ul>
+                    <li><strong>Minimal Collection:</strong> Only necessary personal data is collected</li>
+                    <li><strong>Purpose Limitation:</strong> Data is used solely for Repository functionality and institutional record-keeping</li>
+                    <li><strong>Access Control:</strong> Personally identifiable information (PII) is accessible only to authorized administrators and subject teachers</li>
+                    <li><strong>Data Retention:</strong> Personal data is retained only as long as necessary for educational and archival purposes</li>
+                </ul>
+
+                <p class="terms-subsection">2.3 User Rights</p>
+                <p>Users have the right to:</p>
+                <ul>
+                    <li>Access their personal information stored in the system</li>
+                    <li>Request correction of inaccurate personal data</li>
+                    <li>Object to processing of personal data (subject to institutional requirements)</li>
+                    <li>Request deletion of account (subject to archival and legal retention requirements)</li>
+                </ul>
+
+                <p class="terms-subsection">2.4 Security Measures</p>
+                <ul>
+                    <li>Email verification for account authentication</li>
+                    <li>Role-based access control (RBAC)</li>
+                    <li>SSL/TLS encryption for data transmission</li>
+                    <li>Regular security audits and updates</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Intellectual Property -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h2 class="terms-section-title">3. Intellectual Property and Copyright</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">3.1 Compliance with IP Code of the Philippines (RA 8293)</p>
+                <p>All research outputs uploaded to the Repository are subject to the Intellectual Property Code of the Philippines. The Repository respects and protects the intellectual property rights of authors, BTCSI, and third parties.</p>
+
+                <p class="terms-subsection">3.2 Ownership of Research Outputs</p>
+                <ul>
+                    <li><strong>Student Works:</strong> Research papers produced by students as part of academic requirements are considered collaborative works between students and BTCSI</li>
+                    <li><strong>School Property:</strong> BTCSI retains institutional rights to preserve, archive, and display approved research outputs</li>
+                    <li><strong>Author Attribution:</strong> Student authors retain moral rights and proper attribution</li>
+                </ul>
+
+                <p class="terms-subsection">3.3 Copyright Notices and Attribution</p>
+                <ul>
+                    <li>Author names are clearly displayed (subject to consent status)</li>
+                    <li>Research outputs may only be used for educational, non-commercial purposes</li>
+                    <li>Proper citation is required when referencing Repository content</li>
+                </ul>
+
+                <p class="terms-subsection">3.4 Permission and Consent Requirements</p>
+                <p>Before research outputs are publicly displayed in the Repository:</p>
+                <ul>
+                    <li>Student authors must provide explicit permission</li>
+                    <li>For minor students (under 18), parental/guardian consent is required</li>
+                    <li>Authors may control whether their full name or initials are displayed publicly</li>
+                    <li>Consent may be withdrawn, subject to institutional archival policies</li>
+                </ul>
+
+                <p class="terms-subsection">3.5 Prohibited Uses</p>
+                <p>Users may NOT:</p>
+                <ul>
+                    <li>Reproduce, distribute, or publicly display Repository content without permission</li>
+                    <li>Use content for commercial purposes</li>
+                    <li>Plagiarize or claim authorship of others' work</li>
+                    <li>Remove or alter copyright notices, author attributions, or metadata</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Cybercrime Prevention -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h2 class="terms-section-title">4. Cybercrime Prevention and Prohibited Conduct</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">4.1 Compliance with Cybercrime Prevention Act of 2012 (RA 10175)</p>
+                <p>All users must comply with the Cybercrime Prevention Act of 2012. The following activities are strictly prohibited:</p>
+
+                <p class="terms-subsection">4.2 Prohibited Activities</p>
+                <ul>
+                    <li><strong>Unauthorized Access:</strong> Attempting to access accounts, data, or system areas without authorization</li>
+                    <li><strong>Data Interference:</strong> Intentionally altering, deleting, or damaging Repository data</li>
+                    <li><strong>System Interference:</strong> Disrupting Repository services or server operations</li>
+                    <li><strong>Misuse of Devices:</strong> Using automated tools, bots, or scripts to scrape, download, or manipulate content</li>
+                    <li><strong>Identity Theft:</strong> Impersonating other users or creating fake accounts</li>
+                    <li><strong>Cyber Libel:</strong> Posting defamatory, malicious, or false content</li>
+                </ul>
+
+                <p class="terms-subsection">4.3 Security Controls</p>
+                <ul>
+                    <li>Upload and access permissions controlled through role-based authentication</li>
+                    <li>Regular security monitoring and incident response procedures</li>
+                </ul>
+
+                <p class="terms-subsection">4.4 Consequences of Violations</p>
+                <p>Violations may result in:</p>
+                <ul>
+                    <li>Immediate account suspension or termination</li>
+                    <li>Referral to school disciplinary authorities</li>
+                    <li>Legal action in accordance with RA 10175</li>
+                    <li>Reporting to law enforcement if criminal activity is suspected</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Terms for Students -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <h2 class="terms-section-title">5. Terms for Students</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">5.1 Account Access and Approval</p>
+                <ul>
+                    <li>Student accounts require administrative approval before full access is granted</li>
+                    <li>Upon registration, students are directed to a pending dashboard until approval</li>
+                    <li>Email verification is required for all logins</li>
+                </ul>
+
+                <p class="terms-subsection">5.2 Browsing and Access Rights</p>
+                <ul>
+                    <li>Students may browse, search, and view research outputs in the Repository</li>
+                    <li>Full-text PDF downloads require an approved account</li>
+                    <li>Unapproved students may view metadata but cannot download files</li>
+                </ul>
+
+                <p class="terms-subsection">5.3 Consent for Name Display</p>
+                <ul>
+                    <li><strong>Students 18+:</strong> May provide consent directly to display full name</li>
+                    <li><strong>Students under 18:</strong> Must submit parental consent form (PDF) for approval</li>
+                    <li><strong>Without Consent:</strong> Names displayed as initials (e.g., "Dela Cruz, J. A.")</li>
+                    <li><strong>Consent Revocation:</strong> Students may revoke consent at any time; name will revert to initials</li>
+                </ul>
+
+                <p class="terms-subsection">5.4 Responsible Use</p>
+                <p>Students agree to:</p>
+                <ul>
+                    <li>Use Repository content for educational purposes only</li>
+                    <li>Properly cite all references from Repository research</li>
+                    <li>Not plagiarize or misrepresent others' work</li>
+                    <li>Report any technical issues or inappropriate content to administrators</li>
+                </ul>
+
+                <p class="terms-subsection">5.5 Research Submission</p>
+                <ul>
+                    <li>Students do not upload research directly; teachers upload on their behalf</li>
+                    <li>Only research that has passed final defense is eligible for upload</li>
+                    <li>Students may request removal of their research (subject to archival policies)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 6: Terms for Teachers -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                <h2 class="terms-section-title">6. Terms for Teachers</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">6.1 Account Privileges</p>
+                <ul>
+                    <li>Research teachers and non-research teachers have access to teacher dashboards</li>
+                    <li>Research teachers may upload approved student research outputs</li>
+                    <li>Teachers may review and approve parental consent forms for students under 18</li>
+                </ul>
+
+                <p class="terms-subsection">6.2 Upload Responsibilities</p>
+                <p>When uploading research outputs, teachers must ensure:</p>
+                <ul>
+                    <li>Research has successfully passed final defense</li>
+                    <li>All metadata (title, authors, keywords, abstract, etc.) is accurate and complete</li>
+                    <li>Proper author attribution and consent status is recorded</li>
+                    <li>PDF files are free from errors and properly formatted</li>
+                    <li>Content complies with BTCSI academic integrity policies</li>
+                </ul>
+
+                <p class="terms-subsection">6.3 Quality Control</p>
+                <ul>
+                    <li>Teachers are responsible for verifying the quality and originality of uploaded research</li>
+                    <li>Uploads may be subject to administrative review before publication</li>
+                    <li>Teachers may edit or remove research outputs if errors are discovered</li>
+                </ul>
+
+                <p class="terms-subsection">6.4 Consent Management</p>
+                <ul>
+                    <li>Teachers may review parental consent forms submitted by students under 18</li>
+                    <li>Consent approvals/denials must be processed within a reasonable timeframe</li>
+                    <li>Denial of consent must be communicated with clear reasoning</li>
+                </ul>
+
+                <p class="terms-subsection">6.5 Professional Conduct</p>
+                <p>Teachers agree to:</p>
+                <ul>
+                    <li>Maintain confidentiality of student data</li>
+                    <li>Use the Repository for educational purposes only</li>
+                    <li>Not alter or manipulate research content without authorization</li>
+                    <li>Report suspected plagiarism or academic misconduct</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 7: Terms for Administrators -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <h2 class="terms-section-title">7. Terms for Administrators</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">7.1 Administrative Privileges</p>
+                <p>Administrators have full access to:</p>
+                <ul>
+                    <li>User account management (approval, suspension, deletion)</li>
+                    <li>Research paper management (upload, edit, delete)</li>
+                    <li>Author and keyword database management</li>
+                    <li>System configuration and settings</li>
+                    <li>Access logs and activity monitoring</li>
+                </ul>
+
+                <p class="terms-subsection">7.2 Account Approval Process</p>
+                <ul>
+                    <li>Administrators must review and approve new user accounts in a timely manner</li>
+                    <li>Verification of user identity and affiliation with BTCSI is required</li>
+                    <li>Administrators may edit user information (name, batch year, role) during approval</li>
+                    <li>Denials must be justified and communicated appropriately</li>
+                </ul>
+
+                <p class="terms-subsection">7.3 Content Moderation</p>
+                <ul>
+                    <li>Administrators are responsible for maintaining Repository content quality</li>
+                    <li>Content that violates Terms of Service must be removed promptly</li>
+                    <li>Administrators may edit metadata to correct errors or improve discoverability</li>
+                    <li>All content changes must be logged for accountability</li>
+                </ul>
+
+                <p class="terms-subsection">7.4 Data Protection Obligations</p>
+                <ul>
+                    <li>Administrators must protect user privacy and personal data</li>
+                    <li>Access to PII is limited to necessary administrative functions</li>
+                    <li>Data breaches must be reported immediately to BTCSI IT and management</li>
+                    <li>Regular backups and security measures must be maintained</li>
+                </ul>
+
+                <p class="terms-subsection">7.5 Ethical Responsibilities</p>
+                <p>Administrators agree to:</p>
+                <ul>
+                    <li>Exercise administrative powers responsibly and fairly</li>
+                    <li>Not abuse access privileges for personal gain</li>
+                    <li>Maintain confidentiality of sensitive information</li>
+                    <li>Report any security vulnerabilities or policy violations</li>
+                    <li>Follow BTCSI policies and Philippine laws at all times</li>
+                </ul>
+
+                <p class="terms-subsection">7.6 System Maintenance</p>
+                <ul>
+                    <li>Administrators are responsible for routine system maintenance</li>
+                    <li>Software updates and security patches must be applied promptly</li>
+                    <li>System downtime should be minimized and communicated in advance</li>
+                    <li>Technical issues must be addressed in a timely manner</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 8: Content Quality -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                </svg>
+                <h2 class="terms-section-title">8. Content Quality and Academic Integrity</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">8.1 Review and Approval Process</p>
+                <ul>
+                    <li>All research outputs undergo review before publication in the Repository</li>
+                    <li>Research must successfully pass final defense evaluation</li>
+                    <li>Quality standards align with BTCSI Practical Research course requirements</li>
+                </ul>
+
+                <p class="terms-subsection">8.2 Academic Integrity Standards</p>
+                <p>The Repository maintains high standards of academic integrity. Content must:</p>
+                <ul>
+                    <li>Be original work by the attributed student authors</li>
+                    <li>Include proper citations for all referenced sources</li>
+                    <li>Not contain plagiarized material</li>
+                    <li>Comply with BTCSI research ethics guidelines</li>
+                </ul>
+
+                <p class="terms-subsection">8.3 Reporting Violations</p>
+                <p>Users who discover violations must report them to:</p>
+                <ul>
+                    <li>Repository administrators via the provided contact channels</li>
+                    <li>BTCSI research coordinators for academic integrity issues</li>
+                    <li>IT staff for technical or security concerns</li>
+                </ul>
+
+                <p class="terms-subsection">8.4 Investigation and Action</p>
+                <ul>
+                    <li>All reported violations will be investigated promptly</li>
+                    <li>Content may be temporarily removed during investigation</li>
+                    <li>Confirmed violations may result in permanent removal and disciplinary action</li>
+                    <li>Legal action may be pursued for serious violations (plagiarism, copyright infringement)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 9: System Usage -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h2 class="terms-section-title">9. System Usage and Availability</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">9.1 Acceptable Use Policy</p>
+                <p>The Repository may only be used for:</p>
+                <ul>
+                    <li>Educational research and reference purposes</li>
+                    <li>Institutional archival and knowledge preservation</li>
+                    <li>Academic instruction and mentoring</li>
+                    <li>Non-commercial scholarly activities</li>
+                </ul>
+
+                <p class="terms-subsection">9.2 Prohibited Uses</p>
+                <ul>
+                    <li>Commercial exploitation of Repository content</li>
+                    <li>Bulk downloading or automated scraping</li>
+                    <li>Redistribution of content on external platforms</li>
+                    <li>Any use that violates intellectual property rights</li>
+                </ul>
+
+                <p class="terms-subsection">9.3 System Availability</p>
+                <ul>
+                    <li>BTCSI strives to maintain 24/7 Repository availability</li>
+                    <li>Scheduled maintenance will be announced in advance</li>
+                    <li>BTCSI is not liable for temporary interruptions or downtime</li>
+                    <li>Users should maintain local copies of important research</li>
+                </ul>
+
+                <p class="terms-subsection">9.4 No Warranty</p>
+                <p>The Repository is provided "as is" without warranties of any kind. BTCSI does not guarantee uninterrupted access, error-free operation, or fitness for any particular purpose.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 10: Limitation of Liability -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h2 class="terms-section-title">10. Limitation of Liability</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">10.1 Disclaimer</p>
+                <p>To the fullest extent permitted by law, BTCSI, its employees, and affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from use of the Repository.</p>
+
+                <p class="terms-subsection">10.2 User Responsibility</p>
+                <ul>
+                    <li>Users are responsible for their own use of Repository content</li>
+                    <li>Users must independently verify information accuracy</li>
+                    <li>BTCSI is not liable for user misconduct or violations of these Terms</li>
+                </ul>
+
+                <p class="terms-subsection">10.3 Indemnification</p>
+                <p>Users agree to indemnify and hold harmless BTCSI from any claims, damages, or expenses arising from their violation of these Terms or misuse of the Repository.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 11: Contact and Dispute Resolution -->
+    <div class="terms-section">
+        <button class="terms-section-header" onclick="toggleSection(this)">
+            <div class="terms-section-header-content">
+                <svg class="terms-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h2 class="terms-section-title">11. Contact Information and Dispute Resolution</h2>
+            </div>
+            <svg class="terms-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="terms-section-content">
+            <div class="terms-text">
+                <p class="terms-subsection">11.1 Contact Information</p>
+                <p>For questions, concerns, or reports regarding the Repository:</p>
+                <ul>
+                    <li><strong>Email:</strong> btcsirepository@gmail.com</li>
+                    <li><strong>Address:</strong> Bacolod Trinity Christian School, Inc., Villa Angela Subd., Phase 3, Bacolod City</li>
+                    <li><strong>Phone:</strong> (034) 434-3924 / (034) 434-3925</li>
+                </ul>
+
+                <p class="terms-subsection">11.2 Dispute Resolution</p>
+                <ul>
+                    <li>Disputes should first be reported to Repository administrators</li>
+                    <li>Unresolved issues may be escalated to BTCSI administration</li>
+                    <li>Legal disputes will be governed by Philippine law</li>
+                </ul>
+
+                <p class="terms-subsection">11.3 Governing Law</p>
+                <p>These Terms are governed by the laws of the Republic of the Philippines. Any legal action arising from these Terms shall be filed in the appropriate courts of Bacolod City.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="terms-footer">
+        <div class="terms-acknowledgment">
+            <p class="terms-acknowledgment-text">
+                <strong>Acknowledgment:</strong> By using the BTCSI Research Repository, you acknowledge 
+                that you have read, understood, and agree to be bound by these Terms of Service and all 
+                applicable laws and regulations.
+            </p>
+        </div>
+        
+        <div class="terms-footer-content">
+            <p class="terms-school-name">Bacolod Trinity Christian School, Inc.</p>
+            <p>Villa Angela Subd., Phase 3, Bacolod City</p>
+            <p>© 2024-2026 All rights reserved</p>
+            <p style="margin-top: 1rem; font-size: 0.75rem;">Last Updated: January 21, 2026</p>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'research/js/terms.js' %}"></script>
+{% endblock %}

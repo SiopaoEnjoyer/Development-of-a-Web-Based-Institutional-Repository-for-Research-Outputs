@@ -1,0 +1,374 @@
+
+    /* Enhanced Strand Selection */
+    .choose-header {
+        background: linear-gradient(135deg, var(--theme-green), #059669);
+        color: white;
+        padding: 2rem;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 40px rgba(1, 87, 38, 0.2);
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .choose-header h2 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .choose-header p {
+        margin-bottom: 0;
+        opacity: 0.95;
+        font-size: 0.95rem;
+        color: white;
+    }
+
+    /* Strand Cards - Compact & Modern */
+    .strand-card {
+    background: white; /* Changed from rgba(255, 255, 255, 0.95) to solid white */
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border: 2px solid rgba(1, 87, 38, 0.1);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    height: 100%;
+    z-index: 10; /* Add this */
+}
+
+
+    .strand-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #015726, #059669, #10b981);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .strand-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 45px rgba(1, 87, 38, 0.15);
+        border-color: var(--theme-green);
+        background: white;
+    }
+
+    .strand-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .strand-emoji {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+
+    .strand-card:hover .strand-emoji {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .strand-card h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--theme-green);
+        margin-bottom: 0.5rem;
+        transition: color 0.3s ease;
+    }
+
+    .strand-card:hover h2 {
+        color: #059669;
+    }
+
+    .strand-card small {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: block;
+    }
+
+    /* Research Design Selection */
+    .design-selection {
+        display: none;
+        animation: fadeInUp 0.5s ease-out;
+        margin-bottom: 3rem;
+    }
+
+    .design-selection.active {
+        display: block;
+    }
+
+    .design-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .design-header h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--theme-green);
+        margin-bottom: 0.5rem;
+    }
+
+    .design-header p {
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+
+    .back-to-strands {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        background: white;
+        border: 2px solid var(--theme-green);
+        color: var(--theme-green);
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-to-strands:hover {
+        background: var(--theme-green);
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    .design-card {
+    background: white; /* Changed from rgba(255, 255, 255, 0.95) to solid white */
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 2px solid rgba(1, 87, 38, 0.15);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    z-index: 10; /* Add this */
+    }
+
+    .design-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(1, 87, 38, 0.2);
+        border-color: var(--theme-green);
+    }
+
+    .design-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--theme-green), #059669);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .design-card:hover .design-icon {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    .design-card h5 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--theme-green);
+        margin-bottom: 0.5rem;
+    }
+
+    .design-card p {
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 0;
+        flex-grow: 1;
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.5rem;
+        background: white;
+        border: 2px solid var(--theme-green);
+        color: var(--theme-green);
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .back-btn:hover {
+        background: var(--theme-green);
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Ensure proper z-index layering */
+    .section-header {
+        position: relative;
+        z-index: 10;
+    }
+
+    .paper-wrapper {
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Responsive adjustments for strand/design cards */
+    @media (max-width: 992px) {
+        .choose-header {
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+
+        .choose-header h2 {
+            font-size: 1.6rem;
+        }
+
+        .strand-card {
+            margin-bottom: 1rem;
+        }
+
+        .design-card {
+            margin-bottom: 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .choose-header {
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .choose-header h2 {
+            font-size: 1.4rem;
+        }
+
+        .choose-header p {
+            font-size: 0.85rem;
+        }
+
+        .strand-card {
+            padding: 1.5rem 1rem;
+            overflow: visible !important;
+        }
+
+        .strand-card h2 {
+            font-size: 1.4rem;
+        }
+
+        .strand-emoji {
+            font-size: 2rem;
+        }
+
+        .design-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .design-card {
+            padding: 1.25rem;
+        }
+
+        .design-card h5 {
+            font-size: 1.1rem;
+        }
+
+        .back-btn,
+        .back-to-strands {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .choose-header {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .choose-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .strand-card {
+            padding: 1.25rem 0.75rem;
+        }
+
+        .strand-card h2 {
+            font-size: 1.25rem;
+        }
+
+        .strand-card small {
+            font-size: 0.8rem;
+        }
+
+        .strand-emoji {
+            font-size: 1.75rem;
+        }
+
+        .design-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .design-card {
+            padding: 1rem;
+        }
+
+        .design-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
+
+        .design-card h5 {
+            font-size: 1rem;
+        }
+
+        .design-card p {
+            font-size: 0.8rem;
+        }
+
+        .back-btn,
+        .back-to-strands {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .choose-header h2 {
+            font-size: 1.1rem;
+        }
+
+        .strand-card h2 {
+            font-size: 1.1rem;
+        }
+    }

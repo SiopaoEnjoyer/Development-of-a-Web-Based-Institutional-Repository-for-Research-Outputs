@@ -1,0 +1,233 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+{% block title %}Home - Trinity Repository{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'research/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <img src="{% static 'research/img/trinity.jpg' %}" class="hero-bg-image" alt="Trinity Background">
+    <div class="hero-overlay"></div>
+    <div class="hero-glow" id="heroGlow"></div>
+    
+    <div class="container" style="position: relative; z-index: 10; max-width: 1200px;">
+        <div class="text-center">
+            <!-- Floating Badges -->
+            <div class="mb-4">
+                <span class="floating-badge">
+                    <i class="bi bi-star-fill"></i>
+                    Powered by Excellence
+                </span>
+                <span class="floating-badge">
+                    <i class="bi bi-award-fill"></i>
+                    Faith-Based Education
+                </span>
+            </div>
+
+            <!-- Main Title -->
+            <h1 class="hero-title" id="heroTitle">BTCSI Research Repository</h1>
+
+            <p class="hero-subtitle">
+                A comprehensive platform for <span style="color: #fbbf24; font-weight: 900; text-shadow: 0 3px 15px rgba(0, 0, 0, 0.9);">Bacolod Trinity Christian School, Inc.</span>
+            </p>
+
+            <p class="hero-description">
+                Empowering students by providing easy access to academic resources from past BTCSI alumni
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="cta-buttons">
+                <a href="{% url 'research:index' %}" class="btn-hero btn-primary">
+                    <i class="bi bi-journal-text"></i>
+                    Explore Research Papers
+                </a>
+                <a href="#vision" class="btn-hero btn-secondary">
+                    Learn More
+                </a>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="scroll-indicator">
+                <i class="bi bi-chevron-down" style="font-size: 2rem;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="stats-section" id="stats">
+    <div class="container" style="max-width: 1200px;">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-journal-text" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="stat-value" data-target="100">0</div>
+                    <div class="stat-label">Research Papers</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-people-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="stat-value" data-target="200">0</div>
+                    <div class="stat-label">Students Served</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="stat-value" data-target="6">0</div>
+                    <div class="stat-label">Strands and Specializations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VISION SECTION -->
+<section class="vision-section" id="vision">
+    <div class="container" style="max-width: 1000px;">
+        <div class="vision-card">
+            <div class="vision-header">
+                <i class="bi bi-star-fill" style="font-size: 2.5rem; color: #fbbf24;"></i>
+                <h2 class="vision-title">Our Vision</h2>
+            </div>
+            <p class="vision-text">
+                At <span class="vision-highlight">BTCSI Research Repository</span>, we believe that past BTCSI research should be accessible, transparent, and open to everyone in the school. Our vision is to share past knowledge with future students using an online repository — preserving the academic legacy of BTCSI.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="features-section" id="features">
+    <div class="container" style="max-width: 1200px;">
+        <h2 class="section-title">What We Do</h2>
+        <p class="section-subtitle">Three powerful ways we serve the Trinity community</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card" data-feature="0">
+                    <div class="feature-icon">
+                        <i class="bi bi-upload" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="feature-title">Upload & Share Research</h3>
+                    <p class="feature-description">
+                        Researchers can submit their work, making it available to future BTCSI students.
+                    </p>
+                    <div class="feature-check">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card active" data-feature="1">
+                    <div class="feature-icon">
+                        <i class="bi bi-search" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="feature-title">Discover Scholarly Resources</h3>
+                    <p class="feature-description">
+                        Students can browse, search, and download research from BTCSI alumni across various academic tracks.
+                    </p>
+                    <div class="feature-check">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card" data-feature="2">
+                    <div class="feature-icon">
+                        <i class="bi bi-archive-fill" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="feature-title">Preserve Knowledge</h3>
+                    <p class="feature-description">
+                        We ensure research remains accessible for generations, keeping valuable insights alive long after publication.
+                    </p>
+                    <div class="feature-check">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STRANDS SECTION -->
+<section class="strands-section" id="strands">
+    <div class="container" style="max-width: 1200px;">
+        <h2 class="section-title">Explore by Strand</h2>
+        <p class="section-subtitle">Choose your academic track to discover relevant research</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <a href="{% url 'research:strand' 'STEM' %}" class="text-decoration-none">
+                    <div class="strand-card">
+                        <div class="strand-emoji">🔬</div>
+                        <h3 class="strand-name">STEM</h3>
+                        <p class="strand-full">Science, Technology, Engineering, Mathematics</p>
+                        <div class="strand-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{% url 'research:strand' 'ABM' %}" class="text-decoration-none">
+                    <div class="strand-card">
+                        <div class="strand-emoji">💼</div>
+                        <h3 class="strand-name">ABM</h3>
+                        <p class="strand-full">Accounting, Business, Management</p>
+                        <div class="strand-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{% url 'research:strand' 'HUMSS' %}" class="text-decoration-none">
+                    <div class="strand-card">
+                        <div class="strand-emoji">📚</div>
+                        <h3 class="strand-name">HUMSS</h3>
+                        <p class="strand-full">Humanities & Social Sciences</p>
+                        <div class="strand-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+    <div class="container" style="max-width: 900px;">
+        <div class="cta-card">
+            <h2 class="cta-title">Ready to Explore?</h2>
+            <p class="cta-description">
+                Join a plethora of students discovering world-class research from BTCSI alumni
+            </p>
+            <a href="{% url 'research:index' %}" class="btn-cta">
+                Start Exploring
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<script src="{% static 'research/js/home.js' %}"></script>
+{% endblock %}

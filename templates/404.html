@@ -1,0 +1,259 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+
+{% block title %}Page Not Found - REPOSITORY NAME{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        min-height: calc(100vh - 400px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .error-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(1, 87, 38, 0.1);
+        padding: 60px 40px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--theme-green), #013d1c, var(--theme-green));
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease infinite;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .error-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, var(--theme-green), #013d1c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(1, 87, 38, 0.3);
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .error-code {
+        font-size: 72px;
+        font-weight: 700;
+        color: var(--theme-green);
+        margin: 0 0 15px;
+        font-family: 'Montserrat', sans-serif;
+        letter-spacing: -2px;
+    }
+
+    .error-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 15px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .error-message {
+        font-size: 16px;
+        color: #666;
+        line-height: 1.6;
+        margin: 0 0 35px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-btn {
+        padding: 14px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-family: 'Montserrat', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .error-btn-primary {
+        background: var(--theme-green);
+        color: white;
+        border: 2px solid var(--theme-green);
+    }
+
+    .error-btn-primary:hover {
+        background: #013d1c;
+        border-color: #013d1c;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(1, 87, 38, 0.3);
+        color: white;
+    }
+
+    .error-btn-secondary {
+        background: white;
+        color: var(--theme-green);
+        border: 2px solid var(--theme-green);
+    }
+
+    .error-btn-secondary:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(1, 87, 38, 0.15);
+        color: var(--theme-green);
+    }
+
+    .helpful-links {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .helpful-links h6 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .link-list {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .link-list li a {
+        color: var(--theme-green);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .link-list li a:hover {
+        color: #013d1c;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 576px) {
+        .error-card {
+            padding: 40px 25px;
+        }
+
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            font-size: 50px;
+        }
+
+        .error-code {
+            font-size: 56px;
+        }
+
+        .error-title {
+            font-size: 24px;
+        }
+
+        .error-message {
+            font-size: 14px;
+        }
+
+        .error-actions {
+            flex-direction: column;
+        }
+
+        .error-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .link-list {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="bi bi-question-circle"></i>
+        </div>
+
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Page Not Found</h2>
+        <p class="error-message">
+            We're sorry, but the page you're looking for doesn't exist or may have been moved. 
+            Please check the URL or navigate back to our homepage.
+        </p>
+
+        <div class="error-actions">
+            <a href="{% url 'research:home' %}" class="error-btn error-btn-primary">
+                <i class="bi bi-house-door"></i>
+                Go to Homepage
+            </a>
+            <a href="javascript:history.back()" class="error-btn error-btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Go Back
+            </a>
+        </div>
+
+        <div class="helpful-links">
+            <h6>Helpful Links</h6>
+            <ul class="link-list">
+                <li><a href="{% url 'research:index' %}">Research Papers</a></li>
+                <li><a href="{% url 'research:search' %}">Search</a></li>
+                <li><a href="{% url 'research:about' %}">About</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'accounts:dashboard_redirect' %}">Dashboard</a></li>
+                {% else %}
+                    <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

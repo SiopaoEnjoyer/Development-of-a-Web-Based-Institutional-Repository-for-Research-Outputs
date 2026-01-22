@@ -1,0 +1,294 @@
+<!-- Modal for editing a single user (loaded dynamically via AJAX) -->
+<div id="editModal_{{ profile.id }}" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><i class="bi bi-pencil-square"></i> Edit User: {{ profile.pending_first_name }} {{ profile.pending_last_name }}</h5>
+                <button type="button" class="close" onclick="closeEditModal({{ profile.id }})">&times;</button>
+            </div>
+            
+            <form method="post" action="{% url 'accounts:edit_user' profile.id %}" onsubmit="return handleEditSubmit(event, this)">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- User Account Information -->
+                    <h6 class="section-title"><i class="bi bi-person-badge"></i> Account Information</h6>
+                    <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 15px;">
+                        <i class="bi bi-info-circle"></i> Manage user account settings, role, and access permissions.
+                    </p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="bi bi-envelope"></i> Email Address</label>
+                            <div class="display-value">{{ profile.user.email }}</div>
+                            <small class="text-muted">Primary login identifier (cannot be changed)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="role_{{ profile.id }}"><i class="bi bi-shield-check"></i> Role</label>
+                            <select 
+                                id="role_{{ profile.id }}" 
+                                name="role" 
+                                class="form-control" 
+                                onchange="toggleAcademicSection({{ profile.id }})"
+                                required
+                            >
+                                {% for value, label in role_choices %}
+                                <option value="{{ value }}" {% if profile.user.role == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Determines access level and available features</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" name="is_active" {% if profile.user.is_active %}checked{% endif %}>
+                                <i class="bi bi-power"></i> Account Active
+                            </label>
+                            <small class="text-muted">Inactive users cannot log in</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" name="is_approved" {% if profile.is_approved %}checked{% endif %}>
+                                <i class="bi bi-check-circle"></i> Approved
+                            </label>
+                            <small class="text-muted">Approved users can access full features</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-check">
+                            <input type="checkbox" name="is_staff" {% if profile.user.is_staff %}checked{% endif %}>
+                            <i class="bi bi-star"></i> Staff Status
+                        </label>
+                        <small class="text-muted">Grants access to Django admin panel</small>
+                    </div>
+                    
+                    <hr class="section-divider">
+                    
+                    <!-- Personal Information -->
+                    <h6 class="section-title"><i class="bi bi-person"></i> Personal Information</h6>
+                    <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 15px;">
+                        <i class="bi bi-info-circle"></i> User's personal details and identification information.
+                    </p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="first_name_{{ profile.id }}"><i class="bi bi-person-fill"></i> First Name *</label>
+                            <input 
+                                type="text" 
+                                id="first_name_{{ profile.id }}" 
+                                name="first_name" 
+                                class="form-control" 
+                                value="{{ profile.pending_first_name }}" 
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last_name_{{ profile.id }}"><i class="bi bi-person-fill"></i> Last Name *</label>
+                            <input 
+                                type="text" 
+                                id="last_name_{{ profile.id }}" 
+                                name="last_name" 
+                                class="form-control" 
+                                value="{{ profile.pending_last_name }}" 
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="middle_initial_{{ profile.id }}"><i class="bi bi-fonts"></i> Middle Initial</label>
+                            <input 
+                                type="text" 
+                                id="middle_initial_{{ profile.id }}" 
+                                name="middle_initial" 
+                                class="form-control" 
+                                value="{{ profile.pending_middle_initial|default:'' }}" 
+                                maxlength="1"
+                            >
+                            <small class="text-muted">Optional - single letter only</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="suffix_{{ profile.id }}"><i class="bi bi-tag"></i> Suffix</label>
+                            <input 
+                                type="text" 
+                                id="suffix_{{ profile.id }}" 
+                                name="suffix" 
+                                class="form-control" 
+                                value="{{ profile.pending_suffix|default:'' }}"
+                            >
+                            <small class="text-muted">Optional (e.g., Jr., Sr., III)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="bi bi-calendar-event"></i> Birthdate</label>
+                        <div class="birthdate-group">
+                            <select id="birthMonth_{{ profile.id }}" name="birth_month" class="form-control birthMonth">
+                                <option value="">Month</option>
+                                {% if profile.user.birthdate %}
+                                <option value="1" {% if profile.user.birthdate.month == 1 %}selected{% endif %}>January</option>
+                                <option value="2" {% if profile.user.birthdate.month == 2 %}selected{% endif %}>February</option>
+                                <option value="3" {% if profile.user.birthdate.month == 3 %}selected{% endif %}>March</option>
+                                <option value="4" {% if profile.user.birthdate.month == 4 %}selected{% endif %}>April</option>
+                                <option value="5" {% if profile.user.birthdate.month == 5 %}selected{% endif %}>May</option>
+                                <option value="6" {% if profile.user.birthdate.month == 6 %}selected{% endif %}>June</option>
+                                <option value="7" {% if profile.user.birthdate.month == 7 %}selected{% endif %}>July</option>
+                                <option value="8" {% if profile.user.birthdate.month == 8 %}selected{% endif %}>August</option>
+                                <option value="9" {% if profile.user.birthdate.month == 9 %}selected{% endif %}>September</option>
+                                <option value="10" {% if profile.user.birthdate.month == 10 %}selected{% endif %}>October</option>
+                                <option value="11" {% if profile.user.birthdate.month == 11 %}selected{% endif %}>November</option>
+                                <option value="12" {% if profile.user.birthdate.month == 12 %}selected{% endif %}>December</option>
+                                {% else %}
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                                {% endif %}
+                            </select>
+                            
+                            <select id="birthDay_{{ profile.id }}" name="birth_day" class="form-control" {% if not profile.user.birthdate %}disabled{% endif %}>
+                                <option value="">Day</option>
+                                {% if profile.user.birthdate %}
+                                    {% for i in "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" %}
+                                        <option value="{{ forloop.counter }}" {% if profile.user.birthdate.day == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                            
+                            <select id="birthYear_{{ profile.id }}" name="birth_year" class="form-control">
+                                <option value="">Year</option>
+                                {% if profile.user.birthdate %}
+                                    <option value="{{ profile.user.birthdate.year }}" selected>{{ profile.user.birthdate.year }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        {% if profile.user.age %}
+                            <small class="text-muted"><i class="bi bi-clock-history"></i> Current age: {{ profile.user.age }} years</small>
+                        {% else %}
+                            <small class="text-muted"><i class="bi bi-exclamation-triangle"></i> Age not set - used for consent requirements</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consent_status_{{ profile.id }}"><i class="bi bi-file-text"></i> Consent Status</label>
+                        <select id="consent_status_{{ profile.id }}" name="consent_status" class="form-control">
+                            <option value="not_consented" {% if profile.consent_status == 'not_consented' %}selected{% endif %}>Not Consented</option>
+                            <option value="pending_approval" {% if profile.consent_status == 'pending_approval' %}selected{% endif %}>Pending Approval</option>
+                            <option value="consented" {% if profile.consent_status == 'consented' %}selected{% endif %}>Consented</option>
+                        </select>
+                        <small class="text-muted">Determines if user's full name appears on research papers</small>
+                    </div>
+                    
+                    <hr class="section-divider">
+                    
+                    <!-- Academic Information -->
+                    <div id="academic_section_{{ profile.id }}" {% if profile.user.role != 'shs_student' and profile.user.role != 'alumni' %}class="d-none"{% endif %}>
+                        <h6 class="section-title"><i class="bi bi-mortarboard"></i> Academic Information</h6>
+                        <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 15px;">
+                            <i class="bi bi-info-circle"></i> School year batches and academic history (only for SHS students and alumni).
+                        </p>
+                        
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input 
+                                    type="checkbox" 
+                                    id="took_shs_{{ profile.id }}" 
+                                    name="took_shs" 
+                                    {% if profile.took_shs %}checked{% endif %}
+                                    onchange="toggleBatchFields({{ profile.id }})"
+                                >
+                                <i class="bi bi-building"></i> Took SHS at BTCS
+                            </label>
+                            <small class="text-muted">Check if user attended Senior High School at BTCS</small>
+                        </div>
+                        
+                        <div id="batch_fields_{{ profile.id }}" {% if not profile.took_shs %}class="d-none"{% endif %}>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="g11_batch_{{ profile.id }}"><i class="bi bi-calendar3"></i> Grade 11 Batch</label>
+                                    <input 
+                                        type="text" 
+                                        id="g11_batch_{{ profile.id }}" 
+                                        name="g11_batch" 
+                                        class="form-control" 
+                                        value="{{ profile.pending_G11|default:'' }}"
+                                        placeholder="e.g., 2022-2023"
+                                    >
+                                    <small class="text-muted">School year format: YYYY-YYYY</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="g12_batch_{{ profile.id }}"><i class="bi bi-calendar3"></i> Grade 12 Batch</label>
+                                    <input 
+                                        type="text" 
+                                        id="g12_batch_{{ profile.id }}" 
+                                        name="g12_batch" 
+                                        class="form-control" 
+                                        value="{{ profile.pending_G12|default:'' }}"
+                                        placeholder="e.g., 2023-2024"
+                                    >
+                                    <small class="text-muted">School year format: YYYY-YYYY</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal({{ profile.id }})">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle edit form submission with toast
+function handleEditSubmit(event, form) {
+    event.preventDefault();
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            showSuccess('User updated successfully!');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showError('Failed to update user.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('An error occurred. Please try again.');
+    });
+    
+    return false;
+}
+</script>

@@ -1,0 +1,138 @@
+{% extends "research/base.html" %}
+{% load static %}
+{% block title %}User Management{% endblock %}
+{% block page_header %}Admin Panel - User Management{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/admin_common.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Django Messages (will be converted to toasts) -->
+    <div class="django-messages" style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Statistics Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_count }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ approved_count }}</div>
+            <div class="stat-label">Approved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ pending_count }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ active_count }}</div>
+            <div class="stat-label">Active</div>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="admin-section">
+        <h4>
+            <i class="bi bi-people-fill"></i> User & Profile Management
+        </h4>
+
+        <!-- Active Filters Section -->
+        <div id="activeFiltersSection" style="display: none;">
+            <div class="filters-active-section">
+                <h6><i class="bi bi-funnel-fill"></i> ACTIVE FILTERS</h6>
+                <div id="active-filters"></div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <form id="filtersForm" method="get" class="filter-bar">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="search"><i class="bi bi-search"></i> Search</label>
+                    <input 
+                        type="text" 
+                        id="search" 
+                        name="search" 
+                        placeholder="Email, name..." 
+                        value="{{ current_search }}"
+                    >
+                </div>
+                
+                <div class="filter-group">
+                    <label for="role"><i class="bi bi-shield-check"></i> Role</label>
+                    <select id="role" name="role">
+                        <option value="">All Roles</option>
+                        {% for value, label in role_choices %}
+                        <option value="{{ value }}" {% if current_role == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="approval"><i class="bi bi-check-circle"></i> Approval</label>
+                    <select id="approval" name="approval">
+                        <option value="">All</option>
+                        <option value="approved" {% if current_approval == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="pending" {% if current_approval == 'pending' %}selected{% endif %}>Pending</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="consent"><i class="bi bi-file-check"></i> Consent</label>
+                    <select id="consent" name="consent">
+                        <option value="">All</option>
+                        <option value="consented" {% if current_consent == 'consented' %}selected{% endif %}>Consented</option>
+                        <option value="pending_approval" {% if current_consent == 'pending_approval' %}selected{% endif %}>Pending</option>
+                        <option value="not_consented" {% if current_consent == 'not_consented' %}selected{% endif %}>Not Consented</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="batch"><i class="bi bi-calendar3"></i> School Year</label>
+                    <select id="batch" name="batch">
+                        <option value="">All Batches</option>
+                        {% for batch in batches %}
+                        <option value="{{ batch }}" {% if current_batch == batch %}selected{% endif %}>{{ batch }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button type="button" id="resetAllBtn" class="btn btn-danger" style="width: 100%; height: 34px;">
+                        <i class="bi bi-x-circle"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Users Table -->
+        <div id="tableContainer">
+            {% include 'accounts/user_table_partial.html' %}
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="text-center mb-4">
+        <a href="{% url 'accounts:pending_accounts' %}" class="btn btn-primary" style="margin-right: 10px;">
+            <i class="bi bi-clock-history"></i> Pending Approvals
+        </a>
+        <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+</div>
+
+<script src="{% static 'accounts/js/admin_common.js' %}"></script>
+<script src="{% static 'accounts/js/user_management.js' %}"></script>
+{% endblock %}

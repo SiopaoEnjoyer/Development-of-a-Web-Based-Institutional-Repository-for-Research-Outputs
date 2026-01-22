@@ -1,0 +1,91 @@
+<!-- Add Keyword Modal -->
+<div class="modal fade" id="addKeywordModal" tabindex="-1" aria-labelledby="addKeywordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addKeywordModalLabel">
+          <i class="bi bi-tag-fill"></i> Add New Keyword
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="keywordModalErrors" style="display: none;" class="alert alert-danger"></div>
+        
+        <div class="mb-3">
+          <label class="form-label">Keyword <span class="text-danger">*</span></label>
+          <input type="text" id="keyword_name" class="form-control" placeholder="Enter keyword" required>
+          <small class="text-muted">Wrap with asterisks for italics: <code>*example*</code> → <em>example</em></small>
+        </div>
+        
+        <!-- Live Preview -->
+        <div id="keyword_preview" style="display: none;">
+          <span class="keyword-preview-label"><i class="bi bi-eye"></i> Preview:</span>
+          <div class="keyword-preview">
+            <div class="keyword-preview-content" id="keyword_preview_text">
+              <span class="keyword-preview-empty">Type to see preview...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert alert-info mb-0 mt-3">
+          <i class="bi bi-info-circle"></i> <strong>Note:</strong> Keywords are case-sensitive and will be saved exactly as entered.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="saveKeywordBtn">
+          <i class="bi bi-plus-circle"></i> Add Keyword
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Keyword Modal -->
+<div class="modal fade" id="editKeywordModal" tabindex="-1" aria-labelledby="editKeywordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editKeywordModalLabel">
+          <i class="bi bi-pencil-fill"></i> Edit Keyword
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="editModalErrors" style="display: none;" class="alert alert-danger"></div>
+        
+        <input type="hidden" id="edit_keyword_id">
+        
+        <div class="mb-3">
+          <label class="form-label">Keyword <span class="text-danger">*</span></label>
+          <input type="text" id="edit_keyword_name" class="form-control" required>
+          <small class="text-muted">Wrap with asterisks for italics: <code>*example*</code> → <em>example</em></small>
+        </div>
+        
+        <!-- Live Preview -->
+        <div>
+          <span class="keyword-preview-label"><i class="bi bi-eye"></i> Preview:</span>
+          <div class="keyword-preview">
+            <div class="keyword-preview-content" id="editPreviewContent">
+              <span class="keyword-preview-empty">Type to see preview...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert alert-warning mb-0 mt-3">
+          <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong> This keyword is used in <span id="edit_usage_count">0</span> research paper(s). Changes will affect all associated papers.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-warning" id="updateKeywordBtn">
+          <i class="bi bi-check-circle"></i> Update Keyword
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

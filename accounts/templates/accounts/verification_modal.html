@@ -1,0 +1,104 @@
+<!-- Unified Verification Modal Template -->
+<!-- Works for both email verification and password reset -->
+
+<div class="modal fade" id="verificationModal" tabindex="-1">    
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="bi bi-envelope-check me-2"></i>Verify Your Email
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-center mb-3 modal-intro-text">We've sent a verification code to:</p>
+                
+                <div class="email-display-box">
+                    <i class="bi bi-envelope-check email-icon"></i>
+                    <strong id="modalEmail" class="email-text"></strong>
+                </div>
+                
+                <div id="modalMessage" class="alert" style="display: none;"></div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-center w-100 code-label">Enter 6-Digit Code</label>
+                    
+                    <!-- 6-box input version (for email verification) -->
+                    <div class="code-inputs-container" id="codeBoxesContainer">
+                        <input type="text" class="code-box" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="0" autocomplete="off">
+                        <input type="text" class="code-box" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="1" autocomplete="off">
+                        <input type="text" class="code-box" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="2" autocomplete="off">
+                        <input type="text" class="code-box" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="3" autocomplete="off">
+                        <input type="text" class="code-box" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="4" autocomplete="off">
+                        <input type="text" class="code-box" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="5" autocomplete="off">
+                    </div>
+                    
+                    <!-- Single input version (for password reset, hidden by default) -->
+                    <div class="code-inputs-container" id="singleCodeContainer" style="display: none;">
+                        <input type="text" 
+                               class="code-box single-code-input" 
+                               id="singleCodeInput"
+                               maxlength="6" 
+                               pattern="[0-9]{6}" 
+                               inputmode="numeric" 
+                               placeholder="000000" 
+                               autocomplete="off">
+                    </div>
+                </div>
+                
+                <button type="button" 
+                        class="btn btn-success w-100 mb-3" 
+                        id="modalVerifyBtn">
+                    <i class="bi bi-check-circle me-2"></i>Verify Email
+                </button>
+                
+                <div class="text-center">
+                    <p class="mb-2 resend-text">Didn't receive the code?</p>
+                    <button type="button" 
+                            class="btn btn-link resend-btn" 
+                            id="modalResendBtn">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Resend Code
+                    </button>
+                </div>
+                
+                <div class="text-center mt-3" id="modalTimer">
+                    Code expires in <strong id="modalTimeLeft">15:00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Locked Modal -->
+<div class="modal fade" id="accountLockedModal" tabindex="-1">    
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-4">
+                    <i class="bi bi-shield-exclamation" style="font-size: 4rem; color: #dc3545;"></i>
+                </div>
+                <h4 class="mb-3" style="color: #dc3545; font-weight: 700;">Account Locked</h4>
+                <p class="mb-4" style="font-size: 1rem; color: #495057;">
+                    You've exceeded the maximum number of verification attempts (10).
+                    For security reasons, this account has been temporarily locked.
+                </p>
+                <div class="alert alert-danger mb-4" style="background-color: #fff5f5; border-color: #fcc;">
+                    <p class="mb-2"><strong>What this means:</strong></p>
+                    <ul class="text-start mb-0" style="font-size: 0.9rem;">
+                        <li>You cannot login or register with this account for 24 hours</li>
+                        <li>All pending verification codes have been invalidated</li>
+                        <li>Please try again after the lockout period expires</li>
+                    </ul>
+                </div>
+                <p class="mb-3" style="font-size: 0.9rem; color: #6c757d;">
+                    If you believe this is an error or need assistance, please contact support.
+                </p>
+                <a href="/" class="btn btn-outline-danger px-4">
+                    <i class="bi bi-house-door me-2"></i>Return to Homepage
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

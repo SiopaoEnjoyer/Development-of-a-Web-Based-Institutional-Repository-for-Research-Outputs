@@ -1,0 +1,434 @@
+/* static/research/css/paper-cards.css */
+
+/* Section Headers */
+.section-header {
+    background: linear-gradient(135deg, var(--theme-green), #059669);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 10px 40px rgba(1, 87, 38, 0.2);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.section-header p {
+    margin-bottom: 0;
+    opacity: 0.95;
+    font-size: 0.95rem;
+    color: white;
+}
+
+/* Paper Cards */
+.paper-wrapper {
+    margin-bottom: 1.5rem;
+    background: transparent !important;
+    position: relative;
+    z-index: 0;
+}
+
+.paper-card {
+    background: white; /* Changed from rgba(255, 255, 255, 0.95) to solid white */
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 
+        0 0 0 1px rgba(1, 87, 38, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.04),
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 8px 16px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(1, 87, 38, 0.12);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10; /* Increased from 1 to 10 */
+    cursor: pointer;
+}
+
+.paper-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(1, 87, 38, 0.1), rgba(16, 185, 129, 0.1));
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.paper-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 0 0 1px rgba(1, 87, 38, 0.15),
+        0 4px 8px rgba(1, 87, 38, 0.08),
+        0 8px 16px rgba(1, 87, 38, 0.08),
+        0 16px 32px rgba(1, 87, 38, 0.08);
+    border-color: rgba(1, 87, 38, 0.3);
+}
+
+.paper-card:hover::before {
+    opacity: 1;
+}
+
+.paper-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.paper-title a {
+    color: var(--theme-green);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.paper-title a:hover {
+    color: #059669;
+    text-decoration: underline;
+}
+
+.pub-date {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.authors {
+    color: #475569;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.abstract-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+/* Badges */
+.badge {
+    padding: 0.4rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    display: inline-block;
+}
+
+.strand-badge {
+    background: linear-gradient(135deg, var(--theme-green), #059669);
+    color: white;
+}
+
+.spec-badge {
+    background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+    color: white;
+}
+
+.award-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.keyword-badge {
+    background: rgba(100, 116, 139, 0.1);
+    color: #475569;
+    border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--theme-green);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    pointer-events: none; /* Prevent double-click when card is clickable */
+}
+
+.read-more:hover {
+    gap: 0.75rem;
+    color: #059669;
+}
+
+.read-more::after {
+    content: '→';
+    transition: transform 0.3s ease;
+}
+
+.read-more:hover::after {
+    transform: translateX(4px);
+}
+
+/* Pagination */
+.pagination-green {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.pagination-green .page-item {
+    margin: 0 !important;
+}
+
+.pagination-green .page-link {
+    color: var(--theme-green) !important;
+    background: white !important;
+    border: 1.5px solid rgba(1, 87, 38, 0.3) !important;
+    border-radius: 50px !important;
+    font-weight: 600;
+    padding: 0.7rem 1.8rem !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(1, 87, 38, 0.08);
+    display: inline-block;
+}
+
+.pagination-green .page-link:hover:not(.disabled) {
+    background: var(--theme-green) !important;
+    color: white !important;
+    border-color: var(--theme-green) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(1, 87, 38, 0.2);
+}
+
+.pagination-green .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--theme-green), #059669) !important;
+    border-color: var(--theme-green) !important;
+    color: white !important;
+    box-shadow: 0 6px 20px rgba(1, 87, 38, 0.25);
+}
+
+.pagination-green .page-item.disabled .page-link {
+    opacity: 0.5 !important;
+    background: white !important;
+    border-color: rgba(226, 232, 240, 0.6) !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.pagination-green .page-item.disabled .page-link:hover {
+    transform: none !important;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-up {
+    animation: fadeInUp 0.6s ease-out forwards; /* Added 'forwards' */
+    opacity: 1; /* Ensure final state */
+}
+
+/* Ensure transparent backgrounds */
+.container {
+    background: transparent !important;
+}
+
+.fade-up.container,
+.container.fade-up {
+    background: transparent !important;
+}
+
+.row {
+    background: transparent !important;
+}
+
+.row.g-4,
+.row.g-3 {
+    background: transparent !important;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1200px) {
+    .paper-card {
+        padding: 1.5rem;
+    }
+
+    .paper-title {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .section-header {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .section-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .col-lg-10 {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+        width: calc(100vw - 1rem);
+    }
+
+    .section-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .section-header p {
+        font-size: 0.85rem;
+    }
+
+    .paper-card {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+
+    .paper-title {
+        font-size: 1.1rem;
+    }
+
+    .paper-title a {
+        word-break: break-word;
+    }
+
+    .abstract-text {
+        font-size: 0.85rem;
+    }
+
+    .authors {
+        font-size: 0.85rem;
+    }
+
+    .pub-date {
+        font-size: 0.8rem;
+    }
+
+    .badge {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+    }
+
+    .read-more {
+        font-size: 0.85rem;
+    }
+
+    .pagination-green .page-link {
+        padding: 0.5rem 1.2rem !important;
+        font-size: 0.85rem;
+    }
+
+    .row.g-4 {
+        row-gap: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-header {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .paper-card {
+        padding: 1rem;
+    }
+
+    .paper-title {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .abstract-text {
+        font-size: 0.8rem;
+    }
+
+    .authors {
+        font-size: 0.8rem;
+    }
+
+    .badge {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.7rem;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .read-more {
+        font-size: 0.8rem;
+    }
+
+    .pagination-green {
+        gap: 0.5rem;
+    }
+
+    .pagination-green .page-link {
+        padding: 0.4rem 1rem !important;
+        font-size: 0.8rem;
+    }
+
+    .col-md-4,
+    .col-lg-3,
+    .col-md-6 {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .section-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .paper-title {
+        font-size: 0.95rem;
+    }
+
+    .pagination-green .page-link {
+        padding: 0.35rem 0.75rem !important;
+        font-size: 0.75rem;
+    }
+}
+

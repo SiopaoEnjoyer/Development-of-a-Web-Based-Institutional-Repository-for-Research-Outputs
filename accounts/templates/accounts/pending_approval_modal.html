@@ -1,0 +1,200 @@
+<div class="modal" id="editModal_{{ profile.id }}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:approve_user_edit' profile.id %}" onsubmit="return handleEditApproveSubmit(event, this)">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5>
+                        <i class="bi bi-pencil-square"></i>
+                        Edit User Information
+                    </h5>
+                    <button type="button" class="close" onclick="closeEditModal('{{ profile.id }}')">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><i class="bi bi-envelope"></i> Email (Read-only)</label>
+                        <div class="display-value">{{ profile.user.email }}</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role_modal_{{ profile.id }}">
+                            <i class="bi bi-shield-check"></i> Role *
+                        </label>
+                        <select 
+                            class="form-control" 
+                            id="role_modal_{{ profile.id }}"
+                            name="role"
+                            required
+                            onchange="toggleBatchFields('{{ profile.id }}')"
+                        >
+                            <option value="shs_student" {% if profile.user.role == 'shs_student' %}selected{% endif %}>BTCS SHS Student</option>
+                            <option value="alumni" {% if profile.user.role == 'alumni' %}selected{% endif %}>BTCS Alumni</option>
+                            <option value="nonresearch_teacher" {% if profile.user.role == 'nonresearch_teacher' %}selected{% endif %}>BTCS Non-Research Teacher</option>
+                            <option value="research_teacher" {% if profile.user.role == 'research_teacher' %}selected{% endif %}>BTCS Research Teacher</option>
+                            <option value="admin" {% if profile.user.role == 'admin' %}selected{% endif %}>BTCS Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="first_name_modal_{{ profile.id }}">
+                                <i class="bi bi-person"></i> First Name *
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="first_name_modal_{{ profile.id }}"
+                                name="first_name"
+                                value="{{ profile.pending_first_name }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_name_modal_{{ profile.id }}">
+                                <i class="bi bi-person"></i> Last Name *
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="last_name_modal_{{ profile.id }}"
+                                name="last_name"
+                                value="{{ profile.pending_last_name }}"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="middle_initial_modal_{{ profile.id }}">
+                                <i class="bi bi-person"></i> Middle Initial
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="middle_initial_modal_{{ profile.id }}"
+                                name="middle_initial"
+                                value="{{ profile.pending_middle_initial|default:'' }}"
+                                maxlength="1"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="suffix_modal_{{ profile.id }}">
+                                <i class="bi bi-person"></i> Suffix
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="suffix_modal_{{ profile.id }}"
+                                name="suffix"
+                                value="{{ profile.pending_suffix|default:'' }}"
+                                placeholder="Jr., Sr., III, etc."
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="bi bi-calendar"></i> Birthdate</label>
+                        <div class="display-value">
+                            {% if profile.user.birthdate %}
+                                {{ profile.user.birthdate|date:"F d, Y" }} (Age: {{ profile.user.age }})
+                            {% else %}
+                                <span class="text-muted">Not provided</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div id="academic_section_{{ profile.id }}" class="{% if profile.user.role != 'shs_student' and not profile.took_shs %}d-none{% endif %}">
+                        <hr class="section-divider">
+                        <h6 class="section-title"><i class="bi bi-mortarboard"></i> Academic Information</h6>
+
+                        <div class="form-group">
+                            <label for="took_shs_modal_{{ profile.id }}">
+                                <i class="bi bi-mortarboard"></i> Took SHS?
+                            </label>
+                            <select 
+                                class="form-control" 
+                                id="took_shs_modal_{{ profile.id }}"
+                                name="took_shs"
+                                onchange="toggleBatchInputs('{{ profile.id }}')"
+                            >
+                                <option value="true" {% if profile.took_shs %}selected{% endif %}>Yes</option>
+                                <option value="false" {% if not profile.took_shs %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+
+                        <div id="batch_inputs_{{ profile.id }}" class="{% if not profile.took_shs %}d-none{% endif %}">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="g11_batch_modal_{{ profile.id }}">
+                                        <i class="bi bi-bookmark"></i> G11 Batch
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="g11_batch_modal_{{ profile.id }}"
+                                        name="g11_batch"
+                                        value="{{ profile.pending_G11|default:'' }}"
+                                        placeholder="e.g., 2023-2024"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="g12_batch_modal_{{ profile.id }}">
+                                        <i class="bi bi-bookmark"></i> G12 Batch
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="g12_batch_modal_{{ profile.id }}"
+                                        name="g12_batch"
+                                        value="{{ profile.pending_G12|default:'' }}"
+                                        placeholder="e.g., 2024-2025"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if profile.matching_authors.exists %}
+                    <div>
+                        <hr class="section-divider">
+                        <h6 class="section-title"><i class="bi bi-exclamation-triangle-fill"></i> Existing Author Information</h6>
+                        {% for author in profile.matching_authors %}
+                        <div class="display-value" style="margin-bottom: 10px;">
+                            <div>
+                                <strong>{{ author.first_name }} {{ author.middle_initial|default:'' }} {{ author.last_name }}{% if author.suffix %}, {{ author.suffix }}{% endif %}</strong>
+                                <br>
+                                <small>
+                                    {% if author.user %}
+                                        ⚠️ Claimed by: {{ author.user.email }}
+                                    {% else %}
+                                        ✓ Unclaimed (will be automatically linked)
+                                    {% endif %}
+                                    | {{ author.researchpaper_set.count }} paper{{ author.researchpaper_set.count|pluralize }}
+                                    {% if author.G11_Batch or author.G12_Batch %}
+                                        | G11: {{ author.G11_Batch|default:"N/A" }}, G12: {{ author.G12_Batch|default:"N/A" }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditModal('{{ profile.id }}')">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-check-circle"></i> Save & Approve
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

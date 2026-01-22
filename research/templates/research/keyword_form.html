@@ -1,0 +1,200 @@
+{% extends "research/base.html" %}
+{% load static %}
+{% block title %}Manage Keywords{% endblock %}
+{% block page_header %}Keywords Dashboard{% endblock %}
+
+{% load research_form_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'research/css/admin-dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'research/css/toast_notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h2 class="mb-2">Manage Keywords</h2>
+      <p>Add, filter, and manage research paper keywords</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addKeywordModal">
+        <i class="bi bi-tag-fill"></i> Add New Keyword
+      </button>
+      <a href="{% url 'research:admin_dashboard' %}" class="btn btn-light">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH & FILTER FORM -->
+<div class="filter-card">
+    <form id="filtersForm" method="get" action="{% url 'research:manage_keywords' %}">
+        <div class="input-group mb-3">
+            <input
+                type="text"
+                class="form-control"
+                name="q"
+                id="searchQuery"
+                placeholder="Search keywords..."
+                value="{{ request.GET.q }}"
+                style="border-radius: 50px 0 0 50px;"
+            />
+            <button class="btn btn-success" type="submit" style="border-radius: 0 50px 50px 0;">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-10">
+                <label class="form-label">Sort By</label>
+                <select class="form-select" name="sort_by" id="sort_by">
+                    <option value="alphabetical" {% if request.GET.sort_by == 'alphabetical' or not request.GET.sort_by %}selected{% endif %}>A-Z</option>
+                    <option value="reverse_alphabetical" {% if request.GET.sort_by == 'reverse_alphabetical' %}selected{% endif %}>Z-A</option>
+                    <option value="most_used" {% if request.GET.sort_by == 'most_used' %}selected{% endif %}>Most Used</option>
+                    <option value="least_used" {% if request.GET.sort_by == 'least_used' %}selected{% endif %}>Least Used</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-secondary w-100" type="button" id="resetAllBtn" style="background: #dc3545; border: none; border-radius: 50px; font-weight: 600; padding: 0.7rem 1.5rem;">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ACTIVE FILTER TOKENS -->
+<div id="activeFiltersSection" style="display: none;">
+    <div class="filters-active-section">
+        <h6><i class="bi bi-funnel-fill me-2"></i>Active Filters</h6>
+        <div id="active-filters"></div>
+    </div>
+</div>
+
+<!-- Keyword List -->
+<div class="card shadow-sm">
+  <div class="card-header bg-white border-0 py-3" style="background: white !important; color: #2d5a3d !important;">
+    <h5 class="mb-0 fw-bold" style="color: #2d5a3d; font-family: 'Montserrat', sans-serif;">
+      <i class="bi bi-tags"></i> Keyword Database
+    </h5>
+    <small class="text-muted" style="font-family: 'Montserrat', sans-serif;">
+      Browse and manage all research paper keywords
+    </small>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Usage Count</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="keywordTableBody">
+        {% for keyword in keywords %}
+        <tr>
+          <td>
+            <span class="data-pill keyword">
+              {{ keyword.word|format_italics|safe }}
+            </span>
+          </td>
+          <td>
+            <span class="data-pill count" 
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  data-bs-html="true"
+                  title="<strong>Used in:</strong><ul>{% for paper in keyword.papers %}<li>{{ paper.title }}</li>{% empty %}<li>No papers yet</li>{% endfor %}</ul>">
+              {{ keyword.usage_count }} paper{{ keyword.usage_count|pluralize }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-warning edit-keyword-btn" 
+                      data-id="{{ keyword.id }}" 
+                      data-name="{{ keyword.word }}"
+                      data-count="{{ keyword.usage_count }}">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              <a href="?delete={{ keyword.id }}" 
+                 class="btn btn-danger" 
+                 onclick="return confirm('Delete this keyword? It is used in {{ keyword.usage_count }} paper(s).')">
+                <i class="bi bi-trash"></i> Delete
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="text-center py-4 text-muted">No keywords found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    
+  <!-- Pagination -->
+  {% if is_paginated %}
+  <div class="card-footer bg-white border-0 py-3">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center mb-0">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+              <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+              <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+    
+    <p class="text-center text-muted mt-2 mb-0" style="font-size: 0.9rem;">
+      Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} keywords
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+{% include "research/partials/keyword_modals.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'research/js/keyword-manage.js' %}"></script>
+<script src="{% static 'research/js/toast_notifications.js' %}"></script>
+{% endblock %}

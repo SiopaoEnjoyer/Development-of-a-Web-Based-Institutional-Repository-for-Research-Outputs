@@ -1,0 +1,371 @@
+/* ===== VERIFICATION MODAL STYLES ===== */
+
+/* Kill Bootstrap's broken backdrop */
+.modal-backdrop {
+    display: none !important;
+}
+
+/* Modal container */
+.modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 100 !important;
+    display: none;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 20px 0 !important;
+}
+
+.modal.show {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Backdrop using ::before pseudo-element */
+.modal.show::before {
+    content: '';
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Dialog styling */
+.modal-dialog {
+    position: relative !important;
+    width: 90% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    z-index: 10 !important;
+    min-height: auto !important;
+}
+
+/* Everything inside the dialog works */
+.modal-content,
+.modal-content *,
+#verificationModal *,
+#modalCodeInput,
+#modalVerifyBtn,
+#modalResendBtn {
+    pointer-events: auto !important;
+}
+
+#modalCodeInput {
+    cursor: text !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+#modalVerifyBtn,
+#modalResendBtn {
+    cursor: pointer !important;
+}
+
+/* Modal content styling */
+#verificationModal .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    background: white !important;
+}
+
+.modal-header {
+    border-bottom: 2px solid var(--theme-green);
+    background: linear-gradient(135deg, rgba(1, 87, 38, 0.05), rgba(1, 87, 38, 0.02));
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-title {
+    color: var(--theme-green);
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.modal-body {
+    padding: 1.5rem 2rem;
+}
+
+/* Compact email display */
+.modal-body > p:first-of-type {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem !important;
+}
+
+.modal-intro-text {
+    color: #6c757d;
+}
+
+.email-display-box {
+    background: linear-gradient(135deg, rgba(1, 87, 38, 0.05), rgba(1, 87, 38, 0.02));
+    border: 2px solid rgba(1, 87, 38, 0.2);
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.email-icon {
+    color: var(--theme-green);
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.email-text {
+    color: var(--theme-green);
+    font-size: 1rem;
+    display: block;
+}
+
+/* Code Input Boxes */
+.code-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-bottom: 1rem !important;
+    font-size: 1rem !important;
+}
+
+.code-inputs-container {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.code-box {
+    width: 50px !important;
+    height: 60px !important;
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border: 3px solid #e9ecef !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+    color: var(--theme-green) !important;
+    padding: 0 !important;
+}
+
+.code-box:focus {
+    border-color: var(--theme-green) !important;
+    box-shadow: 0 0 0 0.3rem rgba(1, 87, 38, 0.15) !important;
+    background-color: #f8fff8 !important;
+    outline: none !important;
+    transform: scale(1.05) !important;
+}
+
+.code-box:disabled {
+    background-color: #e9ecef !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Compact buttons */
+#modalVerifyBtn {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Compact resend section */
+.modal-body .text-center p {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.resend-text {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.resend-btn {
+    color: var(--theme-green);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.resend-btn:hover {
+    color: #013d1c;
+}
+
+#modalResendBtn {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 1rem !important;
+}
+
+/* Compact timer */
+#modalTimer {
+    font-size: 0.85rem !important;
+    margin-top: 1rem !important;
+}
+
+/* Message alert - compact */
+#modalMessage {
+    font-size: 0.9rem !important;
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-dialog {
+        max-width: 90% !important;
+    }
+    
+    .modal-body {
+        padding: 1.25rem 1.5rem !important;
+    }
+    
+    .code-box {
+        width: 45px !important;
+        height: 55px !important;
+        font-size: 1.6rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-dialog {
+        max-width: 95% !important;
+    }
+    
+    .modal-header {
+        padding: 1rem !important;
+    }
+    
+    .modal-title {
+        font-size: 1rem !important;
+    }
+    
+    .code-box {
+        width: 40px !important;
+        height: 50px !important;
+        font-size: 1.4rem !important;
+    }
+}
+
+/* Make sure modal shows properly */
+.modal.fade.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+/* Account Locked Modal Styles */
+#accountLockedModal .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    background: white !important;
+}
+
+#accountLockedModal .modal-header {
+    border-bottom: none !important;
+    background: transparent !important;
+    padding: 1rem 1.5rem 0 1.5rem !important;
+}
+
+#accountLockedModal .btn-close {
+    font-size: 0.9rem;
+    opacity: 0.5;
+}
+
+#accountLockedModal .btn-close:hover {
+    opacity: 1;
+}
+
+#accountLockedModal .modal-body {
+    padding: 1rem 2rem 2rem 2rem !important;
+}
+
+#accountLockedModal .bi-shield-exclamation {
+    font-size: 4rem;
+    color: #dc3545;
+}
+
+#accountLockedModal h4 {
+    color: #dc3545;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+#accountLockedModal .alert {
+    background-color: #fff5f5;
+    border-color: #ffcccc;
+    border-radius: 12px;
+}
+
+#accountLockedModal .alert ul {
+    padding-left: 1.5rem;
+    margin-bottom: 0;
+}
+
+#accountLockedModal .alert li {
+    margin-bottom: 0.5rem;
+}
+
+#accountLockedModal .alert li:last-child {
+    margin-bottom: 0;
+}
+
+#accountLockedModal .btn-outline-danger {
+    border-width: 2px;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    transition: all 0.3s ease;
+}
+
+#accountLockedModal .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Responsive adjustments for locked modal */
+@media (max-width: 768px) {
+    #accountLockedModal .modal-body {
+        padding: 1rem 1.5rem 1.5rem 1.5rem !important;
+    }
+    
+    #accountLockedModal .bi-shield-exclamation {
+        font-size: 3rem;
+    }
+    
+    #accountLockedModal h4 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #accountLockedModal .modal-body {
+        padding: 0.75rem 1rem 1.25rem 1rem !important;
+    }
+    
+    #accountLockedModal .bi-shield-exclamation {
+        font-size: 2.5rem;
+    }
+    
+    #accountLockedModal h4 {
+        font-size: 1.25rem;
+    }
+    
+    #accountLockedModal .btn-outline-danger {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}

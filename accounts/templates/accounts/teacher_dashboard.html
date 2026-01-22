@@ -1,0 +1,151 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+{% block page_header %}Teacher Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard-common.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Background Image -->
+<div class="dashboard-background">
+    <img src="{% static 'research/img/trinity.jpg' %}" alt="Background">
+</div>
+
+<div class="container py-5">
+    <!-- Page Header with Animation -->
+    <div class="mb-5">
+        <div class="page-header-box">
+            <h1 class="display-5 fw-bold mb-2">Teacher Dashboard</h1>
+            <p class="text-muted fs-5 mb-0">Manage Research Papers & Student Information</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Cards with Staggered Animation -->
+    <div class="row g-4 justify-content-center">
+        <!-- 1. Research Dashboard Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-folder-open text-success" viewBox="0 0 16 16">
+                                <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Research Dashboard</h5>
+                    <p class="card-text text-muted mb-4">View and manage all research papers</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'research:admin_dashboard' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Manage Papers</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Authors Dashboard Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float" style="animation-delay: 0.3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-people text-success" viewBox="0 0 16 16">
+                                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8Zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022ZM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816ZM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Authors Dashboard</h5>
+                    <p class="card-text text-muted mb-4">Assign and manage paper authors</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'research:manage_authors' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Manage Authors</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Keywords Dashboard Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float" style="animation-delay: 0.6s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-tags text-success" viewBox="0 0 16 16">
+                                <path d="M3 2v4.586l7 7L14.586 9l-7-7H3zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2z"/>
+                                <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1v5.086z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Keywords Dashboard</h5>
+                    <p class="card-text text-muted mb-4">Manage research paper keywords</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'research:manage_keywords' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Manage Keywords</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Consent Approval Dashboard Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float" style="animation-delay: 0.9s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-file-earmark-check text-success" viewBox="0 0 16 16">
+                                <path d="M10.854 7.854a.5.5 0 0 0-.708-.708L7.5 9.793 6.354 8.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Consent Approval Dashboard</h5>
+                    <p class="card-text text-muted mb-4">Review parental consent submissions</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'accounts:consent_approvals' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Review Consents</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Add New Paper Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float" style="animation-delay: 1.2s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-file-earmark-plus text-success" viewBox="0 0 16 16">
+                                <path d="M8 6.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 .5-.5z"/>
+                                <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Add New Paper</h5>
+                    <p class="card-text text-muted mb-4">Create a new research paper entry</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'research:upload_paper' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Add New Paper</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'accounts/js/dashboard-common.js' %}"></script>
+{% endblock %}

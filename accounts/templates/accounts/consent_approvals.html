@@ -1,0 +1,115 @@
+{% extends "research/base.html" %}
+{% load static %}
+{% block title %}Parental Consent Approvals{% endblock %}
+{% block page_header %}Teacher Panel - Parental Consent Approvals{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/admin_common.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Django Messages (will be converted to toasts) -->
+    <div class="django-messages" style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="admin-section">
+        <h4>
+            <i class="bi bi-file-earmark-check-fill"></i> Pending Parental Consent Approvals
+        </h4>
+        
+        {% if pending_consents %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Student Name</th>
+                            <th style="width: 18%;">Email</th>
+                            <th style="width: 10%;">Age</th>
+                            <th style="width: 15%;">Upload Date</th>
+                            <th style="width: 15%;">Consent File</th>
+                            <th style="width: 12%;">Status</th>
+                            <th style="width: 15%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for profile in pending_consents %}
+                        <tr>
+                            <td>
+                                <strong>{{ profile.display_name }}</strong>
+                            </td>
+                            <td>{{ profile.user.email }}</td>
+                            <td>
+                                {% if profile.user.age %}
+                                    {{ profile.user.age }} yrs
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if profile.parental_consent_file %}
+                                    {{ profile.parental_consent_file.name|slice:":50" }}
+                                {% else %}
+                                    <span class="text-muted">No date</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if profile.parental_consent_file %}
+                                    <a href="{{ profile.parental_consent_file.url }}" target="_blank" class="consent-file-link">
+                                        <i class="bi bi-file-pdf-fill"></i>
+                                        View PDF
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">No file</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-text status-pending">
+                                    <i class="bi bi-clock"></i> Pending Review
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <form method="post" action="{% url 'accounts:approve_consent' profile.id %}" style="display:inline;" onsubmit="return handleApproveConsent(event, this, '{{ profile.display_name }}')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'accounts:deny_consent' profile.id %}" style="display:inline;" onsubmit="return handleDenyConsent(event, this, '{{ profile.display_name }}')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-x-circle"></i> Deny
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p class="mb-0">No pending parental consent approvals.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="text-center mb-4">
+        <a href="{% url 'accounts:teacher_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Teacher Dashboard
+        </a>
+    </div>
+</div>
+
+<script src="{% static 'accounts/js/admin_common.js' %}"></script>
+<script src="{% static 'accounts/js/consent_approvals.js' %}"></script>
+{% endblock %}

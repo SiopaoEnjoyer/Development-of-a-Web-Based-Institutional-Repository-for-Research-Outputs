@@ -1,0 +1,103 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_header %}Admin Control Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard-common.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Background Image -->
+<div class="dashboard-background">
+    <img src="{% static 'research/img/trinity.jpg' %}" alt="Background">
+</div>
+
+<div class="container py-5">
+    <!-- Page Header with Animation -->
+    <div class="mb-5">
+        <div class="page-header-box">
+            <h1 class="display-5 fw-bold mb-2">Admin Control Panel</h1>
+            <p class="text-muted fs-5 mb-0">System Management</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Cards with Staggered Animation -->
+    <div class="row g-4 justify-content-center">
+        <!-- User Management Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-people-fill text-success" viewBox="0 0 16 16">
+                                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">User Management</h5>
+                    <p class="card-text text-muted mb-4">Manage all user accounts and profiles</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'accounts:user_management' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Manage Users</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending User Approvals Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float" style="animation-delay: 0.3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person-check text-success" viewBox="0 0 16 16">
+                                <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm1.679-4.493-1.335 2.226a.75.75 0 0 1-1.174.144l-.774-.773a.5.5 0 0 1 .708-.708l.547.548 1.17-1.951a.5.5 0 1 1 .858.514ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                                <path d="M8.256 14a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Pending Approvals</h5>
+                    <p class="card-text text-muted mb-4">Approve or reject new user accounts</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'accounts:pending_accounts' %}" class="btn btn-success w-100 rounded-pill">
+                            <span>Review Accounts</span>
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Django Admin Panel Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3 animate-float" style="animation-delay: 0.6s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-gear-fill text-success" viewBox="0 0 16 16">
+                                <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--theme-green);">Django Admin</h5>
+                    <p class="card-text text-muted mb-4">Advanced system configuration and database management</p>
+                    <div class="mt-auto">
+                        <a href="/admin/" class="btn btn-success w-100 rounded-pill">
+                            <span>Open Admin Panel</span>
+                            <i class="bi bi-box-arrow-up-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'accounts/js/dashboard-common.js' %}"></script>
+{% endblock %}

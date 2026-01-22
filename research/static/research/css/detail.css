@@ -1,0 +1,644 @@
+/* Modern Detail Page Styling - Enhanced */
+:root {
+  --theme-green: #015726;
+  --theme-green-light: #059669;
+  --theme-green-gradient: linear-gradient(135deg, #015726 0%, #059669 100%);
+  --theme-gold: #f59e0b;
+  --theme-gold-dark: #d97706;
+}
+
+/* Particle Background - Enhanced */
+.particle-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+  opacity: 0.4;
+}
+
+/* Add subtle animated gradient overlay */
+.particle-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(1, 87, 38, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(5, 150, 105, 0.05) 0%, transparent 50%);
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* Detail page header - Fixed gradient */
+.detail-header {
+  background: linear-gradient(135deg, #015726 0%, #059669 100%);
+  color: white;
+  padding: 3.5rem 2.5rem;
+  margin: 0 0 2.5rem 0;
+  box-shadow: 
+    0 10px 40px rgba(1, 87, 38, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border-radius: 24px;
+  animation: fadeInDown 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Remove or simplify the ::before overlay - it was interfering with the gradient */
+.detail-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.detail-header h2 {
+  font-weight: 800;
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detail-header .author-list {
+  font-size: 1rem;
+  opacity: 0.95;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-header .meta-info {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes patternFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(10px, -10px) scale(1.05); }
+  66% { transform: translate(-10px, 10px) scale(0.95); }
+}
+
+.detail-header h2 {
+  font-weight: 800;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Content card - Enhanced with better shadows and borders */
+.detail-content {
+  animation: fadeInUp 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.detail-content.card {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 24px;
+  box-shadow: 
+    0 0 0 1px rgba(1, 87, 38, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.04),
+    0 12px 24px rgba(0, 0, 0, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(1, 87, 38, 0.12);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.detail-content.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 0 1px rgba(1, 87, 38, 0.12),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.08),
+    0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* Enhanced inner border effect */
+.detail-content.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(1, 87, 38, 0.15), rgba(16, 185, 129, 0.15));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  opacity: 1;
+}
+
+/* Info pills - Enhanced */
+.info-pill {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0.25rem;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.info-pill:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Strand badges */
+.info-pill.strand-stem,
+.info-pill.strand-humss,
+.info-pill.strand-abm { 
+  background: linear-gradient(135deg, var(--theme-green), #059669);
+  color: white;
+  box-shadow: 0 2px 8px rgba(1, 87, 38, 0.3);
+}
+
+/* Research Design pills */
+.info-pill.research-qualitative,
+.info-pill.research-survey,
+.info-pill.research-experimental,
+.info-pill.research-capstone { 
+  background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+  color: white;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+/* Grade level pills */
+.info-pill.grade-11 { 
+  background: #212529 !important; 
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(33, 37, 41, 0.4);
+}
+
+.info-pill.grade-12 { 
+  background: white !important; 
+  color: #212529 !important;
+  border: 2px solid #212529 !important;
+  box-shadow: 0 2px 8px rgba(33, 37, 41, 0.2);
+}
+
+.info-pill.grade,
+.info-pill.school-year { 
+  background: rgba(100, 116, 139, 0.1);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+/* Award badges */
+.info-pill.award { 
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.info-pill.award:hover {
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
+}
+
+/* Keyword badges - NO HOVER EFFECTS */
+.keyword-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  margin: 4px;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 2px 4px rgba(1, 87, 38, 0.3);
+  cursor: default;
+}
+
+/* Section styling - Enhanced */
+.detail-section {
+  margin-bottom: 3rem;
+}
+
+.detail-section h4 {
+  color: var(--theme-green);
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--theme-green);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+/* Remove the after element since we want full width line */
+.detail-section h4::after {
+  display: none;
+}
+
+.detail-section h4 i {
+  font-size: 1.3rem;
+}
+
+.detail-section p {
+  line-height: 1.9;
+  color: #475569;
+  text-align: justify;
+  font-size: 1rem;
+  text-indent: 2rem;
+}
+
+/* Info grid layout for 2x2 compact design */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.info-label {
+  font-weight: 700;
+  color: var(--theme-green);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-button {
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 6px rgba(1, 87, 38, 0.2);
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+}
+
+.pdf-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(1, 87, 38, 0.3);
+  background: linear-gradient(135deg, #018a3d 0%, #015726 100%);
+  color: white;
+  text-decoration: none;
+}
+
+.pdf-button i {
+  font-size: 1.1em;
+}
+
+.back-button {
+  background: white;
+  border: 2px solid var(--theme-green);
+  color: var(--theme-green);
+  padding: 0.6rem 1.25rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Montserrat', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(1, 87, 38, 0.1);
+}
+
+.back-button:hover {
+  background: var(--theme-green);
+  color: white;
+  text-decoration: none;
+  transform: translateX(-8px);
+  box-shadow: 0 4px 16px rgba(1, 87, 38, 0.25);
+}
+
+.back-button i {
+  transition: transform 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.back-button:hover i {
+  transform: translateX(-4px);
+}
+
+/* Modal styling - Enhanced */
+.modal-content {
+  border-radius: 24px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modal-header {
+  background: var(--theme-green-gradient);
+  color: white;
+  border-radius: 24px 24px 0 0;
+  border: none;
+  padding: 1.75rem 2rem;
+}
+
+.modal-title {
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.modal-body {
+  padding: 3rem 2.5rem;
+  text-align: center;
+}
+
+.modal-body p {
+  font-size: 1.05rem;
+  color: #475569;
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+.modal-body i.bi-file-pdf {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.modal-footer {
+  border: none;
+  padding: 1.5rem 2.5rem;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+.btn-login,
+.btn-pending-dashboard {
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.btn-login {
+  background: var(--theme-green);
+  color: white;
+}
+
+.btn-login:hover {
+  background: var(--theme-green-light);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(1, 87, 38, 0.3);
+  text-decoration: none;
+}
+
+.btn-pending-dashboard {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.btn-pending-dashboard:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.3);
+  text-decoration: none;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.register-link a {
+  color: var(--theme-green);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.register-link a:hover {
+  color: var(--theme-green-light);
+  text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .detail-header {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .detail-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .detail-section h4 {
+    font-size: 1.3rem;
+  }
+
+  .detail-header .author-list {
+    font-size: 0.9rem;
+  }
+  
+  .detail-header .meta-info {
+    font-size: 0.85rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .info-label {
+    min-width: auto;
+  }
+}
+
+/* Login Required Modal - Fixed */
+#loginModal .modal-dialog {
+  max-width: 450px;
+}
+
+#loginModal .modal-content {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+#loginModal .modal-header {
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  border: none;
+  padding: 1.5rem 2rem;
+  border-radius: 20px 20px 0 0;
+}
+
+#loginModal .modal-title {
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+#loginModal .modal-body {
+  padding: 2rem 2rem 1.5rem 2rem;
+  text-align: center;
+}
+
+#loginModal .modal-body i.bi-file-pdf {
+  font-size: 3.5rem;
+  color: #015726;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+#loginModal .modal-body p {
+  font-size: 1rem;
+  color: #475569;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+#loginModal .modal-footer {
+  border: none;
+  padding: 1.5rem 2rem 2rem 2rem;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+#loginModal .btn-login {
+  padding: 0.875rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+}
+
+#loginModal .btn-login:hover {
+  background: linear-gradient(135deg, #018a3d 0%, #059669 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 87, 38, 0.3);
+  text-decoration: none;
+}
+
+#loginModal .register-link {
+  text-align: center;
+  margin-top: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+#loginModal .register-link a {
+  color: #015726;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+#loginModal .register-link a:hover {
+  color: #018a3d;
+  text-decoration: underline;
+}

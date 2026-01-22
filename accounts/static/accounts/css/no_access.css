@@ -1,0 +1,208 @@
+/* Access Denied Page Styles */
+
+/* Main container wrapper - ensures proper spacing from navbar */
+.access-denied-wrapper {
+    padding-top: 100px; /* Increased spacing from navbar */
+    padding-bottom: 60px; /* Added spacing from footer */
+    min-height: calc(100vh - 100px);
+    position: relative;
+    z-index: 1; /* Ensures content appears above particle background */
+}
+
+.access-denied-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 50px 30px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95); /* Increased opacity to hide particles better */
+    border-radius: 20px;
+    border: 1px solid rgba(1, 87, 38, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 2; /* Ensures container is above particles */
+}
+
+.icon-container {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 30px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(220, 53, 69, 0.4);
+    }
+}
+
+.icon-container i {
+    font-size: 60px;
+    color: white;
+}
+
+.access-denied-container h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 15px;
+}
+
+.error-code {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 25px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.error-message {
+    font-size: 16px;
+    color: #4a5568;
+    line-height: 1.7;
+    margin-bottom: 35px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.error-message strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--theme-green), #013d1c);
+    color: white;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(1, 87, 38, 0.3);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(1, 87, 38, 0.4);
+    color: white;
+}
+
+.btn-secondary-custom {
+    background: white;
+    color: var(--theme-green);
+    padding: 14px 30px;
+    border: 2px solid var(--theme-green);
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-custom:hover {
+    background: var(--theme-green);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(1, 87, 38, 0.3);
+}
+
+.help-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.help-section p {
+    font-size: 14px;
+    color: #718096;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 0;
+}
+
+.help-section a {
+    color: var(--theme-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.help-section a:hover {
+    color: #013d1c;
+    text-decoration: underline;
+}
+
+/* Tablet Responsive */
+@media (max-width: 768px) {
+    .access-denied-wrapper {
+        padding-top: 80px;
+        padding-bottom: 50px;
+    }
+
+    .access-denied-container {
+        padding: 40px 20px;
+    }
+
+    .access-denied-container h1 {
+        font-size: 2rem;
+    }
+
+    .icon-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .icon-container i {
+        font-size: 50px;
+    }
+
+    .btn-primary-custom,
+    .btn-secondary-custom {
+        padding: 12px 25px;
+        font-size: 15px;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+    .access-denied-wrapper {
+        padding-top: 70px;
+        padding-bottom: 40px;
+    }
+
+    .access-denied-container h1 {
+        font-size: 1.75rem;
+    }
+
+    .icon-container {
+        width: 90px;
+        height: 90px;
+    }
+
+    .icon-container i {
+        font-size: 45px;
+    }
+}

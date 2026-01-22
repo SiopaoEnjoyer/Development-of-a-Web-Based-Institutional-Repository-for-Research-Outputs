@@ -1,0 +1,140 @@
+{% extends "research/base.html" %}
+{% load static %}
+{% block title %}Pending Approvals{% endblock %}
+{% block page_header %}Admin Panel - Pending User Account Approvals{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accounts/css/admin_common.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Django Messages (will be converted to toasts) -->
+    <div class="django-messages" style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- PENDING USER ACCOUNTS -->
+    <div class="admin-section">
+        <h4>
+            <i class="bi bi-person-plus-fill"></i> Pending User Account Approvals
+        </h4>
+        
+        {% if users %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 18%;">Name</th>
+                            <th style="width: 15%;">Email</th>
+                            <th style="width: 13%;">Role</th>
+                            <th style="width: 11%;">School Year</th>
+                            <th style="width: 18%;">Existing Author</th>
+                            <th style="width: 15%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for profile in users %}
+                        <tr>
+                            <td>
+                                <strong>
+                                    {{ profile.pending_last_name }}, {{ profile.pending_first_name }}
+                                    {% if profile.pending_middle_initial %} {{ profile.pending_middle_initial }}.{% endif %}
+                                    {% if profile.pending_suffix %} {{ profile.pending_suffix }}{% endif %}
+                                </strong>
+                            </td>
+                            <td>{{ profile.user.email }}</td>
+                            <td>
+                                <span class="role-text">
+                                    {{ profile.user.get_role_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if profile.pending_G11 and profile.pending_G12 %}
+                                    <span class="batch-text" style="display: block; margin-bottom: 2px;">G11: {{ profile.pending_G11 }}</span>
+                                    <span class="batch-text" style="display: block;">G12: {{ profile.pending_G12 }}</span>
+                                {% elif profile.pending_G12 %}
+                                    <span class="batch-text">{{ profile.pending_G12 }}</span>
+                                {% elif profile.pending_G11 %}
+                                    <span class="batch-text">{{ profile.pending_G11 }}</span>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if profile.matching_authors.exists %}
+                                    {% for author in profile.matching_authors %}
+                                        {% if author.user %}
+                                            <span class="author-match-badge author-claimed" title="Author already claimed by {{ author.user.email }}">
+                                                <i class="bi bi-person-fill-x"></i> Claimed
+                                                <span class="paper-count">({{ author.researchpaper_set.count }} paper{{ author.researchpaper_set.count|pluralize }})</span>
+                                            </span>
+                                        {% else %}
+                                            <span class="author-match-badge author-unclaimed" title="Unclaimed author exists">
+                                                <i class="bi bi-person-fill-check"></i> Unclaimed
+                                                <span class="paper-count">({{ author.researchpaper_set.count }} paper{{ author.researchpaper_set.count|pluralize }})</span>
+                                            </span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="author-match-badge author-exists" title="No existing author found">
+                                        <i class="bi bi-person-fill-add"></i> New Author
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-warning btn-sm"
+                                        onclick="openEditModal('{{ profile.id }}')"
+                                    >
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <form method="post" action="{% url 'accounts:approve_user' profile.id %}" style="display:inline;" onsubmit="return handleApprove(event, this, '{{ profile.pending_first_name }} {{ profile.pending_last_name }}')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'accounts:deny_user' profile.id %}" style="display:inline;" onsubmit="return handleDeny(event, this, '{{ profile.pending_first_name }} {{ profile.pending_last_name }}')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-x-circle"></i> Deny
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Edit Modals -->
+            {% for profile in users %}
+            {% include 'accounts/pending_approval_modal.html' %}
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p class="mb-0">No pending user account approvals.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="text-center mb-4">
+        <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+</div>
+
+<script src="{% static 'accounts/js/admin_common.js' %}"></script>
+<script src="{% static 'accounts/js/pending_approvals.js' %}"></script>
+{% endblock %}
