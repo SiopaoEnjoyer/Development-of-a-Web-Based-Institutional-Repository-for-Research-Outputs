@@ -17,12 +17,9 @@ worker_class = 'sync'
 worker_connections = 50  # Reduced from 1000
 
 # Preload to save memory
-preload_app = True
+preload_app = False
 
 # Log settings
 loglevel = 'warning'  # Changed from 'info' to reduce log memory
 accesslog = '-'
 errorlog = '-'
-
-# Memory optimization
-worker_tmp_dir = '/dev/shm'  # Use RAM disk for worker heartbeat
