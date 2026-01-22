@@ -94,7 +94,7 @@ class UserProfile(models.Model):
     blank=True,
     validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
     help_text='PDF file, max 10MB',
-    storage=SupabaseStorage()
+    storage=SupabaseStorage
 )
 
     email_verification_code = models.CharField(max_length=6, null=True, blank=True)

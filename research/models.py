@@ -28,7 +28,9 @@ class Keyword(models.Model):
     
     class Meta:
         ordering = ['word']
-
+        indexes = [
+            models.Index(fields=['word']),  # For search/filtering
+        ]
 
 class Author(models.Model):
     user = models.OneToOneField(
@@ -69,6 +71,12 @@ class Author(models.Model):
                 condition=models.Q(user__isnull=False),
                 name="one_author_per_user"
             )
+        ]
+
+        indexes = [
+            models.Index(fields=['last_name', 'first_name']),  # For sorting/filtering
+            models.Index(fields=['G11_Batch']),  # For batch filtering
+            models.Index(fields=['G12_Batch']),  # For batch filtering
         ]
 
     def save(self, *args, **kwargs):
@@ -163,12 +171,23 @@ class ResearchPaper(models.Model):
 
     pdf_file = models.FileField(
     upload_to="research_papers/",
-    storage=SupabaseStorage()
+    storage=SupabaseStorage
 )
 
     awards = models.ManyToManyField(
         'Award', blank=True, related_name='research_papers'
     )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['-publication_date']),  # For default ordering
+            models.Index(fields=['strand']),  # For strand filtering
+            models.Index(fields=['grade_level']),  # For grade filtering
+            models.Index(fields=['school_year']),  # For year filtering
+            models.Index(fields=['research_design']),  # For design filtering
+            models.Index(fields=['strand', 'research_design']),  # Composite index
+            models.Index(fields=['title']),  # For search
+        ]
  
     def clean(self):
         """

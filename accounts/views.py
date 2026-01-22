@@ -8,7 +8,6 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
-from django.db.models import Q
 from .models import User, UserProfile
 from research.models import Author
 from .forms import RegistrationForm, LoginForm, EmailVerificationForm
@@ -17,6 +16,9 @@ from django.template.loader import render_to_string
 from django.contrib.auth.hashers import make_password
 from datetime import timedelta
 from django.utils.timezone import now
+from django.http import HttpResponse
+from django.db.models import Count, Q, Exists, OuterRef, Subquery, Prefetch
+
 
 class RoleRequiredMixin(UserPassesTestMixin):
     role = None
@@ -56,29 +58,11 @@ class RegisterView(FormView):
         return self.request.path
     
     def form_valid(self, form):
-        print("\n" + "="*50)
-        print("REGISTRATION - Starting")
-        print("="*50)
-        
         # Form.save() handles everything now
         user = form.save(commit=True)
         
-        print(f"✅ User and profile saved: {user.email}")
-        
-        # CRITICAL FIX: Get fresh profile from database
-        # Don't use user.userprofile as it might be cached
-        profile = UserProfile.objects.get(user=user)
-        
-        print(f"DEBUG: Profile name after save:")
-        print(f"  First: {profile.pending_first_name}")
-        print(f"  Last: {profile.pending_last_name}")
-        print(f"  Middle: {profile.pending_middle_initial}")
-        print(f"  Role: {user.role}")
-        print(f"  Took SHS: {profile.took_shs}")
-        print(f"  Is Approved: {profile.is_approved}")
-        
-        # Author will be created/claimed by signal when admin approves
-        print(f"⏳ Author creation will happen upon admin approval")
+        # ✅ OPTIMIZED: Use select_related to avoid extra query
+        profile = UserProfile.objects.select_related('user').get(user=user)
         
         # Generate verification code
         code = profile.generate_verification_code()
@@ -88,13 +72,7 @@ class RegisterView(FormView):
         self.request.session['verification_email'] = user.email
         self.request.session['verification_user_id'] = user.id
         self.request.session['show_verification_modal'] = True
-        self.request.session.modified = True  # Force save
-        
-        print(f"✅ Verification code generated: {code}")
-        print("✅ Session variables set:")
-        print(f"  - Email: {self.request.session.get('verification_email')}")
-        print(f"  - User ID: {self.request.session.get('verification_user_id')}")
-        print(f"  - Show modal: {self.request.session.get('show_verification_modal')}")
+        self.request.session.modified = True
         
         # Send verification email
         email_sent = send_verification_email(user.email, code, user_name)
@@ -102,19 +80,8 @@ class RegisterView(FormView):
         if not email_sent:
             print(f"\n{'='*50}\nVERIFICATION CODE: {code}\n{'='*50}\n")
         
-        print("="*50 + "\n")
-        
-        # IMPORTANT: Return with fresh empty form to avoid showing submitted data
-        # This prevents form validation errors from appearing
+        # Return with fresh empty form
         context = self.get_context_data(form=RegistrationForm())
-        
-        # Double-check session right before rendering
-        print(f"\n{'='*50}")
-        print(f"JUST BEFORE RENDER:")
-        print(f"  verification_email: {self.request.session.get('verification_email')}")
-        print(f"  show_verification_modal: {self.request.session.get('show_verification_modal')}")
-        print(f"{'='*50}\n")
-        
         return self.render_to_response(context)
 
 class LoginView(FormView):
@@ -122,7 +89,7 @@ class LoginView(FormView):
     form_class = LoginForm
 
     def get(self, request, *args, **kwargs):
-        # Clear any leftover verification session data when GET (page load)
+        # Clear any leftover verification session data
         if 'show_verification_modal' in request.session:
             del request.session['show_verification_modal']
         if 'verification_email' in request.session:
@@ -148,7 +115,7 @@ class LoginView(FormView):
             is_session_verified = self.request.session.get(session_key, False)
             
             if not is_session_verified:
-                # Need to verify for this session (or first time)
+                # Need to verify for this session
                 profile = user.userprofile
                 code = profile.generate_verification_code()
                 user_name = profile.pending_first_name or ""
@@ -156,13 +123,6 @@ class LoginView(FormView):
                 self.request.session['verification_email'] = user.email
                 self.request.session['verification_user_id'] = user.id
                 self.request.session['show_verification_modal'] = True
-                
-                print(f"\n{'='*50}")
-                print(f"LOGIN - VERIFICATION REQUIRED:")
-                print(f"User ID: {user.id}")
-                print(f"Email: {user.email}")
-                print(f"Session variables set!")
-                print(f"{'='*50}\n")
                 
                 email_sent = send_verification_email(user.email, code, user_name)
                 
@@ -172,7 +132,7 @@ class LoginView(FormView):
                 self.request.session.modified = True
                 return self.render_to_response(self.get_context_data(form=LoginForm()))
             
-            # Already verified in this session, log them in directly
+            # Already verified in this session
             login(self.request, user)
             return redirect("accounts:dashboard_redirect")
         else:
@@ -185,20 +145,15 @@ class VerifyEmailAjaxView(View):
         code = request.POST.get('code', '').strip()
         user_id = request.session.get('verification_user_id')
         
-        print(f"\n{'='*50}")
-        print(f"VERIFICATION ATTEMPT:")
-        print(f"Code received: {code}")
-        print(f"User ID from session: {user_id}")
-        print(f"{'='*50}\n")
-        
         if not user_id:
             return JsonResponse({'success': False, 'message': 'No verification in progress.'})
         
         try:
-            user = User.objects.get(id=user_id)
+            # ✅ OPTIMIZED: select_related to avoid extra query
+            user = User.objects.select_related('userprofile').get(id=user_id)
             profile = user.userprofile
             
-            # Check if account is locked due to too many attempts
+            # Check if account is locked
             if profile.verification_locked_until:
                 if now() < profile.verification_locked_until:
                     time_remaining = profile.verification_locked_until - now()
@@ -209,15 +164,13 @@ class VerifyEmailAjaxView(View):
                         'message': f'Too many verification attempts. Account locked for {hours} more hours.'
                     })
                 else:
-                    # Lock period expired, reset
                     profile.verification_attempts = 0
                     profile.verification_locked_until = None
                     profile.save()
             
-            # Check attempt limit (10 attempts max)
+            # Check attempt limit
             MAX_ATTEMPTS = 10
             if profile.verification_attempts >= MAX_ATTEMPTS:
-                # Lock account for 24 hours
                 profile.verification_locked_until = now() + timedelta(hours=24)
                 profile.save()
                 return JsonResponse({
@@ -241,9 +194,6 @@ class VerifyEmailAjaxView(View):
                 # Mark as verified in THIS SESSION
                 session_key = f'email_verified_{user.id}'
                 request.session[session_key] = True
-                
-                print(f"✅ Verification successful!")
-                print(f"Session key set: {session_key}")
                 
                 # Log the user in
                 login(request, user)
@@ -274,73 +224,6 @@ class VerifyEmailAjaxView(View):
         except User.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'User not found.'})
             
-# Update DashboardRedirectView to handle unapproved users
-class DashboardRedirectView(LoginRequiredMixin, View):
-    def get(self, request):
-        profile = request.user.userprofile
-        
-        # If user is not approved, send to pending dashboard
-        if not profile.is_approved:
-            return redirect("accounts:pending_dashboard")
-        
-        # Otherwise, route based on role
-        role = request.user.role
-        mapping = {
-            "shs_student": "accounts:student_dashboard",
-            "alumni": "accounts:student_dashboard",
-            "research_teacher": "accounts:teacher_dashboard",
-            "admin": "accounts:admin_dashboard",
-        }
-        return redirect(mapping.get(role, "accounts:no_access"))
-
-# ✅ UPDATED: Resend code
-class ResendVerificationCodeView(View):
-    def post(self, request):
-        user_id = request.session.get('verification_user_id')
-        
-        if not user_id:
-            return JsonResponse({'success': False, 'message': 'No verification in progress.'})
-        
-        try:
-            user = User.objects.get(id=user_id)
-            profile = user.userprofile
-            
-            code = profile.generate_verification_code()
-            user_name = profile.pending_first_name or ""
-            
-            email_sent = send_verification_email(user.email, code, user_name)
-            
-            if not email_sent:
-                print(f"\n{'='*50}\nVERIFICATION CODE: {code}\n{'='*50}\n")
-            
-            return JsonResponse({'success': True, 'message': 'Verification code resent successfully.'})
-        except User.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'User not found.'})
-
-# ✅ UPDATED: Logout - clears session verification
-class LogoutView(View):
-    def get(self, request):
-        # Store user_id before logout
-        user_id = request.user.id if request.user.is_authenticated else None
-        
-        # Clear the session verification flag BEFORE logout
-        if user_id:
-            session_key = f'email_verified_{user_id}'
-            if session_key in request.session:
-                del request.session[session_key]
-                print(f"\n{'='*50}")
-                print(f"LOGOUT - Session verification cleared for user {user_id}")
-                print(f"Session key deleted: {session_key}")
-                print(f"{'='*50}\n")
-        
-        # Logout (this clears the session but we already removed our flag)
-        logout(request)
-        
-        # Force session modification to save changes
-        request.session.modified = True
-        
-        return redirect("accounts:login")
-
 class DashboardRedirectView(LoginRequiredMixin, View):
     def get(self, request):
         profile = request.user.userprofile
@@ -360,14 +243,54 @@ class DashboardRedirectView(LoginRequiredMixin, View):
         }
         return redirect(mapping.get(role, "accounts:no_access"))
 
+class ResendVerificationCodeView(View):
+    def post(self, request):
+        user_id = request.session.get('verification_user_id')
+        
+        if not user_id:
+            return JsonResponse({'success': False, 'message': 'No verification in progress.'})
+        
+        try:
+            user = User.objects.select_related('userprofile').get(id=user_id)
+            profile = user.userprofile
+            
+            code = profile.generate_verification_code()
+            user_name = profile.pending_first_name or ""
+            
+            email_sent = send_verification_email(user.email, code, user_name)
+            
+            if not email_sent:
+                print(f"\n{'='*50}\nVERIFICATION CODE: {code}\n{'='*50}\n")
+            
+            return JsonResponse({'success': True, 'message': 'Verification code resent successfully.'})
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'User not found.'})
+
+class LogoutView(View):
+    def get(self, request):
+        # Store user_id before logout
+        user_id = request.user.id if request.user.is_authenticated else None
+        
+        # Clear the session verification flag BEFORE logout
+        if user_id:
+            session_key = f'email_verified_{user_id}'
+            if session_key in request.session:
+                del request.session[session_key]
+        
+        # Logout
+        logout(request)
+        
+        # Force session modification to save changes
+        request.session.modified = True
+        
+        return redirect("accounts:login")
+
 class PendingDashboardView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/pending_dashboard.html"
     
     def dispatch(self, request, *args, **kwargs):
-        # Call parent dispatch first to ensure LoginRequiredMixin runs
         response = super().dispatch(request, *args, **kwargs)
         
-        # Only check approval if user is authenticated (after LoginRequiredMixin check)
         if request.user.is_authenticated and hasattr(request.user, 'userprofile'):
             if request.user.userprofile.is_approved:
                 # If AJAX request, return JSON
@@ -376,7 +299,6 @@ class PendingDashboardView(LoginRequiredMixin, TemplateView):
                         'approved': True,
                         'redirect_url': reverse_lazy('accounts:dashboard_redirect')
                     })
-                # Otherwise redirect
                 return redirect('accounts:dashboard_redirect')
         
         # If AJAX and not approved, return status
@@ -401,8 +323,10 @@ class StudentDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         profile = self.request.user.userprofile
+        
+        # ✅ OPTIMIZED: Prefetch related data
         ctx.update({
-            "papers": profile.assigned_papers.all(),
+            "papers": profile.assigned_papers.prefetch_related('keywords', 'awards'),
             "authors": profile.author_profile.all()
         })
         return ctx
@@ -415,38 +339,50 @@ class AdminDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
     template_name = "accounts/admin_dashboard.html"
     role = "admin"
 
+
 class PendingAccountsView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     template_name = "accounts/pending_requests.html"
     context_object_name = "users"
     role = "admin"
+    paginate_by = 20  # ✅ ADD PAGINATION
 
     def get_queryset(self):
-        from research.models import Author
+        # ✅ CRITICAL FIX: Use annotations instead of Python loops
         
         queryset = UserProfile.objects.filter(
             is_approved=False
         ).select_related('user').prefetch_related('author_profile').order_by('-id')
         
-        # Annotate each profile with matching author info
+        # ✅ Annotate matching author counts in SQL, not Python
+        queryset = queryset.annotate(
+            has_matching_authors=Exists(
+                Author.objects.filter(
+                    first_name__iexact=OuterRef('pending_first_name'),
+                    last_name__iexact=OuterRef('pending_last_name'),
+                )
+            )
+        )
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # ✅ CRITICAL: Process ONLY the current page, not all profiles
         profiles_with_authors = []
-        for profile in queryset:
-            # Check for existing author with same name
+        
+        for profile in context['users']:  # Only processes paginated results
             first = profile.pending_first_name
             last = profile.pending_last_name
             middle = profile.pending_middle_initial or ""
             suffix = profile.pending_suffix or ""
             
-            # Normalize for matching
-            def normalize(val):
-                return val.strip().upper() if val else ""
-            
-            # Find matching authors
+            # Find matching authors efficiently
             matching_authors = Author.objects.filter(
                 first_name__iexact=first.strip() if first else "",
                 last_name__iexact=last.strip() if last else "",
             )
             
-            # Filter by middle initial
             if middle:
                 matching_authors = matching_authors.filter(middle_initial__iexact=middle)
             else:
@@ -454,7 +390,6 @@ class PendingAccountsView(LoginRequiredMixin, RoleRequiredMixin, ListView):
                     Q(middle_initial__isnull=True) | Q(middle_initial="")
                 )
             
-            # Filter by suffix
             if suffix:
                 matching_authors = matching_authors.filter(suffix__iexact=suffix)
             else:
@@ -462,21 +397,25 @@ class PendingAccountsView(LoginRequiredMixin, RoleRequiredMixin, ListView):
                     Q(suffix__isnull=True) | Q(suffix="")
                 )
             
-            # Add matching author data to profile
-            profile.matching_authors = matching_authors.prefetch_related('researchpaper_set')
+            # ✅ OPTIMIZED: Only get count and basic info
+            profile.matching_authors = list(matching_authors.only(
+                'id', 'first_name', 'last_name', 'middle_initial', 'suffix'
+            ).annotate(paper_count=Count('researchpaper'))[:5])  # Limit to 5 matches
+            
             profiles_with_authors.append(profile)
         
-        return profiles_with_authors
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Remove pending_consents from this view
+        context['users'] = profiles_with_authors
         return context
 
 class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
     role = "admin"
     def post(self, request, id):
-        profile = get_object_or_404(UserProfile, id=id)
+        # ✅ OPTIMIZED: select_related to reduce queries
+        profile = get_object_or_404(
+            UserProfile.objects.select_related('user'),
+            id=id
+        )
+        
         if profile.is_approved:
             messages.warning(request, "Already approved")
         else:
@@ -508,11 +447,9 @@ class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
                 middle_for_query = middle if middle else ""
                 suffix_for_query = suffix if suffix else ""
                 
-                # Check if user already has an author
                 existing_author = Author.objects.filter(user=user).first()
                 
                 if existing_author:
-                    # User already has an author, update it if needed
                     existing_author.first_name = first
                     existing_author.last_name = last
                     existing_author.middle_initial = middle_for_query
@@ -524,7 +461,6 @@ class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
                     existing_author.save()
                     profile.author_profile.add(existing_author)
                 else:
-                    # Try to find or create author
                     try:
                         author = Author.objects.get(
                             first_name=first,
@@ -534,7 +470,6 @@ class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
                         )
                         created = False
                     except Author.DoesNotExist:
-                        # Create new author
                         author = Author.objects.create(
                             first_name=first,
                             last_name=last,
@@ -547,7 +482,6 @@ class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
                         )
                         created = True
                     
-                    # If author exists but has no user, claim it
                     if not created and author.user is None:
                         author.user = profile.user
                         author.G11_Batch = g11 if g11 else None
@@ -569,7 +503,12 @@ class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
 class ApproveUserView(LoginRequiredMixin, RoleRequiredMixin, View):
     role = "admin"
     def post(self, request, id):
-        profile = get_object_or_404(UserProfile, id=id)
+        # ✅ OPTIMIZED: select_related
+        profile = get_object_or_404(
+            UserProfile.objects.select_related('user'),
+            id=id
+        )
+        
         if profile.is_approved:
             messages.warning(request, "Already approved")
         else:
@@ -582,14 +521,11 @@ class ApproveUserView(LoginRequiredMixin, RoleRequiredMixin, View):
             is_shs_alumni = user.role == "alumni" and profile.took_shs
             
             if is_shs_student or is_shs_alumni:
-                # Check if user already has an author
                 existing_author = Author.objects.filter(user=user).first()
                 
                 if existing_author:
-                    # User already has an author, just link it to profile
                     profile.author_profile.add(existing_author)
                 else:
-                    # Try to find or create author
                     try:
                         author = Author.objects.get(
                             first_name=first,
@@ -599,7 +535,6 @@ class ApproveUserView(LoginRequiredMixin, RoleRequiredMixin, View):
                         )
                         created = False
                     except Author.DoesNotExist:
-                        # Create new author
                         author = Author.objects.create(
                             first_name=first,
                             last_name=last,
@@ -612,7 +547,6 @@ class ApproveUserView(LoginRequiredMixin, RoleRequiredMixin, View):
                         )
                         created = True
                     
-                    # If author exists but has no user, claim it
                     if not created and author.user is None:
                         author.user = profile.user
                         author.G11_Batch = profile.pending_G11
@@ -706,7 +640,6 @@ class ApproveConsentView(LoginRequiredMixin, UserPassesTestMixin, View):
         else:
             messages.warning(request, "This consent is not pending approval.")
         
-        # Redirect based on role
         if request.user.role == 'admin':
             return redirect("accounts:pending_accounts")
         else:
@@ -733,7 +666,6 @@ class DenyConsentView(LoginRequiredMixin, UserPassesTestMixin, View):
         else:
             messages.warning(request, "This consent is not pending approval.")
         
-        # Redirect based on role
         if request.user.role == 'admin':
             return redirect("accounts:pending_accounts")
         else:
@@ -746,7 +678,18 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = UserProfile.objects.select_related('user').prefetch_related('author_profile').all()
+        # ✅ OPTIMIZED: select_related and prefetch_related with limited fields
+        queryset = UserProfile.objects.select_related('user').prefetch_related(
+            Prefetch(
+                'author_profile',
+                queryset=Author.objects.only('id', 'first_name', 'last_name', 'user_id')
+            )
+        ).only(
+            # ✅ Limit fields loaded from UserProfile
+            'id', 'user', 'pending_first_name', 'pending_last_name', 
+            'pending_middle_initial', 'pending_suffix', 'pending_G11', 'pending_G12',
+            'is_approved', 'consent_status', 'took_shs'
+        )
         
         # Search functionality
         search = self.request.GET.get('search', '').strip()
@@ -774,7 +717,7 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         if consent_filter:
             queryset = queryset.filter(consent_status=consent_filter)
         
-        # Filter by batch (school year)
+        # Filter by batch
         batch_filter = self.request.GET.get('batch', '')
         if batch_filter:
             queryset = queryset.filter(
@@ -805,22 +748,40 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get all profiles for statistics (without filters)
-        all_profiles = UserProfile.objects.select_related('user').all()
+        # ✅ CRITICAL: Use aggregate for counts instead of loading all profiles
+        from django.db.models import Count
         
-        # Calculate statistics
-        context['total_count'] = all_profiles.count()
-        context['approved_count'] = all_profiles.filter(is_approved=True).count()
-        context['pending_count'] = all_profiles.filter(is_approved=False).count()
-        context['active_count'] = all_profiles.filter(user__is_active=True).count()
+        # ✅ Get counts efficiently with a single query
+        counts = UserProfile.objects.aggregate(
+            total=Count('id'),
+            approved=Count('id', filter=Q(is_approved=True)),
+            pending=Count('id', filter=Q(is_approved=False)),
+            active=Count('id', filter=Q(user__is_active=True))
+        )
         
-        # Get all unique batches for filter dropdown
-        g11_batches = UserProfile.objects.exclude(pending_G11__isnull=True).exclude(pending_G11='').values_list('pending_G11', flat=True).distinct()
-        g12_batches = UserProfile.objects.exclude(pending_G12__isnull=True).exclude(pending_G12='').values_list('pending_G12', flat=True).distinct()
-        all_batches = sorted(set(list(g11_batches) + list(g12_batches)), reverse=True)
-        context['batches'] = all_batches
+        context['total_count'] = counts['total']
+        context['approved_count'] = counts['approved']
+        context['pending_count'] = counts['pending']
+        context['active_count'] = counts['active']
         
-        # Other context data
+        # ✅ Get batches efficiently using distinct values only
+        batches = set()
+        
+        # Use values_list to get only the batch fields
+        g11_batches = UserProfile.objects.exclude(
+            Q(pending_G11__isnull=True) | Q(pending_G11='')
+        ).values_list('pending_G11', flat=True).distinct()
+        
+        g12_batches = UserProfile.objects.exclude(
+            Q(pending_G12__isnull=True) | Q(pending_G12='')
+        ).values_list('pending_G12', flat=True).distinct()
+        
+        # ✅ Force evaluation and combine
+        batches.update(g11_batches)
+        batches.update(g12_batches)
+        
+        context['batches'] = sorted(batches, reverse=True)
+        
         context['role_choices'] = User.ROLE_CHOICES
         context['current_search'] = self.request.GET.get('search', '')
         context['current_role'] = self.request.GET.get('role', '')
@@ -829,24 +790,30 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         context['current_batch'] = self.request.GET.get('batch', '')
         context['current_sort'] = self.request.GET.get('sort', 'id')
         context['current_order'] = self.request.GET.get('order', 'desc')
+        
+        # ✅ Force evaluation of paginated profiles
+        context['profiles'] = list(context['profiles'])
+        
         return context
     
     def render_to_response(self, context, **response_kwargs):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             table_html = render_to_string('accounts/user_table_partial.html', context, request=self.request)
             
-            # Don't render modals in AJAX - they're loaded on-demand
             return JsonResponse({
                 'table_html': table_html
             })
         return super().render_to_response(context, **response_kwargs)
-
-# NEW: Edit User View
+    
 class EditUserView(LoginRequiredMixin, RoleRequiredMixin, View):
     role = "admin"
     
     def post(self, request, id):
-        profile = get_object_or_404(UserProfile, id=id)
+        # ✅ OPTIMIZED: select_related
+        profile = get_object_or_404(
+            UserProfile.objects.select_related('user'),
+            id=id
+        )
         user = profile.user
         
         # Update user fields
@@ -864,7 +831,7 @@ class EditUserView(LoginRequiredMixin, RoleRequiredMixin, View):
         user.is_active = is_active
         user.is_staff = is_staff
         
-        # Set birthdate from dropdowns
+        # Set birthdate
         if birth_month and birth_day and birth_year:
             try:
                 from datetime import date
@@ -898,7 +865,7 @@ class EditUserView(LoginRequiredMixin, RoleRequiredMixin, View):
         
         profile.save()
         
-        # Handle author profile for SHS students and alumni
+        # Handle author profile
         is_shs_student = new_role == "shs_student"
         is_shs_alumni = new_role == "alumni" and took_shs
         
@@ -952,7 +919,6 @@ class EditUserView(LoginRequiredMixin, RoleRequiredMixin, View):
         messages.success(request, f"User {profile.display_name} updated successfully.")
         return redirect("accounts:user_management")
 
-# NEW: Delete User View
 class DeleteUserView(LoginRequiredMixin, RoleRequiredMixin, View):
     role = "admin"
     
@@ -961,7 +927,6 @@ class DeleteUserView(LoginRequiredMixin, RoleRequiredMixin, View):
         email = profile.user.email
         display_name = profile.display_name
         
-        # Don't allow deleting yourself
         if profile.user == request.user:
             messages.error(request, "You cannot delete your own account.")
             return redirect("accounts:user_management")
@@ -970,7 +935,6 @@ class DeleteUserView(LoginRequiredMixin, RoleRequiredMixin, View):
         messages.info(request, f"User {display_name} ({email}) has been deleted.")
         return redirect("accounts:user_management")
 
-# NEW: Toggle User Active Status
 class ToggleUserActiveView(LoginRequiredMixin, RoleRequiredMixin, View):
     role = "admin"
     
@@ -992,17 +956,16 @@ class GetUserModalView(LoginRequiredMixin, RoleRequiredMixin, View):
     role = "admin"
     
     def get(self, request, id):
-        from django.template.loader import render_to_string
-        from django.http import HttpResponse
-        
-        profile = get_object_or_404(UserProfile.objects.select_related('user'), id=id)
+        profile = get_object_or_404(
+            UserProfile.objects.select_related('user'),
+            id=id
+        )
         
         context = {
             'profile': profile,
             'role_choices': User.ROLE_CHOICES
         }
         
-        # Render single modal template
         html = render_to_string('accounts/user_modal_single.html', context, request=request)
         return HttpResponse(html)
     
@@ -1014,15 +977,12 @@ class AlreadyLoggedInView(LoginRequiredMixin, TemplateView):
         profile = self.request.user.userprofile
         context['profile'] = profile
         return context
-    
 
 class ForgotPasswordView(TemplateView):
     template_name = "accounts/forgot_password.html"
     
     def get(self, request, *args, **kwargs):
-        # Clear session data on GET UNLESS modal should be shown
         if not request.session.get('show_password_reset_modal'):
-            # Only clear if no modal should be shown
             for key in ['password_reset_email', 'password_reset_user_id', 'show_password_reset_modal', 'new_password_hash']:
                 if key in request.session:
                     del request.session[key]
@@ -1031,7 +991,6 @@ class ForgotPasswordView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Pass session variables to template
         context['show_modal'] = self.request.session.get('show_password_reset_modal', False)
         context['reset_email'] = self.request.session.get('password_reset_email', '')
         return context
@@ -1058,16 +1017,15 @@ class ForgotPasswordView(TemplateView):
             messages.error(request, "Password must be at least 8 characters long.")
             return self.get(request, *args, **kwargs)
         
-        # Check if user exists
         try:
-            user = User.objects.get(email=email)
+            # ✅ OPTIMIZED: select_related
+            user = User.objects.select_related('userprofile').get(email=email)
             profile = user.userprofile
         except User.DoesNotExist:
-            # Don't reveal if email exists - security best practice
             messages.error(request, "If this email is registered, a verification code will be sent.")
             return self.get(request, *args, **kwargs)
         
-        # Check 24-hour cooldown
+        # Check cooldown
         if profile.last_password_reset_request:
             time_since_last = now() - profile.last_password_reset_request
             if time_since_last < timedelta(hours=24):
@@ -1083,24 +1041,14 @@ class ForgotPasswordView(TemplateView):
         code = profile.generate_verification_code()
         user_name = profile.pending_first_name or ""
         
-        # Store in session (don't actually change password yet)
+        # Store in session
         request.session['password_reset_email'] = email
         request.session['password_reset_user_id'] = user.id
         request.session['new_password_hash'] = make_password(new_password)
         request.session['show_password_reset_modal'] = True
-        request.session.modified = True  # Force save
+        request.session.modified = True
         
-        print(f"\n{'='*50}")
-        print(f"PASSWORD RESET - VERIFICATION REQUIRED:")
-        print(f"User ID: {user.id}")
-        print(f"Email: {user.email}")
-        print(f"Session variables set:")
-        print(f"  password_reset_email: {request.session.get('password_reset_email')}")
-        print(f"  password_reset_user_id: {request.session.get('password_reset_user_id')}")
-        print(f"  show_password_reset_modal: {request.session.get('show_password_reset_modal')}")
-        print(f"{'='*50}\n")
-        
-        # Send verification email
+        # Send email
         email_sent = send_password_reset_email(email, code, user_name)
         
         if not email_sent:
@@ -1118,12 +1066,6 @@ class VerifyPasswordResetView(View):
         user_id = request.session.get('password_reset_user_id')
         new_password_hash = request.session.get('new_password_hash')
         
-        print(f"\n{'='*50}")
-        print(f"PASSWORD RESET VERIFICATION:")
-        print(f"Code: {code}")
-        print(f"User ID: {user_id}")
-        print(f"{'='*50}\n")
-        
         if not user_id or not new_password_hash:
             return JsonResponse({
                 'success': False, 
@@ -1131,10 +1073,11 @@ class VerifyPasswordResetView(View):
             })
         
         try:
-            user = User.objects.get(id=user_id)
+            # ✅ OPTIMIZED: select_related
+            user = User.objects.select_related('userprofile').get(id=user_id)
             profile = user.userprofile
             
-            # Check if account is locked due to too many attempts
+            # Check lock
             if profile.verification_locked_until:
                 if now() < profile.verification_locked_until:
                     time_remaining = profile.verification_locked_until - now()
@@ -1145,12 +1088,11 @@ class VerifyPasswordResetView(View):
                         'message': f'Too many verification attempts. Account locked for {hours} more hours.'
                     })
                 else:
-                    # Lock period expired, reset
                     profile.verification_attempts = 0
                     profile.verification_locked_until = None
                     profile.save()
             
-            # Check attempt limit
+            # Check attempts
             MAX_ATTEMPTS = 10
             if profile.verification_attempts >= MAX_ATTEMPTS:
                 profile.verification_locked_until = now() + timedelta(hours=24)
@@ -1161,7 +1103,6 @@ class VerifyPasswordResetView(View):
                     'message': 'Too many verification attempts. Your account has been locked for 24 hours.'
                 })
             
-            # Increment attempt counter
             profile.verification_attempts += 1
             profile.save()
             
@@ -1176,13 +1117,11 @@ class VerifyPasswordResetView(View):
                 profile.verification_locked_until = None
                 profile.save()
                 
-                # Clear session data
+                # Clear session
                 request.session.pop('password_reset_email', None)
                 request.session.pop('password_reset_user_id', None)
                 request.session.pop('show_password_reset_modal', None)
                 request.session.pop('new_password_hash', None)
-                
-                print(f"✅ Password reset successful for user {user.email}")
                 
                 return JsonResponse({
                     'success': True,
@@ -1213,7 +1152,7 @@ class ResendPasswordResetCodeView(View):
             })
         
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.select_related('userprofile').get(id=user_id)
             profile = user.userprofile
             
             code = profile.generate_verification_code()
@@ -1239,7 +1178,6 @@ class ConsentApprovalsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     context_object_name = "pending_consents"
     
     def test_func(self):
-        # Allow both research and non-research teachers
         return self.request.user.role in ['research_teacher', 'nonresearch_teacher']
     
     def handle_no_permission(self):
@@ -1247,6 +1185,7 @@ class ConsentApprovalsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return redirect("accounts:no_access")
     
     def get_queryset(self):
+        # ✅ OPTIMIZED: select_related
         return UserProfile.objects.filter(
             consent_status='pending_approval',
             parental_consent_file__isnull=False

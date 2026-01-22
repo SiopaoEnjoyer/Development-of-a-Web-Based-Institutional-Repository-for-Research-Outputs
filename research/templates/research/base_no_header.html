@@ -14,6 +14,146 @@
     <link rel="stylesheet" href="{% static 'research/css/base.css' %}">
     <link rel="stylesheet" href="{% static 'research/css/papers.css' %}">
     {% block extra_css %}{% endblock extra_css %}
+    <script>
+// NUCLEAR CLEANUP - Intercept and track ALL RAF calls globally
+(function() {
+    // Page load counter for debugging
+    window.__pageLoadCount = (window.__pageLoadCount || 0) + 1;
+    const currentLoad = window.__pageLoadCount;
+    console.log(`📄 Page Load #${currentLoad}`);
+    
+    // IMMEDIATE: Kill any animations that might still be running
+    // (This handles the case where user refreshes before cleanup completes)
+    let killedOrphans = 0;
+    for (let i = 1; i < 10000; i++) { // Cancel potential orphaned RAFs
+        try {
+            cancelAnimationFrame(i);
+            killedOrphans++;
+        } catch (e) {}
+    }
+    if (killedOrphans > 0) {
+        console.log(`🔫 Killed ${killedOrphans} potential orphan RAF IDs`);
+    }
+    
+    // Store original functions
+    const originalRAF = window.requestAnimationFrame;
+    const originalCAF = window.cancelAnimationFrame;
+    const originalSetInterval = window.setInterval;
+    const originalClearInterval = window.clearInterval;
+    
+    // Track active IDs for THIS page load
+    const activeRAFs = new Set();
+    const activeIntervals = new Set();
+    let rafCallCount = 0;
+    let intervalCallCount = 0;
+    
+    // Override RAF
+    window.requestAnimationFrame = function(callback) {
+        rafCallCount++;
+        const id = originalRAF.call(window, function(...args) {
+            activeRAFs.delete(id);
+            return callback(...args);
+        });
+        activeRAFs.add(id);
+        return id;
+    };
+    
+    window.cancelAnimationFrame = function(id) {
+        activeRAFs.delete(id);
+        return originalCAF.call(window, id);
+    };
+    
+    // Override setInterval
+    window.setInterval = function(callback, delay) {
+        intervalCallCount++;
+        const id = originalSetInterval.call(window, callback, delay);
+        activeIntervals.add(id);
+        return id;
+    };
+    
+    window.clearInterval = function(id) {
+        activeIntervals.delete(id);
+        return originalClearInterval.call(window, id);
+    };
+    
+    // Nuclear cleanup function
+    window.__nukeEverything = function() {
+        const rafCount = activeRAFs.size;
+        const intervalCount = activeIntervals.size;
+        
+        console.log(`💣 NUCLEAR CLEANUP for Load #${currentLoad}`);
+        console.log(`   Total RAF calls made: ${rafCallCount}`);
+        console.log(`   Total Interval calls made: ${intervalCallCount}`);
+        console.log(`   Active RAFs: ${rafCount}`);
+        console.log(`   Active Intervals: ${intervalCount}`);
+        
+        // Cancel all RAFs
+        activeRAFs.forEach(id => originalCAF.call(window, id));
+        activeRAFs.clear();
+        
+        // Clear all intervals
+        activeIntervals.forEach(id => originalClearInterval.call(window, id));
+        activeIntervals.clear();
+        
+        console.log(`✅ Nuked ${rafCount} RAFs and ${intervalCount} intervals`);
+    };
+    
+    console.log('✅ Nuclear tracking enabled for Load #' + currentLoad);
+})();
+
+// Global cleanup registry
+(function() {
+    window.__cleanupRegistry = [];
+    
+    window.registerCleanup = function(name, cleanupFn) {
+        window.__cleanupRegistry.push({ name, cleanupFn });
+    };
+    
+    window.killAllAnimations = function() {
+        console.log('🔫 killAllAnimations called');
+        
+        // Nuclear option
+        if (typeof window.__nukeEverything === 'function') {
+            window.__nukeEverything();
+        }
+        
+        // Run registered cleanups
+        window.__cleanupRegistry.forEach(({ name, cleanupFn }) => {
+            try {
+                console.log(`  → Cleaning: ${name}`);
+                cleanupFn();
+            } catch (e) {
+                console.error(`  ✗ Failed: ${name}`, e);
+            }
+        });
+        window.__cleanupRegistry = [];
+        
+        console.log('✅ Cleanup complete');
+    };
+    
+    // CRITICAL: Use 'pagehide' - fires reliably on page unload
+    window.addEventListener('pagehide', (e) => {
+        console.log('🚪 pagehide event - cleaning up immediately');
+        window.killAllAnimations();
+    }, { capture: true }); // Use capture phase to run early
+    
+    // Backup: beforeunload
+    window.addEventListener('beforeunload', (e) => {
+        console.log('🚪 beforeunload event');
+        window.killAllAnimations();
+    });
+    
+    // Backup: visibilitychange
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            console.log('👁️ Page hidden - cleanup');
+            window.killAllAnimations();
+        }
+    });
+    
+    console.log('✅ Cleanup handlers registered');
+})();
+</script>
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
@@ -65,7 +205,6 @@
                         <i class="bi bi-lock-fill me-1"></i>Privacy Policy
                     </a>
                 </li>
-
 
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'terms' %}active{% endif %}" href="{% url 'research:terms' %}">

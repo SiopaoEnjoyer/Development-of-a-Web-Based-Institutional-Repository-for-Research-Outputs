@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.views import generic
-from django.db.models import Q
+from django.db.models import Q, Count, Prefetch
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -41,24 +41,72 @@ class TeacherRequiredMixin:
 # PUBLIC VIEWS
 # =========================
 
+
 class IndexView(generic.ListView):
     model = ResearchPaper
     template_name = "research/index.html"
     context_object_name = "latest_research_list"
     ordering = ["-publication_date"]
     paginate_by = 6
+    
+    # ✅ OPTIMIZED: Reduce queries by prefetching related data
+    def get_queryset(self):
+        return ResearchPaper.objects.prefetch_related(
+            Prefetch(
+                'author',
+                queryset=Author.objects.only('id', 'first_name', 'last_name', 'middle_initial', 'suffix')
+            ),
+            Prefetch(
+                'keywords',
+                queryset=Keyword.objects.only('id', 'word')
+            )
+        ).order_by('-publication_date')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # ✅ Force queryset evaluation to prevent caching
+        context['latest_research_list'] = list(context['latest_research_list'])
+        return context
 
 class DetailView(generic.DetailView):
     model = ResearchPaper
     template_name = "research/detail.html"
     
+    # ✅ OPTIMIZED: Prefetch related data efficiently
+    def get_queryset(self):
+        return ResearchPaper.objects.prefetch_related(
+            Prefetch(
+                'author',
+                queryset=Author.objects.select_related('user__userprofile').only(
+                    'id', 'first_name', 'last_name', 'middle_initial', 'suffix', 'user'
+                )
+            ),
+            Prefetch(
+                'keywords',
+                queryset=Keyword.objects.only('id', 'word')
+            ),
+            Prefetch(
+                'awards',
+                queryset=Award.objects.only('id', 'name')
+            )
+        )
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         paper = self.get_object()
         
-        # Add statistics to context
-        context['view_count'] = paper.get_unique_view_count()
-        context['citation_count'] = paper.get_citation_count()
+        # ✅ Cache these counts in variables instead of calling multiple times
+        view_count = paper.get_unique_view_count()
+        citation_count = paper.get_citation_count()
+        
+        context.update({
+            'view_count': view_count,
+            'citation_count': citation_count,
+            # ✅ Force evaluation of related objects
+            'authors': list(paper.author.all()),
+            'keywords': list(paper.keywords.all()),
+            'awards': list(paper.awards.all()),
+        })
         
         return context
 
@@ -69,7 +117,24 @@ class SearchView(generic.ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        qs = ResearchPaper.objects.all()
+        # ✅ OPTIMIZED: Prefetch related data to avoid N+1 queries
+        qs = ResearchPaper.objects.prefetch_related(
+            Prefetch(
+                'author',
+                queryset=Author.objects.select_related('user__userprofile').only(
+                    'id', 'first_name', 'last_name', 'middle_initial', 'suffix', 'user'
+                )
+            ),
+            Prefetch(
+                'keywords',
+                queryset=Keyword.objects.only('id', 'word')
+            ),
+            Prefetch(
+                'awards',
+                queryset=Award.objects.only('id', 'name')
+            )
+        )
+        
         request = self.request
 
         q = request.GET.get("q")
@@ -134,6 +199,7 @@ class SearchView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # ✅ OPTIMIZED: Only load what's needed for dropdowns
         context.update({
             "query": self.request.GET.get("q", ""),
             "school_year": self.request.GET.get("school_year", ""),
@@ -141,14 +207,17 @@ class SearchView(generic.ListView):
             "research_design": self.request.GET.get("research_design", ""),
             "grade_level": self.request.GET.get("grade_level", ""),
             "selected_award": self.request.GET.get("award", ""),
-            "awards": Award.objects.order_by("name"),
-            "authors": Author.objects.all().order_by("last_name", "first_name"),
-            "school_years": ResearchPaper.objects.values_list("school_year", flat=True).distinct().order_by("school_year"),
+            "awards": list(Award.objects.only('id', 'name').order_by("name")),  # ✅ Force eval
+            "authors": list(Author.objects.only('id', 'first_name', 'last_name').order_by("last_name", "first_name")),  # ✅ Force eval
+            "school_years": list(ResearchPaper.objects.values_list("school_year", flat=True).distinct().order_by("school_year")),  # ✅ Force eval
             "research_designs": ResearchPaper.RESEARCH_DESIGN_CHOICES,
         })
+        
+        # ✅ Force evaluation of papers
+        context['papers'] = list(context['papers'])
 
         return context
-
+    
 class StrandFilteredView(generic.ListView):
     model = ResearchPaper
     template_name = "research/index.html"
@@ -156,8 +225,12 @@ class StrandFilteredView(generic.ListView):
     paginate_by = 6
 
     def get_queryset(self):
+        # ✅ OPTIMIZED: Prefetch related data
         return ResearchPaper.objects.filter(
             strand=self.kwargs["strand"]
+        ).prefetch_related(
+            'author',
+            'keywords'
         ).order_by("-publication_date")
 
     def get_context_data(self, **kwargs):
@@ -173,9 +246,13 @@ class StrandDesignFilteredView(generic.ListView):
     paginate_by = 6
 
     def get_queryset(self):
+        # ✅ OPTIMIZED: Prefetch related data
         return ResearchPaper.objects.filter(
             strand=self.kwargs["strand"],
             research_design=self.kwargs["design"]
+        ).prefetch_related(
+            'author',
+            'keywords'
         ).order_by("-publication_date")
 
     def get_context_data(self, **kwargs):
@@ -198,7 +275,13 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        # ✅ OPTIMIZED: Prefetch related data
+        qs = ResearchPaper.objects.prefetch_related(
+            'author',
+            'keywords',
+            'awards'
+        )
+        
         request = self.request
 
         q = request.GET.get("q")
@@ -210,7 +293,6 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
         award = request.GET.get("award")
         keyword_ids = request.GET.getlist("keywords")
 
-        # ✅ FIX: match frontend param + values
         sort_by = request.GET.get("sort_by", "latest")
 
         if q:
@@ -246,7 +328,6 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
 
         # SORTING 
         if sort_by == "alphabetical":
-            # Strip asterisks for proper alphabetical sorting
             qs = qs.annotate(
                 clean_title=Replace('title', Value('*'), Value(''))
             ).order_by("clean_title")
@@ -268,12 +349,13 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
         grade_level = request.GET.get("grade_level")
         school_year = request.GET.get("school_year")
 
+        # ✅ OPTIMIZED: Only fetch authors when needed, with limited fields
         authors = Author.objects.none()
         if grade_level and school_year:
             if grade_level == "11":
-                authors = Author.objects.filter(G11_Batch=school_year)
+                authors = Author.objects.filter(G11_Batch=school_year).only('id', 'first_name', 'last_name')
             elif grade_level == "12":
-                authors = Author.objects.filter(G12_Batch=school_year)
+                authors = Author.objects.filter(G12_Batch=school_year).only('id', 'first_name', 'last_name')
 
         context.update({
             "selected_authors": request.GET.getlist("authors"),
@@ -282,7 +364,7 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
             "selected_school_year": school_year or "",
             "selected_research_design": request.GET.get("research_design", ""),
             "selected_award": request.GET.get("award", ""),
-            "awards": Award.objects.order_by("name"),
+            "awards": Award.objects.only('id', 'name').order_by("name"),
             "authors": authors.order_by("last_name", "first_name"),
             "strands": ResearchPaper.objects.values_list("strand", flat=True).distinct(),
             "grade_levels": ResearchPaper.objects.values_list("grade_level", flat=True).distinct(),
@@ -310,7 +392,7 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
             filters.append(("research_design", "Design", design_label))
 
         if context["selected_authors"]:
-            for author in Author.objects.filter(id__in=context["selected_authors"]):
+            for author in Author.objects.filter(id__in=context["selected_authors"]).only('id', 'first_name', 'last_name'):
                 filters.append(("authors", "Author", str(author)))
 
         context["filters"] = filters
@@ -325,7 +407,8 @@ class ResearchPaperCreateView(TeacherRequiredMixin, generic.CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields['awards'].queryset = Award.objects.all().order_by('name')
+        # ✅ OPTIMIZED: Only load necessary fields
+        form.fields['awards'].queryset = Award.objects.only('id', 'name').order_by('name')
         return form
 
     def get_context_data(self, **kwargs):
@@ -346,7 +429,8 @@ class ResearchPaperUpdateView(TeacherRequiredMixin, generic.UpdateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields['awards'].queryset = Award.objects.all().order_by('name')
+        # ✅ OPTIMIZED: Only load necessary fields
+        form.fields['awards'].queryset = Award.objects.only('id', 'name').order_by('name')
         return form
 
     def get_context_data(self, **kwargs):
@@ -377,18 +461,20 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     def get_queryset(self):
         from django.db import models
         
-        qs = Keyword.objects.all()
+        # ✅ CRITICAL FIX: Use annotation instead of loading all papers
+        qs = Keyword.objects.annotate(
+            usage_count=models.Count('researchpaper')
+        )
         
         # Search query
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(word__icontains=q)
         
-        # Sorting (strip asterisks for proper sorting)
+        # Sorting
         sort_by = self.request.GET.get("sort_by", "alphabetical")
         
         if sort_by == "alphabetical":
-            # Strip asterisks for alphabetical sorting
             qs = qs.annotate(
                 clean_word=Replace('word', Value('*'), Value(''))
             ).order_by("clean_word")
@@ -397,9 +483,9 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
                 clean_word=Replace('word', Value('*'), Value(''))
             ).order_by("-clean_word")
         elif sort_by == "most_used":
-            qs = qs.annotate(usage=models.Count('researchpaper')).order_by("-usage")
+            qs = qs.order_by("-usage_count")
         elif sort_by == "least_used":
-            qs = qs.annotate(usage=models.Count('researchpaper')).order_by("usage")
+            qs = qs.order_by("usage_count")
         else:
             qs = qs.order_by("word")
         
@@ -408,14 +494,14 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        # ✅ CRITICAL FIX: Don't load papers, just use annotated count
         keyword_data = []
         for keyword in context['keywords']:
-            papers = keyword.researchpaper_set.all()
             keyword_data.append({
                 'id': keyword.id,
                 'word': keyword.word,
-                'usage_count': papers.count(),
-                'papers': papers
+                'usage_count': keyword.usage_count,  # From annotation!
+                'papers': []  # Don't load unless specifically needed
             })
         
         context["keywords"] = keyword_data
@@ -428,7 +514,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
         if action == "add" or "add_keyword" in request.POST:
             keyword_name = request.POST.get("keyword_name", "").strip()
             
-            # Check if it's an AJAX request
             is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             
             if not keyword_name:
@@ -462,7 +547,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
             keyword_id = request.POST.get("keyword_id")
             keyword_name = request.POST.get("keyword_name", "").strip()
             
-            # Check if it's an AJAX request
             is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             
             if not keyword_name:
@@ -537,7 +621,10 @@ class MyResearchView(LoginRequiredMessageMixin, generic.ListView):
 
     def get_queryset(self):
         profile = self.request.user.userprofile
-        return ResearchPaper.objects.filter(author=profile.author_profile)
+        # ✅ OPTIMIZED: Prefetch related data
+        return ResearchPaper.objects.filter(
+            author=profile.author_profile
+        ).prefetch_related('keywords', 'awards')
 
 class ManageAuthorsView(TeacherRequiredMixin, ListView):
     model = Author
@@ -547,7 +634,8 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        # ✅ OPTIMIZED: Prefetch user data
+        qs = Author.objects.select_related('user__userprofile')
         
         # Search query
         q = self.request.GET.get("q", "").strip()
@@ -605,9 +693,9 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
         elif sort_by == "reverse_alphabetical":
             qs = qs.order_by("-last_name", "-first_name")
         elif sort_by == "latest":
-            qs = qs.order_by("-id")  # Latest added (newest first)
+            qs = qs.order_by("-id")
         elif sort_by == "oldest":
-            qs = qs.order_by("id")  # Oldest added (oldest first)
+            qs = qs.order_by("id")
 
         return qs
 
@@ -648,7 +736,6 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
             if not last_name:
                 errors.append("Last Name is required.")
             
-            # NEW: At least one batch is required, but not both
             if not g11_batch and not g12_batch:
                 errors.append("At least one batch (Grade 11 or Grade 12) is required.")
             
@@ -705,7 +792,6 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
             if not last_name:
                 errors.append("Last Name is required.")
             
-            # NEW: At least one batch is required
             if not g11_batch and not g12_batch:
                 errors.append("At least one batch (Grade 11 or Grade 12) is required.")
             
@@ -759,15 +845,19 @@ class GetAuthorsByBatchView(View):
         if not grade or not school_year:
             return JsonResponse([], safe=False)
 
+        # ✅ OPTIMIZED: Only load needed fields
         if grade == "11":
-            authors = Author.objects.filter(G11_Batch=school_year)
+            authors = Author.objects.filter(G11_Batch=school_year).only('id', 'first_name', 'last_name', 'middle_initial', 'suffix')
         elif grade == "12":
-            authors = Author.objects.filter(G12_Batch=school_year)
+            authors = Author.objects.filter(G12_Batch=school_year).only('id', 'first_name', 'last_name', 'middle_initial', 'suffix')
         else:
             return JsonResponse([], safe=False)
 
+        # ✅ OPTIMIZED: Prefetch user data
+        authors = authors.select_related('user').order_by("last_name", "first_name")
+        
         data = []
-        for author in authors.select_related('user').order_by("last_name", "first_name"):
+        for author in authors:
             data.append({
                 "id": author.id,
                 "name": author.display_name_public()
@@ -776,9 +866,10 @@ class GetAuthorsByBatchView(View):
         return JsonResponse(data, safe=False)
 
 class GetAllKeywordsView(View):
-    """NEW: Return all keywords for the keyword dropdown"""
+    """Return all keywords for the keyword dropdown"""
     def get(self, request, *args, **kwargs):
-        keywords = Keyword.objects.all().order_by("word")
+        # ✅ OPTIMIZED: Only load needed fields
+        keywords = Keyword.objects.only('id', 'word').order_by("word")
         data = []
         for keyword in keywords:
             data.append({
@@ -803,9 +894,9 @@ def get_authors_by_batch(request):
     authors = Author.objects.none()
     if grade and sy:
         if grade.endswith("11"):
-            authors = Author.objects.filter(G11_Batch=sy)
+            authors = Author.objects.filter(G11_Batch=sy).only('id', 'first_name', 'last_name')
         elif grade.endswith("12"):
-            authors = Author.objects.filter(G12_Batch=sy)
+            authors = Author.objects.filter(G12_Batch=sy).only('id', 'first_name', 'last_name')
 
     return JsonResponse(
         [{"id": a.id, "name": str(a)} for a in authors],
@@ -817,10 +908,11 @@ def fetch_authors_ajax(request):
     grade = request.GET.get("grade")
     year = request.GET.get("year")
 
+    # ✅ OPTIMIZED: Only load needed fields
     if grade == "11":
-        qs = Author.objects.filter(G11_Batch=year)
+        qs = Author.objects.filter(G11_Batch=year).only('id', 'first_name', 'last_name')
     elif grade == "12":
-        qs = Author.objects.filter(G12_Batch=year)
+        qs = Author.objects.filter(G12_Batch=year).only('id', 'first_name', 'last_name')
     else:
         qs = Author.objects.none()
 
@@ -842,7 +934,6 @@ class AddAuthorAjaxView(View):
             if not first_name or not last_name:
                 return JsonResponse({"error": "First name and last name are required."}, status=400)
             
-            # NEW: At least one batch required
             if not g11_batch and not g12_batch:
                 return JsonResponse({"error": "At least one batch (Grade 11 or Grade 12) is required."}, status=400)
             
