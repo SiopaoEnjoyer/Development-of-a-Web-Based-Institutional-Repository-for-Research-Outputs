@@ -2,24 +2,27 @@ from django.core.mail import send_mail
 from django.conf import settings
 import threading
 import logging
+import resend
 
 logger = logging.getLogger(__name__)
 
 def send_email_async(subject, message, html_message, recipient_list):
-    """Send email in background thread to avoid blocking"""
+    """Send email using Resend API"""
     def _send():
         try:
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=recipient_list,
-                html_message=html_message,
-                fail_silently=False,
-            )
-            logger.info(f"Email sent successfully to {recipient_list}")
+            resend.api_key = settings.RESEND_API_KEY
+            
+            params = {
+                "from": settings.DEFAULT_FROM_EMAIL,
+                "to": recipient_list,
+                "subject": subject,
+                "html": html_message,
+            }
+            
+            resend.Emails.send(params)
+            logger.info(f"✅ Email sent successfully to {recipient_list}")
         except Exception as e:
-            logger.error(f"Error sending email to {recipient_list}: {e}", exc_info=True)
+            logger.error(f"❌ Error sending email to {recipient_list}: {e}", exc_info=True)
     
     thread = threading.Thread(target=_send)
     thread.daemon = False
