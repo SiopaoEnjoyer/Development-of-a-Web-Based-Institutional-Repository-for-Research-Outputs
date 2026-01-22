@@ -17,6 +17,7 @@ def send_email_async(subject, message, html_message, recipient_list):
                 "to": recipient_list,
                 "subject": subject,
                 "html": html_message,
+                "reply_to": "btcsirepository@gmail.com",  # ← ADD THIS LINE - replies go to your Gmail
             }
             
             resend.Emails.send(params)
@@ -520,17 +521,17 @@ BTCSI Research Team
                         
                         <!-- Footer -->
                         <tr>
-                            <td class="footer-padding" style="background: #015726; padding: 25px 40px; text-align: center; border-radius: 0 0 20px 20px;">
-                                <p class="text-responsive" style="color: white; font-size: 14px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
-                                    Welcome to the team!<br>
+                            <td style="background: #015726; padding: 25px 40px; text-align: center; border-radius: 0 0 20px 20px;">
+                                <p style="color: white; font-size: 14px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Best regards,<br>
                                     <strong>BTCSI Research Team</strong>
                                 </p>
-                                <p class="small-text" style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
                                     Trinity Christian School<br>
                                     Villa Angela Subd., Phase 3, Bacolod City<br>
                                     © 2024-2025 All rights reserved
                                 </p>
-                                <p class="small-text" style="color: rgba(255, 255, 255, 0.7); font-size: 11px; margin: 8px 0 0 0; font-style: italic; font-family: 'Montserrat', Arial, sans-serif;">
+                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 11px; margin: 8px 0 0 0; font-style: italic; font-family: 'Montserrat', Arial, sans-serif;">
                                     This is a system-generated email. Please do not reply.
                                 </p>
                             </td>
@@ -542,7 +543,3 @@ BTCSI Research Team
     </body>
     </html>
     """
-    
-    send_email_async(subject, message, html_message, [user_email])
-    
-    return True
