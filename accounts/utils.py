@@ -1,6 +1,9 @@
 from django.core.mail import send_mail
 from django.conf import settings
 import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 def send_email_async(subject, message, html_message, recipient_list):
     """Send email in background thread to avoid blocking"""
@@ -14,11 +17,12 @@ def send_email_async(subject, message, html_message, recipient_list):
                 html_message=html_message,
                 fail_silently=False,
             )
+            logger.info(f"Email sent successfully to {recipient_list}")
         except Exception as e:
-            print(f"Error sending email: {e}")
+            logger.error(f"Error sending email to {recipient_list}: {e}", exc_info=True)
     
     thread = threading.Thread(target=_send)
-    thread.daemon = True  # Thread dies when main program exits
+    thread.daemon = False
     thread.start()
 
 def send_verification_email(user_email, verification_code, user_name=""):
