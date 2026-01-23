@@ -1,12 +1,7 @@
 from django.conf import settings
 import threading
 import logging
-import ElasticEmail
-from ElasticEmail.apis.tags import emails_api
-from ElasticEmail.model.email_message_data import EmailMessageData
-from ElasticEmail.model.body_part import BodyPart
-from ElasticEmail.model.body_content_type import BodyContentType
-from ElasticEmail.model.email_recipient import EmailRecipient
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -14,39 +9,29 @@ def send_email_async(subject, message, html_message, recipient_list):
     """Send email using Elastic Email API"""
     def _send():
         try:
-            # Configure API client
-            configuration = ElasticEmail.Configuration()
-            configuration.api_key['apikey'] = settings.ELASTIC_EMAIL_API_KEY
+            url = "https://api.elasticemail.com/v2/email/send"
             
-            # Create email message
-            email_message = EmailMessageData(
-                recipients=[EmailRecipient(email=email) for email in recipient_list],
-                content=BodyPart(
-                    from_=settings.DEFAULT_FROM_EMAIL,
-                    subject=subject,
-                    body=[
-                        BodyPart(
-                            content_type=BodyContentType("HTML"),
-                            content=html_message,
-                            charset="utf-8"
-                        ),
-                        BodyPart(
-                            content_type=BodyContentType("PlainText"),
-                            content=message,
-                            charset="utf-8"
-                        )
-                    ],
-                    reply_to="btcsirepository@gmail.com"
-                )
-            )
+            data = {
+                'apikey': settings.ELASTIC_EMAIL_API_KEY,
+                'from': settings.DEFAULT_FROM_EMAIL,
+                'to': ';'.join(recipient_list),  # Join multiple recipients with semicolon
+                'subject': subject,
+                'bodyHtml': html_message,
+                'bodyText': message,
+                'replyTo': 'btcsirepository@gmail.com'
+            }
             
-            # Send email
-            with ElasticEmail.ApiClient(configuration) as api_client:
-                api_instance = emails_api.EmailsApi(api_client)
-                api_response = api_instance.emails_post(email_message)
+            response = requests.post(url, data=data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('success'):
+                    logger.info(f"✅ Email sent successfully to {recipient_list} (TransactionID: {result.get('data', {}).get('transactionid', 'N/A')})")
+                else:
+                    logger.error(f"❌ Email API returned error: {result.get('error')}")
+            else:
+                logger.error(f"❌ Email send failed with status {response.status_code}: {response.text}")
                 
-            logger.info(f"✅ Email sent successfully to {recipient_list} (MessageID: {api_response.message_id})")
-            
         except Exception as e:
             logger.error(f"❌ Error sending email to {recipient_list}: {e}", exc_info=True)
     
@@ -54,6 +39,7 @@ def send_email_async(subject, message, html_message, recipient_list):
     thread.daemon = False
     thread.start()
 
+# Keep all your existing email functions unchanged
 def send_verification_email(user_email, verification_code, user_name=""):
     """Send verification code email with improved design"""
     subject = 'Email Verification - BTCSI Research'
