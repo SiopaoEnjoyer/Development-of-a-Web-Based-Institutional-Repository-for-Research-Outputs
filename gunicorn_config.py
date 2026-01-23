@@ -1,26 +1,26 @@
 import multiprocessing
 import os
 
-workers = 1
+workers = 1  # Keep at 1 for 512MB RAM limit
 
-max_requests = 50  # Reduced from 100 - restart more often
-max_requests_jitter = 10  # Add randomness to prevent all workers restarting at once
+# ✅ ADD THREADS - Better concurrency without doubling memory
+threads = 2  # Handle 2 requests concurrently per worker
+worker_class = 'gthread'  # Use threaded worker (changed from 'sync')
+
+max_requests = 50
+max_requests_jitter = 10
 
 # ============================================
 # Timeout settings
 # ============================================
-timeout = 120  # Keep your existing timeout
+timeout = 120
 graceful_timeout = 30
 keepalive = 5
 
 # ============================================
-# Worker configuration
+# Connection settings
 # ============================================
-# Use sync worker (most memory efficient)
-worker_class = 'sync'
-
-# Reduce connections per worker
-worker_connections = 50  # Good setting
+worker_connections = 50
 
 # Preload app = False is better for memory on single worker
 preload_app = False
@@ -28,20 +28,16 @@ preload_app = False
 # ============================================
 # Logging (reduce memory from logs)
 # ============================================
-loglevel = 'warning'  # Only log warnings and errors
-accesslog = None  # Disable access log to save memory
-errorlog = '-'  # Error log to stdout
-
-# Disable access log
-disable_access_log = True  # NEW: Completely disable access logging
+loglevel = 'warning'
+accesslog = None
+errorlog = '-'
+disable_access_log = True
 
 # ============================================
 # Memory and process limits
 # ============================================
-# Worker temporary file directory
-worker_tmp_dir = '/dev/shm'  # Use shared memory for temp files (faster, less I/O)
+worker_tmp_dir = '/dev/shm'
 
-# Limit request line and headers
 limit_request_line = 4096
 limit_request_fields = 100
 limit_request_field_size = 8190
@@ -54,6 +50,8 @@ def on_starting(server):
     print("=" * 50)
     print("Gunicorn starting - Memory Optimized Configuration")
     print(f"Workers: {workers}")
+    print(f"Threads per worker: {threads}")  # ✅ New
+    print(f"Total concurrent requests: {workers * threads}")  # ✅ New
     print(f"Max requests per worker: {max_requests}")
     print(f"Worker class: {worker_class}")
     print(f"Target: Stay under 500MB RAM")
@@ -69,7 +67,7 @@ def worker_int(worker):
 
 def post_worker_init(worker):
     """Called after a worker has been initialized."""
-    print(f"Worker {worker.pid} initialized")
+    print(f"Worker {worker.pid} initialized with {threads} threads")
 
 def pre_fork(server, worker):
     """Called just before a worker is forked."""
@@ -77,9 +75,8 @@ def pre_fork(server, worker):
 
 def post_fork(server, worker):
     """Called after a worker has been forked."""
-    # Import here to avoid issues
     import gc
-    gc.collect()  # Clean up after fork
+    gc.collect()
 
 def worker_exit(server, worker):
     """Called when a worker is exited."""
@@ -90,20 +87,16 @@ def worker_exit(server, worker):
 # ============================================
 # Additional optimizations
 # ============================================
-# Reduce backlog
-backlog = 64  # Down from default 2048
-
-# Daemon mode
+backlog = 64
 daemon = False
-
-# Process naming
 proc_name = 'django_app'
 
-# Environment variables
 raw_env = [
-    'DJANGO_SETTINGS_MODULE=G12Research.settings',  # Update with your project name
+    'DJANGO_SETTINGS_MODULE=G12Research.settings',
 ]
 
 print("\n📊 Gunicorn configured for Render Free Tier (512MB limit)")
-print("Memory will be monitored by MemoryLimiterMiddleware")
-print("Workers restart every 50-60 requests to prevent memory leaks\n")
+print("✅ Using threaded workers for better concurrency")
+print("✅ Memory will be monitored by MemoryLimiterMiddleware")
+print("✅ Workers restart every 50-60 requests to prevent memory leaks")
+print("✅ Can handle 2 concurrent requests with 1 worker + 2 threads\n")
