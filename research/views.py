@@ -96,11 +96,9 @@ class DetailView(generic.DetailView):
         paper = self.get_object()
         
         # ✅ Cache these counts in variables instead of calling multiple times
-        view_count = paper.get_unique_view_count()
         citation_count = paper.get_citation_count()
         
         context.update({
-            'view_count': view_count,
             'citation_count': citation_count,
             # ✅ Force evaluation of related objects
             'authors': list(paper.author.all()),

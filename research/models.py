@@ -236,17 +236,10 @@ class ResearchPaper(models.Model):
             else:  # HUMSS or ABM
                 return [('SURVEY', 'Survey')]
         return []
-    
-    def get_unique_view_count(self):
-        '''Get count of unique views (one per user/session)'''
-        unique_users = self.paper_views.filter(user__isnull=False).values('user').distinct().count()
-        unique_sessions = self.paper_views.filter(user__isnull=True).values('session_key').distinct().count()
-        return unique_users + unique_sessions
 
     def get_citation_count(self):
         '''Get total citation count'''
         return self.citations.count()
-
 
     def __str__(self):
         return self.title
