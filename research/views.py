@@ -15,7 +15,8 @@ from django.contrib import messages
 from django.db.models import Value
 from django.db.models.functions import Replace
 from django.views import View
-from django.utils.decorators import method_decorator, cache_page
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
