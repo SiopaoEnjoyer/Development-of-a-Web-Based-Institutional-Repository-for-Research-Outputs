@@ -847,14 +847,18 @@ class GetAuthorsByBatchView(View):
 
         # ✅ OPTIMIZED: Only load needed fields
         if grade == "11":
-            authors = Author.objects.filter(G11_Batch=school_year).only('id', 'first_name', 'last_name', 'middle_initial', 'suffix')
+            authors = Author.objects.filter(G11_Batch=school_year).only(
+                'id', 'first_name', 'last_name', 'middle_initial', 'suffix'
+            )
         elif grade == "12":
-            authors = Author.objects.filter(G12_Batch=school_year).only('id', 'first_name', 'last_name', 'middle_initial', 'suffix')
+            authors = Author.objects.filter(G12_Batch=school_year).only(
+                'id', 'first_name', 'last_name', 'middle_initial', 'suffix'
+            )
         else:
             return JsonResponse([], safe=False)
 
-        # ✅ OPTIMIZED: Prefetch user data
-        authors = authors.select_related('user').order_by("last_name", "first_name")
+        # Don't need select_related('user') since we're not using user data in the response
+        authors = authors.order_by("last_name", "first_name")
         
         data = []
         for author in authors:
