@@ -1,5 +1,7 @@
 from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden, HttpResponse
+from django.db import connection
+from django.db.utils import OperationalError
 import logging
 import psutil
 import os
@@ -227,6 +229,18 @@ class SessionCleanupMiddleware:
         self.get_response = get_response
     
     def __call__(self, request):
+        # Ensure database connection is alive before processing
+        try:
+            connection.ensure_connection()
+        except OperationalError:
+            # Connection is stale, close and reconnect
+            connection.close()
+            try:
+                connection.ensure_connection()
+            except OperationalError:
+                # If still failing, let it propagate
+                pass
+        
         response = self.get_response(request)
         
         # Clean up verification session data if user is already logged in and approved

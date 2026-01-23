@@ -6,43 +6,50 @@ import requests
 logger = logging.getLogger(__name__)
 
 def send_email_async(subject, message, html_message, recipient_list):
-    """Send email using MailerSend API"""
-    def _send():
-        try:
-            url = "https://api.mailersend.com/v1/email"
-            
-            headers = {
-                "Authorization": f"Bearer {settings.MAILERSEND_API_KEY}",
-                "Content-Type": "application/json"
+    """Send email using MailerSend API - Non-blocking version"""
+    try:
+        url = "https://api.mailersend.com/v1/email"
+        
+        headers = {
+            "Authorization": f"Bearer {settings.MAILERSEND_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "from": {
+                "email": settings.DEFAULT_FROM_EMAIL,
+                "name": "BTCSI Research"
+            },
+            "to": [{"email": email} for email in recipient_list],
+            "subject": subject,
+            "text": message,
+            "html": html_message,
+            "reply_to": {
+                "email": "btcsirepository@gmail.com"
             }
+        }
+        
+        # Fire-and-forget with short timeout
+        response = requests.post(
+            url, 
+            headers=headers, 
+            json=data,
+            timeout=5  # Fail fast if MailerSend is slow
+        )
+        
+        if response.status_code == 202:
+            logger.info(f"✅ Email queued for {recipient_list}")
+            return True
+        else:
+            logger.error(f"❌ Email failed: {response.status_code}")
+            return False
             
-            data = {
-                "from": {
-                    "email": settings.DEFAULT_FROM_EMAIL,
-                    "name": "BTCSI Research"
-                },
-                "to": [{"email": email} for email in recipient_list],
-                "subject": subject,
-                "text": message,
-                "html": html_message,
-                "reply_to": {
-                    "email": "btcsirepository@gmail.com"
-                }
-            }
-            
-            response = requests.post(url, headers=headers, json=data)
-            
-            if response.status_code == 202:
-                logger.info(f"✅ Email sent successfully to {recipient_list}")
-            else:
-                logger.error(f"❌ Email send failed: {response.status_code} - {response.text}")
-                
-        except Exception as e:
-            logger.error(f"❌ Error sending email to {recipient_list}: {e}", exc_info=True)
-    
-    thread = threading.Thread(target=_send)
-    thread.daemon = False
-    thread.start()
+    except requests.Timeout:
+        logger.error(f"⏱️ Email timeout for {recipient_list}")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Email error: {e}")
+        return False
 
 # Keep all your existing email functions unchanged
 def send_verification_email(user_email, verification_code, user_name=""):
