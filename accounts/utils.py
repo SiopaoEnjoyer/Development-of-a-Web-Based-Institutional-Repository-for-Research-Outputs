@@ -6,31 +6,36 @@ import requests
 logger = logging.getLogger(__name__)
 
 def send_email_async(subject, message, html_message, recipient_list):
-    """Send email using Elastic Email API"""
+    """Send email using MailerSend API"""
     def _send():
         try:
-            url = "https://api.elasticemail.com/v2/email/send"
+            url = "https://api.mailersend.com/v1/email"
             
-            data = {
-                'apikey': settings.ELASTIC_EMAIL_API_KEY,
-                'from': settings.DEFAULT_FROM_EMAIL,
-                'to': ';'.join(recipient_list),  # Join multiple recipients with semicolon
-                'subject': subject,
-                'bodyHtml': html_message,
-                'bodyText': message,
-                'replyTo': 'btcsirepository@gmail.com'
+            headers = {
+                "Authorization": f"Bearer {settings.MAILERSEND_API_KEY}",
+                "Content-Type": "application/json"
             }
             
-            response = requests.post(url, data=data)
+            data = {
+                "from": {
+                    "email": settings.DEFAULT_FROM_EMAIL,
+                    "name": "BTCSI Research"
+                },
+                "to": [{"email": email} for email in recipient_list],
+                "subject": subject,
+                "text": message,
+                "html": html_message,
+                "reply_to": {
+                    "email": "btcsirepository@gmail.com"
+                }
+            }
             
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('success'):
-                    logger.info(f"✅ Email sent successfully to {recipient_list} (TransactionID: {result.get('data', {}).get('transactionid', 'N/A')})")
-                else:
-                    logger.error(f"❌ Email API returned error: {result.get('error')}")
+            response = requests.post(url, headers=headers, json=data)
+            
+            if response.status_code == 202:
+                logger.info(f"✅ Email sent successfully to {recipient_list}")
             else:
-                logger.error(f"❌ Email send failed with status {response.status_code}: {response.text}")
+                logger.error(f"❌ Email send failed: {response.status_code} - {response.text}")
                 
         except Exception as e:
             logger.error(f"❌ Error sending email to {recipient_list}: {e}", exc_info=True)
