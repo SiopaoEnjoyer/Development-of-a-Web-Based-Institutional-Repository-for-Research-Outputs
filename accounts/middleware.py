@@ -6,6 +6,7 @@ import logging
 import psutil
 import os
 import gc
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -303,4 +304,119 @@ class SessionCleanupMiddleware:
             logger.debug(f"Session cleanup skipped: {e}")
             pass
         
+        return response
+    
+class DatabaseConnectionMiddleware:
+    """
+    Retry database connections on cold starts.
+    This prevents the timeout error you're seeing.
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        from django.db import connection
+        from django.db.utils import OperationalError
+        
+        max_retries = 3
+        retry_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                # Test database connection before processing request
+                connection.ensure_connection()
+                break  # Connection successful
+            except OperationalError as e:
+                if attempt < max_retries - 1:
+                    logger.warning(f"Database connection attempt {attempt + 1} failed, retrying in {retry_delay}s...")
+                    time.sleep(retry_delay)
+                    connection.close()  # Close the failed connection
+                else:
+                    # All retries failed
+                    logger.error(f"Database connection failed after {max_retries} attempts: {str(e)}")
+                    return HttpResponse(
+                        """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Database Connecting...</title>
+                            <style>
+                                body {
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    min-height: 100vh;
+                                    margin: 0;
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    color: white;
+                                }
+                                .container {
+                                    text-align: center;
+                                    padding: 40px;
+                                    background: rgba(255, 255, 255, 0.1);
+                                    border-radius: 20px;
+                                    backdrop-filter: blur(10px);
+                                    max-width: 500px;
+                                }
+                                h1 { font-size: 48px; margin: 0 0 20px 0; }
+                                p { font-size: 18px; margin: 10px 0; opacity: 0.9; }
+                                .spinner {
+                                    border: 4px solid rgba(255, 255, 255, 0.3);
+                                    border-top: 4px solid white;
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    animation: spin 1s linear infinite;
+                                    margin: 20px auto;
+                                }
+                                @keyframes spin {
+                                    0% { transform: rotate(0deg); }
+                                    100% { transform: rotate(360deg); }
+                                }
+                                .refresh-btn {
+                                    margin-top: 30px;
+                                    padding: 15px 30px;
+                                    font-size: 16px;
+                                    background: white;
+                                    color: #667eea;
+                                    border: none;
+                                    border-radius: 10px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                }
+                                .refresh-btn:hover { transform: scale(1.05); transition: 0.2s; }
+                                .small { font-size: 14px; margin-top: 20px; opacity: 0.7; }
+                            </style>
+                            <script>
+                                // Auto-refresh after 5 seconds
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 5000);
+                            </script>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <h1>🔌</h1>
+                                <h1>Database Waking Up...</h1>
+                                <div class="spinner"></div>
+                                <p>Our database is starting up from sleep mode.</p>
+                                <p><strong>Auto-refreshing in 5 seconds...</strong></p>
+                                <button class="refresh-btn" onclick="window.location.reload()">
+                                    Refresh Now
+                                </button>
+                                <p class="small">This happens on the first visit after inactivity (free tier limitation).</p>
+                            </div>
+                        </body>
+                        </html>
+                        """,
+                        status=503,
+                        content_type="text/html"
+                    )
+        
+        # Connection successful, process request normally
+        response = self.get_response(request)
         return response

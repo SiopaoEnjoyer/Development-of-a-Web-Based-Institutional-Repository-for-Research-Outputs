@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 app_name = 'research'
 
 urlpatterns = [
+    path('healthcheck/', views.healthcheck, name='healthcheck'),
     path("", TemplateView.as_view(template_name="research/home.html"), name="home"),
     path("about/", TemplateView.as_view(template_name="research/about.html"), name="about"),
     path("research/", views.IndexView.as_view(), name="index"),
