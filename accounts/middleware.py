@@ -219,41 +219,22 @@ class ApprovalCheckMiddleware:
             
             return self.get_response(request)
 
-
 class SessionCleanupMiddleware:
     """
     Cleanup temporary session data after page loads to prevent memory leaks
-    from accumulating session data across page navigations
     """
     def __init__(self, get_response):
         self.get_response = get_response
     
     def __call__(self, request):
-        # Ensure database connection with retry logic
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                connection.ensure_connection()
-                break
-            except OperationalError:
-                connection.close()
-                if attempt < max_retries - 1:
-                    import time
-                    time.sleep(0.5)  # Wait 500ms before retry
-                else:
-                    # If DB is completely down, skip session cleanup
-                    logger.error("Database unavailable, skipping session cleanup")
-                    return self.get_response(request)
-        
         response = self.get_response(request)
         
-        # Wrap session access in try-except to handle DB issues
+        # Clean up session data - pure cache, no DB needed
         try:
             # Clean up verification session data if user is already logged in and approved
             if request.user.is_authenticated and hasattr(request.user, 'userprofile'):
                 profile = request.user.userprofile
                 
-                # If user is approved and on non-verification pages, clear verification data
                 verification_paths = [
                     '/accounts/register/',
                     '/accounts/login/',
@@ -266,7 +247,6 @@ class SessionCleanupMiddleware:
                 
                 is_verification_page = any(request.path.startswith(path) for path in verification_paths)
                 
-                # Only clean up if user is approved AND not on a verification page
                 if profile.is_approved and not is_verification_page:
                     keys_to_remove = [
                         'show_verification_modal',
@@ -287,7 +267,6 @@ class SessionCleanupMiddleware:
                     if modified:
                         request.session.modified = True
             
-            # Also clean up for anonymous users who aren't on auth pages
             elif not request.user.is_authenticated:
                 auth_paths = [
                     '/accounts/register/',
@@ -299,7 +278,6 @@ class SessionCleanupMiddleware:
                 
                 is_auth_page = any(request.path.startswith(path) for path in auth_paths)
                 
-                # Clean up ALL auth-related session data if not on auth pages
                 if not is_auth_page:
                     keys_to_remove = [
                         'show_verification_modal',
@@ -320,9 +298,9 @@ class SessionCleanupMiddleware:
                     if modified:
                         request.session.modified = True
         
-        except OperationalError:
-            # If database is down during session cleanup, just skip it
-            logger.error("Database error during session cleanup, skipping")
+        except Exception as e:
+            # Silently fail if there's any issue with session cleanup
+            logger.debug(f"Session cleanup skipped: {e}")
             pass
         
         return response
