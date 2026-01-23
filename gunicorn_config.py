@@ -101,7 +101,7 @@ proc_name = 'django_app'
 
 # Environment variables
 raw_env = [
-    'DJANGO_SETTINGS_MODULE=yourproject.settings',  # Update with your project name
+    'DJANGO_SETTINGS_MODULE=G12Research.settings',  # Update with your project name
 ]
 
 print("\n📊 Gunicorn configured for Render Free Tier (512MB limit)")
