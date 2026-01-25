@@ -14,11 +14,15 @@ if (window.aboutPageCleanup) {
     };
 
     const canvas = document.getElementById('particleCanvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.error('❌ ABOUT: particleCanvas not found');
+        return;
+    }
 
     const ctx = canvas.getContext('2d');
     let particles = [];
     let isRunning = true;
+    let frameId = null;
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -45,25 +49,27 @@ if (window.aboutPageCleanup) {
         }
     }
 
-    for (let i = 0; i < 80; i++) particles.push(new Particle());
+    for (let i = 0; i < 80; i++) {
+        particles.push(new Particle());
+    }
     state.canvases.push({ canvas, ctx, particles });
 
     function animate() {
         if (!isRunning) return;
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
+        particles.forEach(p => { 
+            p.update(); 
+            p.draw(); 
+        });
         
-        let frameId = null;
-
-        function animate() {
-            if (!isRunning) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            frameId = requestAnimationFrame(animate);
-        }
+        frameId = requestAnimationFrame(animate);
+        state.animationFrames.push(frameId);
     }
+    
+    // Start the animation
     animate();
+    console.log('✅ ABOUT: Animation started');
 
     const resizeHandler = () => {
         canvas.width = window.innerWidth;
@@ -76,10 +82,17 @@ if (window.aboutPageCleanup) {
         console.log('🧹 ABOUT: Cleanup starting...');
         isRunning = false;
         
-        state.animationFrames.forEach(cancelAnimationFrame);
+        // Cancel the last animation frame
+        if (frameId) {
+            cancelAnimationFrame(frameId);
+        }
+        
+        state.animationFrames.forEach(id => cancelAnimationFrame(id));
         state.intervals.forEach(clearInterval);
         state.observers.forEach(o => o.disconnect());
-        state.handlers.forEach(({ target, type, handler }) => target.removeEventListener(type, handler));
+        state.handlers.forEach(({ target, type, handler }) => {
+            target.removeEventListener(type, handler);
+        });
         
         state.canvases.forEach(({ canvas, ctx, particles }) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -94,10 +107,17 @@ if (window.aboutPageCleanup) {
         state.handlers.length = 0;
         state.canvases.length = 0;
         particles.length = 0;
+        frameId = null;
         
         console.log('✅ ABOUT: Cleaned');
     }
 
     window.aboutPageCleanup = cleanup;
-    window.registerCleanup('about', cleanup);
+    
+    // Register cleanup if the function exists
+    if (typeof window.registerCleanup === 'function') {
+        window.registerCleanup('about', cleanup);
+    }
+    
+    console.log('✅ ABOUT: Initialization complete');
 })();

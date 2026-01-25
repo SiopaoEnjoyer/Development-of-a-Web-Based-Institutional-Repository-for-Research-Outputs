@@ -47,12 +47,10 @@ function generateAPACitation() {
   // Parse date - extract everything after "Finished on:" or "Published:"
   let dateText = '';
   if (dateElement) {
-    // Get text and remove icon elements
     const fullText = dateElement.textContent || dateElement.innerText;
-    // Remove Bootstrap icon characters and other special chars, then clean whitespace
     const cleanText = fullText
-      .replace(/[\uE000-\uF8FF\u{1F300}-\u{1F9FF}]/gu, '') // Remove icon chars
-      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/[\uE000-\uF8FF\u{1F300}-\u{1F9FF}]/gu, '')
+      .replace(/\s+/g, ' ')
       .trim();
     
     const match = cleanText.match(/(?:Finished on|Published):\s*(.+)/i);
@@ -66,13 +64,9 @@ function generateAPACitation() {
   const authorListElement = document.querySelector('.author-list');
   
   if (authorListElement) {
-    // Get text content, remove any icons
     let authorText = authorListElement.textContent.trim();
-    
-    // Remove the icon character if present (looks like a box or special char)
     authorText = authorText.replace(/^[\uE000-\uF8FF\s]+/, '');
     
-    // Split by comma - this gives us segments
     const segments = authorText.split(',').map(s => s.trim()).filter(s => s);
     
     let i = 0;
@@ -80,15 +74,12 @@ function generateAPACitation() {
       const segment = segments[i];
       
       // Pattern 1: Full name format (consented) - "Arthur B. Gaurana"
-      // Has multiple words with at least one full word (not just initials)
       const isFullName = /^[A-Z][a-z]+(\s+[A-Z]\.?)*\s+[A-Z][a-z]+/.test(segment);
       
       if (isFullName) {
-        // This is "First Middle. Last" format
         const nameParts = segment.split(/\s+/);
         const lastName = nameParts[nameParts.length - 1];
         
-        // Convert first/middle names to initials
         const firstMiddle = nameParts.slice(0, -1);
         const initials = firstMiddle.map(part => {
           if (/^[A-Z]\.?$/.test(part)) {
@@ -99,42 +90,63 @@ function generateAPACitation() {
         
         // Check for suffix in next segment
         if (i + 1 < segments.length && /^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(segments[i + 1])) {
-          authors.push(`${lastName}, ${initials}, ${segments[i + 1]}`);
+          const suffix = segments[i + 1];
+          const normalizedSuffix = suffix.endsWith('.') ? suffix : suffix + '.';
+          authors.push(`${lastName}, ${initials}, ${normalizedSuffix}`);
           i += 2;
         } else {
           authors.push(`${lastName}, ${initials}`);
           i++;
         }
       }
-      // Pattern 2: Last name followed by initials (non-consented) - "Sta. Ana" + "C. L. C."
-      // Last name can be multi-word: "Sta. Ana", "De La Cruz"
+      // Pattern 2: Last name followed by initials (non-consented)
       else if (/^[A-Z][a-z]+(\.\s*[A-Z][a-z]+)*(\s+[A-Z][a-z]+)*$/.test(segment)) {
         const lastName = segment;
         
-        // Next segment should be the initials (all together, space-separated)
         if (i + 1 < segments.length) {
           const nextSegment = segments[i + 1];
           
-          // Check if next segment is initials: "C. L. C." or "S. D. F."
-          // Pattern: letters with dots and spaces, no lowercase
-          if (/^[A-Z](\.\s*[A-Z])*\.?$/.test(nextSegment.replace(/\s+/g, ''))) {
-            // This is the initials segment
+          // Check if next segment is a suffix
+          if (/^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(nextSegment)) {
+            // This is a suffix, check if there are initials after it
+            const suffix = nextSegment;
+            const normalizedSuffix = suffix.endsWith('.') ? suffix : suffix + '.';
+            
+            if (i + 2 < segments.length && /^[A-Z](\.\s*[A-Z])*\.?$/.test(segments[i + 2].replace(/\s+/g, ''))) {
+              // Initials come after suffix
+              const initials = segments[i + 2].replace(/([A-Z])(?!\.)(?=\s|$)/g, '$1.').trim();
+              authors.push(`${lastName}, ${initials}, ${normalizedSuffix}`);
+              i += 3;
+            } else {
+              // No initials, just last name and suffix
+              authors.push(`${lastName}, ${normalizedSuffix}`);
+              i += 2;
+            }
+          }
+          // Check if next segment is initials
+          else if (/^[A-Z](\.\s*[A-Z])*\.?$/.test(nextSegment.replace(/\s+/g, ''))) {
             const initials = nextSegment.replace(/([A-Z])(?!\.)(?=\s|$)/g, '$1.').trim();
-            authors.push(`${lastName}, ${initials}`);
-            i += 2; // Skip both lastname and initials segments
+            
+            // Check if there's a suffix after initials
+            if (i + 2 < segments.length && /^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(segments[i + 2])) {
+              const suffix = segments[i + 2];
+              const normalizedSuffix = suffix.endsWith('.') ? suffix : suffix + '.';
+              authors.push(`${lastName}, ${initials}, ${normalizedSuffix}`);
+              i += 3;
+            } else {
+              authors.push(`${lastName}, ${initials}`);
+              i += 2;
+            }
           } else {
-            // No initials found, just use last name
             authors.push(lastName);
             i++;
           }
         } else {
-          // No next segment, just use last name
           authors.push(lastName);
           i++;
         }
       }
       else {
-        // Skip unrecognized patterns
         i++;
       }
     }
@@ -153,7 +165,6 @@ function generateAPACitation() {
     const otherAuthors = authors.slice(0, -1).join(', ');
     authorString = `${otherAuthors}, & ${lastAuthor}`;
   } else {
-    // For 21+ authors, list first 19, then ... then last author
     const first19 = authors.slice(0, 19).join(', ');
     const lastAuthor = authors[authors.length - 1];
     authorString = `${first19}, ... ${lastAuthor}`;
@@ -162,13 +173,11 @@ function generateAPACitation() {
   // Parse year
   let year = 'n.d.';
   if (dateText) {
-    // Try multiple date parsing approaches
     const parsedDate = new Date(dateText);
     
     if (!isNaN(parsedDate.getTime())) {
       year = parsedDate.getFullYear();
     } else {
-      // Try to extract year directly (YYYY format)
       const yearMatch = dateText.match(/\b(19|20)\d{2}\b/);
       if (yearMatch) {
         year = yearMatch[0];
@@ -176,16 +185,11 @@ function generateAPACitation() {
     }
   }
   
-  // Clean title (remove asterisks used for italics in Django)
   let cleanTitle = title.replace(/\*/g, '');
-  
-  // Convert to sentence case (first letter uppercase, rest lowercase)
   cleanTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1).toLowerCase();
   
-  // Get current page URL
   const currentUrl = window.location.href;
   
-  // Build citation
   let citation = `${authorString} (${year}). <em>${cleanTitle}</em> `;
   citation += `[Unpublished manuscript]. Bacolod Trinity Christian School, Inc. ${currentUrl}`;
   
