@@ -110,8 +110,10 @@ def invalidate_keyword_caches():
 def invalidate_author_caches():
     """Invalidate author caches"""
     cache.delete('all_author_batches')
-    # Also clear all batch-specific caches
-    cache.delete_pattern('authors_grade_*')
+    school_years = ResearchPaper.objects.values_list("school_year", flat=True).distinct()
+    for year in school_years:
+        cache.delete(f'authors_grade_11_year_{year}')
+        cache.delete(f'authors_grade_12_year_{year}')
 
 # =========================
 # MIXINS
