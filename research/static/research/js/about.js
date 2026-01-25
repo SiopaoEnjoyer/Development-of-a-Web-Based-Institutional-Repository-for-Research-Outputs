@@ -1,3 +1,4 @@
+// About Page - Complete Implementation with Cleanup
 if (window.aboutPageCleanup) {
     window.aboutPageCleanup();
 }
@@ -10,9 +11,11 @@ if (window.aboutPageCleanup) {
         observers: [],
         handlers: [],
         animationFrames: [],
-        canvases: []
+        canvases: [],
+        statsAnimated: false
     };
 
+    // ========== PARTICLE ANIMATION ==========
     const canvas = document.getElementById('particleCanvas');
     if (!canvas) {
         console.error('❌ ABOUT: particleCanvas not found');
@@ -64,12 +67,10 @@ if (window.aboutPageCleanup) {
         });
         
         frameId = requestAnimationFrame(animate);
-        state.animationFrames.push(frameId);
     }
     
-    // Start the animation
     animate();
-    console.log('✅ ABOUT: Animation started');
+    console.log('✅ ABOUT: Particle animation started');
 
     const resizeHandler = () => {
         canvas.width = window.innerWidth;
@@ -78,11 +79,113 @@ if (window.aboutPageCleanup) {
     window.addEventListener('resize', resizeHandler);
     state.handlers.push({ target: window, type: 'resize', handler: resizeHandler });
 
+    // ========== SECTION ANIMATIONS (INTERSECTION OBSERVER) ==========
+    const sections = document.querySelectorAll('.content-section');
+    
+    if (sections.length > 0) {
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+
+        sections.forEach(section => {
+            sectionObserver.observe(section);
+        });
+        
+        state.observers.push(sectionObserver);
+        console.log(`✅ ABOUT: Observing ${sections.length} sections`);
+    }
+
+    // ========== STATS COUNTER ANIMATION ==========
+    const statsSection = document.getElementById('stats');
+    
+    if (statsSection) {
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !state.statsAnimated) {
+                    state.statsAnimated = true;
+                    animateStats();
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+
+        statsObserver.observe(statsSection);
+        state.observers.push(statsObserver);
+        console.log('✅ ABOUT: Stats observer initialized');
+    }
+
+    function animateStats() {
+        const statValues = document.querySelectorAll('.stat-value');
+        
+        statValues.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-target'));
+            const duration = 2000; // 2 seconds
+            const increment = target / (duration / 16); // 60fps
+            let current = 0;
+
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    stat.textContent = Math.floor(current);
+                    const intervalId = requestAnimationFrame(updateCounter);
+                    state.animationFrames.push(intervalId);
+                } else {
+                    stat.textContent = target;
+                }
+            };
+
+            updateCounter();
+        });
+        
+        console.log('✅ ABOUT: Stats animation started');
+    }
+
+    // ========== HERO GLOW EFFECT ==========
+    const heroGlow = document.getElementById('heroGlow');
+    const hero = document.querySelector('.about-hero');
+    
+    if (heroGlow && hero) {
+        const mouseMoveHandler = (e) => {
+            const rect = hero.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            heroGlow.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15) 0%, transparent 50%)`;
+        };
+        
+        hero.addEventListener('mousemove', mouseMoveHandler);
+        state.handlers.push({ target: hero, type: 'mousemove', handler: mouseMoveHandler });
+        console.log('✅ ABOUT: Hero glow effect initialized');
+    }
+
+    // ========== SCROLL FADE EFFECT ==========
+    const scrollHandler = () => {
+        if (!hero) return;
+        
+        const scrolled = window.scrollY;
+        const heroHeight = hero.offsetHeight;
+        const opacity = Math.max(0, 1 - (scrolled / heroHeight) * 1.5);
+        
+        hero.style.opacity = opacity;
+    };
+    
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    state.handlers.push({ target: window, type: 'scroll', handler: scrollHandler });
+    console.log('✅ ABOUT: Scroll fade effect initialized');
+
+    // ========== CLEANUP FUNCTION ==========
     function cleanup() {
         console.log('🧹 ABOUT: Cleanup starting...');
         isRunning = false;
         
-        // Cancel the last animation frame
         if (frameId) {
             cancelAnimationFrame(frameId);
         }
@@ -101,6 +204,11 @@ if (window.aboutPageCleanup) {
             particles.length = 0;
         });
         
+        // Reset hero opacity
+        if (hero) {
+            hero.style.opacity = '';
+        }
+        
         state.animationFrames.length = 0;
         state.intervals.length = 0;
         state.observers.length = 0;
@@ -108,16 +216,16 @@ if (window.aboutPageCleanup) {
         state.canvases.length = 0;
         particles.length = 0;
         frameId = null;
+        state.statsAnimated = false;
         
         console.log('✅ ABOUT: Cleaned');
     }
 
     window.aboutPageCleanup = cleanup;
     
-    // Register cleanup if the function exists
     if (typeof window.registerCleanup === 'function') {
         window.registerCleanup('about', cleanup);
     }
     
-    console.log('✅ ABOUT: Initialization complete');
+    console.log('✅ ABOUT: Complete initialization finished');
 })();

@@ -34,8 +34,9 @@ function initializeBackButton() {
   }
 }
 
+
 /**
- * Generate APA 7th Edition Citation
+ * Generate APA 7th Edition Citation with proper suffix handling
  */
 function generateAPACitation() {
   // Get paper data from the page
@@ -44,7 +45,7 @@ function generateAPACitation() {
   
   if (!title) return '';
   
-  // Parse date - extract everything after "Finished on:" or "Published:"
+  // Parse date
   let dateText = '';
   if (dateElement) {
     const fullText = dateElement.textContent || dateElement.innerText;
@@ -59,24 +60,27 @@ function generateAPACitation() {
     }
   }
   
-  // Parse authors
+  // Parse authors with improved suffix handling
   let authors = [];
   const authorListElement = document.querySelector('.author-list');
   
   if (authorListElement) {
     let authorText = authorListElement.textContent.trim();
+    // Remove icon characters
     authorText = authorText.replace(/^[\uE000-\uF8FF\s]+/, '');
     
+    // Split by comma and process
     const segments = authorText.split(',').map(s => s.trim()).filter(s => s);
     
     let i = 0;
     while (i < segments.length) {
       const segment = segments[i];
       
-      // Pattern 1: Full name format (consented) - "Arthur B. Gaurana"
+      // Check if this is a full name format (consented) - e.g., "Arthur B. Gaurana"
       const isFullName = /^[A-Z][a-z]+(\s+[A-Z]\.?)*\s+[A-Z][a-z]+/.test(segment);
       
       if (isFullName) {
+        // Full name format: "First Middle Last" or "First M. Last"
         const nameParts = segment.split(/\s+/);
         const lastName = nameParts[nameParts.length - 1];
         
@@ -99,55 +103,79 @@ function generateAPACitation() {
           i++;
         }
       }
-      // Pattern 2: Last name followed by initials (non-consented)
-      else if (/^[A-Z][a-z]+(\.\s*[A-Z][a-z]+)*(\s+[A-Z][a-z]+)*$/.test(segment)) {
+      // Non-consented format: "LastName, Initials" or "LastName, Initials Suffix"
+      else {
         const lastName = segment;
+        let initials = '';
+        let suffix = '';
         
+        // Look ahead for initials and suffix
         if (i + 1 < segments.length) {
           const nextSegment = segments[i + 1];
           
-          // Check if next segment is a suffix
-          if (/^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(nextSegment)) {
-            // This is a suffix, check if there are initials after it
-            const suffix = nextSegment;
-            const normalizedSuffix = suffix.endsWith('.') ? suffix : suffix + '.';
+          // Check if next segment is initials (e.g., "N. S." or "N. S. II")
+          const initialsMatch = nextSegment.match(/^([A-Z]\.\s*)+/);
+          
+          if (initialsMatch) {
+            // Extract initials
+            const initialsText = initialsMatch[0].trim();
+            initials = initialsText.replace(/([A-Z])(?!\.)(?=\s|$)/g, '$1.').trim();
             
-            if (i + 2 < segments.length && /^[A-Z](\.\s*[A-Z])*\.?$/.test(segments[i + 2].replace(/\s+/g, ''))) {
-              // Initials come after suffix
-              const initials = segments[i + 2].replace(/([A-Z])(?!\.)(?=\s|$)/g, '$1.').trim();
-              authors.push(`${lastName}, ${initials}, ${normalizedSuffix}`);
-              i += 3;
-            } else {
-              // No initials, just last name and suffix
-              authors.push(`${lastName}, ${normalizedSuffix}`);
+            // Check if there's a suffix in the same segment after the initials
+            const remainingText = nextSegment.substring(initialsMatch[0].length).trim();
+            if (remainingText && /^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(remainingText)) {
+              suffix = remainingText.endsWith('.') && !remainingText.match(/^I+$/) ? remainingText : remainingText + '.';
+              if (suffix === 'I.' || suffix === 'II.' || suffix === 'III.') {
+                suffix = suffix.replace(/\.$/, ''); // Remove period from Roman numerals
+              }
+              authors.push(`${lastName}, ${initials}, ${suffix}`);
               i += 2;
             }
-          }
-          // Check if next segment is initials
-          else if (/^[A-Z](\.\s*[A-Z])*\.?$/.test(nextSegment.replace(/\s+/g, ''))) {
-            const initials = nextSegment.replace(/([A-Z])(?!\.)(?=\s|$)/g, '$1.').trim();
-            
-            // Check if there's a suffix after initials
-            if (i + 2 < segments.length && /^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(segments[i + 2])) {
-              const suffix = segments[i + 2];
-              const normalizedSuffix = suffix.endsWith('.') ? suffix : suffix + '.';
-              authors.push(`${lastName}, ${initials}, ${normalizedSuffix}`);
+            // Check if next segment (i+2) is a standalone suffix
+            else if (i + 2 < segments.length && /^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(segments[i + 2])) {
+              suffix = segments[i + 2];
+              const normalizedSuffix = suffix.endsWith('.') && !suffix.match(/^I+$/) ? suffix : suffix + '.';
+              if (normalizedSuffix === 'I.' || normalizedSuffix === 'II.' || normalizedSuffix === 'III.') {
+                suffix = normalizedSuffix.replace(/\.$/, '');
+              } else {
+                suffix = normalizedSuffix;
+              }
+              authors.push(`${lastName}, ${initials}, ${suffix}`);
               i += 3;
             } else {
               authors.push(`${lastName}, ${initials}`);
               i += 2;
             }
+          }
+          // Check if next segment is just a suffix
+          else if (/^(Jr\.?|Sr\.?|I{1,3}|IV|V)$/i.test(nextSegment)) {
+            suffix = nextSegment;
+            const normalizedSuffix = suffix.endsWith('.') && !suffix.match(/^I+$/) ? suffix : suffix + '.';
+            if (normalizedSuffix === 'I.' || normalizedSuffix === 'II.' || normalizedSuffix === 'III.') {
+              suffix = normalizedSuffix.replace(/\.$/, '');
+            } else {
+              suffix = normalizedSuffix;
+            }
+            
+            // Check if there are initials after the suffix
+            if (i + 2 < segments.length && /^[A-Z](\.\s*[A-Z])*\.?$/.test(segments[i + 2].replace(/\s+/g, ''))) {
+              initials = segments[i + 2].replace(/([A-Z])(?!\.)(?=\s|$)/g, '$1.').trim();
+              authors.push(`${lastName}, ${initials}, ${suffix}`);
+              i += 3;
+            } else {
+              authors.push(`${lastName}, ${suffix}`);
+              i += 2;
+            }
           } else {
+            // Just last name
             authors.push(lastName);
             i++;
           }
         } else {
+          // Just last name, no more segments
           authors.push(lastName);
           i++;
         }
-      }
-      else {
-        i++;
       }
     }
   }
@@ -185,11 +213,13 @@ function generateAPACitation() {
     }
   }
   
+  // Clean and format title
   let cleanTitle = title.replace(/\*/g, '');
   cleanTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1).toLowerCase();
   
   const currentUrl = window.location.href;
   
+  // Build citation
   let citation = `${authorString} (${year}). <em>${cleanTitle}</em> `;
   citation += `[Unpublished manuscript]. Bacolod Trinity Christian School, Inc. ${currentUrl}`;
   
