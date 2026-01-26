@@ -1,5 +1,18 @@
 """
 URL configuration for G12Research project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -16,6 +29,12 @@ class StaticViewSitemap(Sitemap):
     priority = 0.8
     changefreq = 'weekly'
     protocol = 'https'
+    
+    def get_urls(self, page=1, site=None, protocol=None):
+        from django.contrib.sites.models import Site
+        if site is None:
+            site = Site(domain='btcsirepository.onrender.com', name='BTCSI Repository')
+        return super().get_urls(page=page, site=site, protocol=protocol or self.protocol)
     
     def items(self):
         return ['home', 'about', 'privacy-policy', 'terms', 'research', 'search']
@@ -35,6 +54,12 @@ class ResearchPaperSitemap(Sitemap):
     changefreq = "monthly"
     priority = 0.9
     protocol = 'https'
+    
+    def get_urls(self, page=1, site=None, protocol=None):
+        from django.contrib.sites.models import Site
+        if site is None:
+            site = Site(domain='btcsirepository.onrender.com', name='BTCSI Repository')
+        return super().get_urls(page=page, site=site, protocol=protocol or self.protocol)
 
     def items(self):
         return ResearchPaper.objects.all().order_by('-publication_date')
