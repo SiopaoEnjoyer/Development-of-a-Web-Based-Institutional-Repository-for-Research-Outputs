@@ -56,8 +56,8 @@ class SupabaseStorage(Storage):
             return self._local_storage.url(name)
         
         from django.urls import reverse
-        # Return URL to Django view that will serve the file
-        return reverse('research:serve_pdf', kwargs={'path': name})
+        # ✅ FIXED: Removed 'research:' namespace since it's in main urls.py
+        return reverse('serve_pdf', kwargs={'path': name})
     
     def delete(self, name):
         """Delete file from Supabase Storage"""
