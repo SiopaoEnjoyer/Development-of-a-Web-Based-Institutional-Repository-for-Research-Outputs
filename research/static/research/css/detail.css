@@ -70,7 +70,7 @@
 
 .detail-header h2 {
   font-weight: 800;
-  font-size: 1.6rem;
+  font-size: 2.5rem;
   margin-bottom: 1.5rem;
   line-height: 1.2;
   position: relative;
@@ -105,16 +105,6 @@
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(10px, -10px) scale(1.05); }
   66% { transform: translate(-10px, 10px) scale(0.95); }
-}
-
-.detail-header h2 {
-  font-weight: 800;
-  font-size: 2.5rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Content card - Enhanced with better shadows and borders */
@@ -161,6 +151,8 @@
   pointer-events: none;
   opacity: 1;
 }
+
+/* Removed - using inline styles instead */
 
 /* Info pills - Enhanced */
 .info-pill {
@@ -314,7 +306,7 @@
   color: white;
   border: none;
   padding: 8px 20px;
-  border-radius: 8px;
+  border-radius: 20px; /* More rounded */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;

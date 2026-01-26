@@ -13,7 +13,7 @@
     color: white;
     border: none;
     padding: 8px 20px;
-    border-radius: 8px;
+    border-radius: 20px; /* More rounded */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -107,32 +107,6 @@
   margin: 0;
 }
 
-.citation-modal .modal-content {
-  border-radius: 16px;
-  border: none;
-  overflow: hidden;
-}
-
-.citation-modal .modal-header {
-  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
-  color: white;
-  border: none;
-  padding: 20px 24px;
-}
-
-.citation-modal .modal-title {
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.25rem;
-}
-
-.citation-modal .btn-close {
-  filter: brightness(0) invert(1);
-  opacity: 1;
-}
-
 .citation-modal .modal-body {
   padding: 30px;
 }
@@ -147,10 +121,10 @@
   line-height: 1.8;
   color: #1e293b;
   font-size: 1rem;
-  text-align: left; /* Left align the citation text */
-  padding-left: 20px; /* Base padding */
-  text-indent: -0.5in; /* Hanging indent */
-  padding-left: calc(20px + 0.5in); /* Adjust left padding to accommodate hanging indent */
+  text-align: left;
+  padding-left: 20px;
+  text-indent: -0.5in;
+  padding-left: calc(20px + 0.5in);
 }
 
 .citation-modal .citation-actions {
@@ -195,6 +169,40 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(1, 87, 38, 0.4);
 }
+
+/* Responsive button container */
+.button-container {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .button-container {
+    width: 100%;
+  }
+  
+  .cite-button,
+  .pdf-button {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+    font-size: 0.9rem;
+    padding: 10px 16px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .button-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .cite-button,
+  .pdf-button {
+    width: 100%;
+  }
+}
 </style>
 {% endblock %}
 
@@ -228,9 +236,9 @@
       
       <!-- Research Information -->
 <div class="detail-section">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 3px solid #015726; padding-bottom: 0.75rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 3px solid #015726; padding-bottom: 0.75rem; flex-wrap: wrap; gap: 1rem;">
     <h4 style="margin: 0; border: none; padding: 0;"><i class="bi bi-info-circle"></i>Research Information</h4>
-    <div style="display: flex; gap: 12px;">
+    <div class="button-container">
       <button class="cite-button" data-bs-toggle="modal" data-bs-target="#citationModal" style="padding: 8px 20px;">
         <i class="bi bi-quote"></i>
         Cite This Work
@@ -295,16 +303,19 @@
           </div>
         </div>
         
+        <!-- Awards (if any) -->
+        {% if object.awards.all %}
         <div class="info-row">
-          <span class="info-label"><i class="bi bi-tags"></i> Keywords:</span>
+          <span class="info-label"><i class="bi bi-trophy"></i> Awards:</span>
           <div>
-            {% for keyword in object.keywords.all %}
-              <span class="keyword-badge">{{ keyword.name|format_italics }}</span>
-            {% empty %}
-              <span class="text-muted">No keywords</span>
+            {% for award in object.awards.all %}
+              <span class="info-pill award">
+                <i class="bi bi-award-fill"></i>{{ award.name }}
+              </span>
             {% endfor %}
           </div>
         </div>
+        {% endif %}
       </div>
 
       <!-- Abstract -->
@@ -313,19 +324,17 @@
         <p>{{ object.abstract }}</p>
       </div>
 
-      <!-- Awards (if any) -->
-      {% if object.awards.all %}
+      <!-- Keywords - NOW AFTER ABSTRACT -->
       <div class="detail-section">
-        <h4><i class="bi bi-trophy"></i>Awards & Recognition</h4>
-        <div class="info-row">
-          {% for award in object.awards.all %}
-            <span class="info-pill award">
-              <i class="bi bi-award-fill"></i>{{ award.name }}
-            </span>
+        <h4><i class="bi bi-tags"></i>Keywords</h4>
+        <div>
+          {% for keyword in object.keywords.all %}
+            <span class="keyword-badge">{{ keyword.name|format_italics }}</span>
+          {% empty %}
+            <span class="text-muted">No keywords</span>
           {% endfor %}
         </div>
       </div>
-      {% endif %}
 
       <div class="mt-4">
         <a href="#" class="back-button" id="backButton">
