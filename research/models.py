@@ -237,6 +237,11 @@ class ResearchPaper(models.Model):
                 return [('SURVEY', 'Survey')]
         return []
 
+    def get_absolute_url(self):
+        """Return the URL for this research paper"""
+        from django.urls import reverse
+        return reverse('research:paper_detail', kwargs={'pk': self.pk})
+
     def get_citation_count(self):
         '''Get total citation count'''
         return self.citations.count()
