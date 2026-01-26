@@ -61,6 +61,7 @@ urlpatterns = [
     path('robots.txt', RedirectView.as_view(url='/static/robots.txt', permanent=True)),
     path('media/<path:path>', serve_pdf, name='serve_pdf'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('google76065d2dc7995232.html', RedirectView.as_view(url='/static/google76065d2dc7995232.html', permanent=True)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
