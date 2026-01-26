@@ -18,6 +18,45 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, Http404
+from django.contrib.auth.decorators import login_required
+from storage import SupabaseStorage
+import mimetypes
+
+@login_required
+def serve_pdf(request, path):
+    """Serve PDF files from Supabase storage with authentication"""
+    try:
+        storage = SupabaseStorage()
+        
+        # Check if path is a research paper PDF
+        if path.startswith('research_papers/'):
+            # Any authenticated user can view research papers
+            file_content = storage.get_file_content(path)
+            
+        elif path.startswith('parental_consents/'):
+            # Only the user can view their own consent file (or staff)
+            path_parts = path.split('/')
+            if len(path_parts) >= 2:
+                file_user_id = path_parts[1]
+                if str(request.user.id) != file_user_id and not request.user.is_staff:
+                    raise Http404("You don't have permission to view this file")
+            
+            file_content = storage.get_file_content(path)
+        else:
+            raise Http404("File not found")
+        
+        # Determine content type
+        content_type, _ = mimetypes.guess_type(path)
+        if not content_type:
+            content_type = 'application/pdf'
+        
+        response = HttpResponse(file_content, content_type=content_type)
+        response['Content-Disposition'] = f'inline; filename="{path.split("/")[-1]}"'
+        return response
+        
+    except Exception as e:
+        raise Http404(f"File not found: {str(e)}")
 
 @csrf_exempt
 @cache_page(60 * 5)  # Cache for 5 minutes

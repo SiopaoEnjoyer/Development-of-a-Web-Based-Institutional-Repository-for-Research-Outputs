@@ -30,6 +30,4 @@ urlpatterns = [
     path("ajax/add-keyword/", views.AddKeywordAjaxView.as_view(), name="add_keyword_ajax"),
     path("ajax/get-all-keywords/", views.GetAllKeywordsView.as_view(), name="get_all_keywords"), 
     path("ajax/add-award/", views.AddAwardAjaxView.as_view(), name="add_award_ajax"),
-
-    path('test-404/', TemplateView.as_view(template_name='404.html'), name='test_404'),
 ]

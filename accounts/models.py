@@ -7,6 +7,12 @@ from django.utils import timezone
 import random
 from storage import SupabaseStorage
 
+# Add this helper function at the top, before the UserManager class
+def user_consent_file_path(instance, filename):
+    """Generate upload path for parental consent files: parental_consents/{user_id}/{filename}"""
+    return f'parental_consents/{instance.user.id}/{filename}'
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -88,14 +94,16 @@ class UserProfile(models.Model):
         default='not_consented'
     )
     consent_date = models.DateTimeField(null=True, blank=True)
+    
+    # CHANGED: Use upload_to function that includes user ID in path
     parental_consent_file = models.FileField(
-    upload_to='parental_consents/',
-    null=True,
-    blank=True,
-    validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
-    help_text='PDF file, max 10MB',
-    storage=SupabaseStorage
-)
+        upload_to=user_consent_file_path,  # Changed from 'parental_consents/'
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        help_text='PDF file, max 10MB',
+        storage=SupabaseStorage
+    )
 
     email_verification_code = models.CharField(max_length=6, null=True, blank=True)
     email_verification_code_created = models.DateTimeField(null=True, blank=True)

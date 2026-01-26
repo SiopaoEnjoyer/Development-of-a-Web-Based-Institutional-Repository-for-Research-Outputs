@@ -1,3 +1,4 @@
+import profile
 from django.shortcuts import redirect, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView, ListView, FormView
@@ -7,7 +8,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.core.files.storage import default_storage
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from .models import User, UserProfile
 from research.models import Author
 from .forms import RegistrationForm, LoginForm, EmailVerificationForm
@@ -18,6 +19,44 @@ from datetime import timedelta
 from django.utils.timezone import now
 from django.http import HttpResponse
 from django.db.models import Count, Q, Exists, OuterRef, Subquery, Prefetch
+from storage import SupabaseStorage
+import mimetypes
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def serve_pdf(request, path):
+    """Serve PDF files from Supabase storage with authentication"""
+    try:
+        storage = SupabaseStorage()
+        
+        # Check if path is a research paper PDF
+        if path.startswith('research_papers/'):
+            # Any authenticated user can view research papers
+            file_content = storage.get_file_content(path)
+            
+        elif path.startswith('parental_consents/'):
+            # Only the user can view their own consent file (or staff)
+            path_parts = path.split('/')
+            if len(path_parts) >= 2:
+                file_user_id = path_parts[1]
+                if str(request.user.id) != file_user_id and not request.user.is_staff:
+                    raise Http404("You don't have permission to view this file")
+            
+            file_content = storage.get_file_content(path)
+        else:
+            raise Http404("File not found")
+        
+        # Determine content type
+        content_type, _ = mimetypes.guess_type(path)
+        if not content_type:
+            content_type = 'application/pdf'
+        
+        response = HttpResponse(file_content, content_type=content_type)
+        response['Content-Disposition'] = f'inline; filename="{path.split("/")[-1]}"'
+        return response
+        
+    except Exception as e:
+        raise Http404(f"File not found: {str(e)}")
 
 
 class RoleRequiredMixin(UserPassesTestMixin):
@@ -605,7 +644,7 @@ class UpdateConsentView(LoginRequiredMixin, View):
                         messages.error(request, "Only PDF files are allowed.")
                         return redirect("accounts:student_dashboard")
                     if profile.parental_consent_file:
-                        default_storage.delete(profile.parental_consent_file.path)
+                        profile.parental_consent_file.delete(save=False)
                     profile.parental_consent_file = consent_file
                     profile.consent_status = 'pending_approval'
                     profile.consent_date = None
@@ -657,7 +696,7 @@ class DenyConsentView(LoginRequiredMixin, UserPassesTestMixin, View):
         profile = get_object_or_404(UserProfile, id=id)
         if profile.consent_status == 'pending_approval':
             if profile.parental_consent_file:
-                default_storage.delete(profile.parental_consent_file.path)
+                profile.parental_consent_file.delete(save=False)
                 profile.parental_consent_file = None
             profile.consent_status = 'not_consented'
             profile.consent_date = None
