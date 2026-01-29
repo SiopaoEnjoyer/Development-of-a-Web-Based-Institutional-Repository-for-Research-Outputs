@@ -590,6 +590,10 @@ class ResearchPaperDeleteView(TeacherRequiredMixin, generic.DeleteView):
         invalidate_paper_caches()
         return super().delete(request, *args, **kwargs)
 
+    def get(self, request, pk):
+        # Redirect GET requests to show confirmation in the dashboard instead
+        messages.warning(request, "Use the delete button to confirm deletion.")
+        return redirect('research:admin_dashboard')
 
 class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     template_name = "research/keyword_form.html"
