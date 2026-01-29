@@ -543,6 +543,18 @@ class ResearchPaperCreateView(TeacherRequiredMixin, generic.CreateView):
         # ✅ Invalidate cache when new paper is created
         invalidate_paper_caches()
         return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"=== PAPER UPLOAD FAILED ===")
+        logger.error(f"Form errors: {form.errors}")
+        logger.error(f"Form data: {form.data}")
+        logger.error(f"Selected authors: {form.data.getlist('author')}")
+        
+        # Show error to user
+        messages.error(self.request, f"Upload failed. Check the form for errors.")
+        return super().form_invalid(form)
 
 class ResearchPaperUpdateView(TeacherRequiredMixin, generic.UpdateView):
     model = ResearchPaper

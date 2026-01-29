@@ -34,9 +34,27 @@ function initializeBackButton() {
   }
 }
 
+/**
+ * Sort authors alphabetically by last name for citation
+ * NEW FUNCTION - Sorts parsed authors before formatting
+ */
+function sortAuthorsAlphabetically(authors) {
+  return authors.sort((a, b) => {
+    // Extract last name (first part before comma in APA format)
+    const lastNameA = a.split(',')[0].trim().toUpperCase();
+    const lastNameB = b.split(',')[0].trim().toUpperCase();
+    
+    if (lastNameA < lastNameB) return -1;
+    if (lastNameA > lastNameB) return 1;
+    
+    // If last names are equal, sort by first name/initials
+    return a.localeCompare(b);
+  });
+}
 
 /**
  * Generate APA 7th Edition Citation with proper suffix handling
+ * UPDATED: Now sorts authors alphabetically
  */
 function generateAPACitation() {
   // Get paper data from the page
@@ -179,6 +197,11 @@ function generateAPACitation() {
       }
     }
   }
+  
+  // ====================================
+  // IMPORTANT: Sort authors alphabetically
+  // ====================================
+  authors = sortAuthorsAlphabetically(authors);
   
   // Format authors according to APA 7th
   let authorString = '';

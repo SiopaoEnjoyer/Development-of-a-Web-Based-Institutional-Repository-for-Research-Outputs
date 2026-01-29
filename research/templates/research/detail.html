@@ -7,13 +7,13 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'research/css/detail.css' %}">
 <style>
-  /* Citation Modal Styles */
+  /* Citation Modal Styles - RESPONSIVE */
   .cite-button {
     background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
     color: white;
     border: none;
     padding: 8px 20px;
-    border-radius: 20px; /* More rounded */
+    border-radius: 20px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -66,9 +66,29 @@
     box-shadow: 0 2px 4px rgba(1, 87, 38, 0.3);
   }
   
-/* Citation Modal Styles */
+/* Citation Modal Styles - FULLY RESPONSIVE */
 .citation-modal .modal-dialog {
-  margin-top: 5vh;
+  margin: 1rem;
+  max-width: calc(100% - 2rem);
+}
+
+@media (min-width: 576px) {
+  .citation-modal .modal-dialog {
+    max-width: 540px;
+    margin: 1.75rem auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .citation-modal .modal-dialog {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .citation-modal .modal-dialog {
+    max-width: 800px;
+  }
 }
 
 .citation-modal .modal-content {
@@ -82,8 +102,14 @@
   background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
   color: white;
   border: none;
-  padding: 24px 30px;
+  padding: 20px;
   border-radius: 16px 16px 0 0;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .modal-header {
+    padding: 24px 30px;
+  }
 }
 
 .citation-modal .modal-title {
@@ -91,13 +117,27 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   font-family: 'Montserrat', sans-serif;
   margin: 0;
+  word-break: break-word;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .modal-title {
+    font-size: 1.35rem;
+  }
 }
 
 .citation-modal .modal-title i {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .modal-title i {
+    font-size: 1.5rem;
+  }
 }
 
 .citation-modal .btn-close {
@@ -105,32 +145,67 @@
   opacity: 1;
   padding: 0.5rem;
   margin: 0;
+  flex-shrink: 0;
 }
 
 .citation-modal .modal-body {
-  padding: 30px;
+  padding: 20px;
+  overflow-x: hidden;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .modal-body {
+    padding: 30px;
+  }
 }
 
 .citation-modal .citation-box {
   background: #f8fafc;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   margin: 0;
   font-family: 'Georgia', serif;
   line-height: 1.8;
   color: #1e293b;
-  font-size: 1rem;
+  font-size: 0.9rem;
   text-align: left;
-  padding-left: 20px;
-  text-indent: -0.5in;
-  padding-left: calc(20px + 0.5in);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  /* Remove hanging indent on mobile */
+  text-indent: 0;
+  padding-left: 16px;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .citation-box {
+    padding: 20px;
+    font-size: 1rem;
+    /* Add hanging indent on larger screens */
+    text-indent: -0.5in;
+    padding-left: calc(20px + 0.5in);
+  }
+}
+
+/* Make sure long URLs and text break properly */
+.citation-modal .citation-box em {
+  word-break: break-word;
 }
 
 .citation-modal .citation-actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 20px;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .citation-actions {
+    flex-direction: row;
+    margin-top: 24px;
+  }
 }
 
 .citation-modal .citation-btn {
@@ -146,6 +221,15 @@
   justify-content: center;
   gap: 8px;
   font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .citation-modal .citation-btn {
+    font-size: 1rem;
+    width: auto;
+  }
 }
 
 .citation-modal .citation-btn-copy {
@@ -217,7 +301,7 @@
     
     <div class="author-list">
       <i class="bi bi-people-fill"></i>
-      {% for author in object.author.all %}
+      {% for author in object.get_authors_alphabetically %}
         {{ author.display_name_public }}{% if not forloop.last %}, {% endif %}
       {% empty %}
         <span class="text-muted">No authors listed</span>

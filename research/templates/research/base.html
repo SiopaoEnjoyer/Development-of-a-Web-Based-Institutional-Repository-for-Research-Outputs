@@ -34,37 +34,26 @@
     <link rel="stylesheet" href="{% static 'research/css/papers.css' %}">
     {% block extra_css %}{% endblock extra_css %}
     <script>
-// Global cleanup registry - runs BEFORE any page scripts load
 (function() {
     window.__cleanupRegistry = window.__cleanupRegistry || [];
     
     window.registerCleanup = function(name, cleanupFn) {
-        console.log(`📝 Registered cleanup: ${name}`);
         window.__cleanupRegistry.push({ name, cleanupFn });
     };
     
     window.cleanupAll = function() {
-        console.log(`🧹 Running ${window.__cleanupRegistry.length} cleanup functions...`);
-        let cleaned = 0;
-        
         window.__cleanupRegistry.forEach(({ name, cleanupFn }) => {
             try {
-                console.log(`  → Cleaning: ${name}`);
                 cleanupFn();
-                cleaned++;
             } catch (e) {
-                console.error(`  ✗ Failed to clean ${name}:`, e);
+                // Silent fail
             }
         });
-        
         window.__cleanupRegistry = [];
-        console.log(`✅ Cleaned ${cleaned} items`);
     };
     
-    // Run cleanup on every page load (to clean previous page)
     window.addEventListener('beforeunload', () => {
-    console.log('🧹 Cleaning before navigation...');
-    window.cleanupAll();
+        window.cleanupAll();
     });
 })();
 </script>

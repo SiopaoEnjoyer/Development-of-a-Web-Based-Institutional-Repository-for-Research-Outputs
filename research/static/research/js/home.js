@@ -1,6 +1,5 @@
 // IMMEDIATE cleanup check
 if (window.__homeState) {
-    console.log('⚠️ HOME: Force cleaning previous instance');
     try {
         window.__homeState.cleanup();
     } catch (e) {
@@ -10,8 +9,6 @@ if (window.__homeState) {
 }
 
 (function () {
-    console.log('🏠 HOME: Initializing...');
-
     // Single state object
     const state = {
         intervals: [],
@@ -184,13 +181,10 @@ if (window.__homeState) {
 
     // AGGRESSIVE cleanup
     function cleanup() {
-        console.log('🧹 HOME: Starting cleanup...');
-        
         // Mark as inactive FIRST to stop all callbacks
         state.isActive = false;
 
         // Clear all intervals (they're tracked globally now)
-        console.log(`  → Clearing ${state.intervals.length} intervals`);
         state.intervals.forEach(id => {
             window.clearInterval(id);
         });
@@ -203,7 +197,6 @@ if (window.__homeState) {
         }
 
         // Disconnect all observers IMMEDIATELY
-        console.log(`  → Disconnecting ${state.observers.length} observers`);
         state.observers.forEach(obs => {
             if (obs && typeof obs.disconnect === 'function') {
                 obs.disconnect();
@@ -212,15 +205,12 @@ if (window.__homeState) {
         state.observers.length = 0;
 
         // Remove all event listeners
-        console.log(`  → Removing ${state.handlers.length} event listeners`);
         state.handlers.forEach(({ target, type, handler }) => {
             if (target && typeof target.removeEventListener === 'function') {
                 target.removeEventListener(type, handler);
             }
         });
         state.handlers.length = 0;
-
-        console.log('✅ HOME: Cleanup complete');
     }
 
     // Store state
@@ -230,8 +220,5 @@ if (window.__homeState) {
     // Register with global system
     if (window.registerCleanup) {
         window.registerCleanup('home', cleanup);
-        console.log('📝 HOME: Registered with cleanup system');
     }
-    
-    console.log('✅ HOME: Initialization complete');
 })();

@@ -1,6 +1,5 @@
 // IMMEDIATE cleanup check on script load
 if (window.__particlesState) {
-    console.log('⚠️ PARTICLES: Force stopping previous instance');
     try {
         window.__particlesState.cleanup();
     } catch (e) {
@@ -12,11 +11,8 @@ if (window.__particlesState) {
 (function() {
     const canvas = document.getElementById('particleCanvas');
     if (!canvas) {
-        console.log('⚠️ PARTICLES: Canvas not found');
         return;
     }
-    
-    console.log('✨ PARTICLES: Starting fresh instance');
     
     const ctx = canvas.getContext('2d', { 
         alpha: true,
@@ -96,13 +92,11 @@ if (window.__particlesState) {
     for (let i = 0; i < particleCount; i++) {
         particles.push(new Particle());
     }
-    console.log(`✅ PARTICLES: Created ${particleCount} particles`);
 
     // Optimized animation loop with frame skipping
     function animate(currentTime) {
         // CRITICAL: Check if we should still be running
         if (!isRunning) {
-            console.log('🛑 PARTICLES: Animation stopped');
             return;
         }
         
@@ -166,19 +160,15 @@ if (window.__particlesState) {
 
     // Start animation
     animationFrameId = requestAnimationFrame(animate);
-    console.log('▶️ PARTICLES: Animation started');
 
     // AGGRESSIVE cleanup function
     function cleanup() {
-        console.log('🧹 PARTICLES: Starting cleanup...');
-        
         // STOP EVERYTHING IMMEDIATELY
         isRunning = false;
         
         // Cancel animation frame (it's being tracked globally now)
         if (animationFrameId !== null) {
             window.cancelAnimationFrame(animationFrameId);
-            console.log('  ✓ Canceled RAF ID:', animationFrameId);
             animationFrameId = null;
         }
         
@@ -188,7 +178,6 @@ if (window.__particlesState) {
             clearTimeout(resizeTimeout);
             resizeTimeout = null;
         }
-        console.log('  ✓ Removed event listeners');
         
         // Destroy all particles IMMEDIATELY
         if (particles && particles.length > 0) {
@@ -201,7 +190,6 @@ if (window.__particlesState) {
             }
             particles.length = 0;
             particles = null;
-            console.log(`  ✓ Destroyed ${count} particles`);
         }
         
         // Clear and minimize canvas to free GPU memory
@@ -213,10 +201,7 @@ if (window.__particlesState) {
             canvas.height = 1;
             canvas.style.width = '1px';
             canvas.style.height = '1px';
-            console.log('  ✓ Canvas cleared and minimized');
         }
-        
-        console.log('✅ PARTICLES: Cleanup complete');
     }
 
     // Store state globally with read-only checks
@@ -231,6 +216,5 @@ if (window.__particlesState) {
     // Register with global cleanup system
     if (window.registerCleanup) {
         window.registerCleanup('particles', cleanup);
-        console.log('📝 PARTICLES: Registered with cleanup system');
     }
 })();

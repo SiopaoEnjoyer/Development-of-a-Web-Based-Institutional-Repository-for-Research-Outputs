@@ -64,6 +64,21 @@ nav.nav-main {
     z-index: 50;
 }
 
+/* Desktop navigation - horizontal layout */
+.nav-main .navbar-collapse {
+    background: transparent !important;
+}
+
+.nav-main .navbar-nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+}
+
+.nav-main .nav-item {
+    margin: 0;
+}
+
 .nav-main a {
     color: white !important;
     margin-right: 15px;
@@ -72,6 +87,7 @@ nav.nav-main {
     border-radius: 4px;
     transition: .3s;
     font-family: 'Montserrat', sans-serif;
+    display: inline-block;
 }
 
 .nav-main a:hover {
@@ -150,10 +166,13 @@ nav.nav-main {
     color: var(--theme-green) !important;
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 600 !important;
-    padding: 8px 16px !important;
+    padding: 8px 20px !important;
     font-size: 0.95rem !important;
     border-radius: 50px !important;
     transition: all 0.3s ease !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .top-logo-bar .btn-success.dropdown-toggle:hover {
@@ -161,6 +180,18 @@ nav.nav-main {
     color: white !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(1, 87, 38, 0.3);
+}
+
+.top-logo-bar .btn-success.dropdown-toggle i {
+    font-size: 1.1rem;
+}
+
+.top-logo-bar .btn-success.dropdown-toggle .user-name {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .top-logo-bar .btn-outline-success {
@@ -484,14 +515,54 @@ nav.nav-main {
 @media (max-width: 768px) {
     .top-logo-bar {
         padding: 10px 15px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+    }
+    
+    .top-logo-bar > a {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .top-logo-bar img {
         height: 36px;
+        flex-shrink: 0;
     }
     
     .top-title {
+        font-size: 0.9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* Account dropdown button responsive */
+    .top-logo-bar .dropdown {
+        flex-shrink: 0;
+    }
+    
+    .top-logo-bar .btn-success.dropdown-toggle {
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+        gap: 0.35rem;
+    }
+    
+    .top-logo-bar .btn-success.dropdown-toggle i {
         font-size: 1rem;
+    }
+    
+    .top-logo-bar .btn-success.dropdown-toggle .user-name {
+        max-width: 140px;
+    }
+    
+    /* Login/Register buttons */
+    .top-logo-bar > div:last-child {
+        flex-shrink: 0;
+        gap: 0.25rem;
     }
     
     .top-logo-bar .btn {
@@ -499,63 +570,18 @@ nav.nav-main {
         font-size: 0.85rem !important;
     }
     
-    .top-logo-bar .dropdown-toggle {
-        padding: 8px 12px !important;
-        min-width: auto !important;
-    }
-    
-    .top-logo-bar .dropdown-toggle .user-name {
-        display: none;
-    }
-    
-    .top-logo-bar .dropdown-toggle i {
-        margin: 0 !important;
-        font-size: 1.2rem;
-    }
-    
-    .nav-main {
-        background: var(--theme-green) !important;
+    nav.nav-main {
+        padding: 3px 10px;
     }
     
     .navbar-toggler {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border: 2px solid rgba(255, 255, 255, 0.5) !important;
+        padding: 5px 7px;
+        font-size: 0.85rem;
     }
     
     .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-    }
-    
-    .nav-main a {
-        color: white !important;
-    }
-    
-    .nav-main a:hover,
-    .nav-main a.active {
-        background: white !important;
-        color: var(--theme-green) !important;
-    }
-    
-    .navbar-collapse {
-        background: white !important;
-        border-radius: 8px;
-        margin-top: 10px;
-        padding: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-collapse .navbar-nav {
-        background: white !important;
-    }
-
-    .navbar-collapse .nav-link {
-        color: var(--theme-green) !important;
-    }
-
-    .navbar-collapse .nav-link:hover,
-    .navbar-collapse .nav-link.active {
-        background: var(--theme-green) !important;
-        color: white !important;
+        width: 20px;
+        height: 20px;
     }
 
     .header-banner {
@@ -573,6 +599,22 @@ nav.nav-main {
     .content-container.has-header {
         padding-top: 20px;
     }
+    
+    .navbar-collapse {
+        margin-top: 6px !important;
+        padding: 8px !important;
+    }
+    
+    .navbar-collapse .nav-link {
+        padding: 6px 10px !important;
+        font-size: 0.85rem !important;
+        margin-bottom: 3px !important;
+    }
+    
+    .navbar-collapse .nav-link i {
+        font-size: 0.9rem !important;
+        margin-right: 0.4rem !important;
+    }
 }
 
 @media (max-width: 576px) {
@@ -585,20 +627,64 @@ nav.nav-main {
     }
     
     .top-title {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
     
-    .top-logo-bar .me-2 {
-        margin-right: 0.25rem !important;
+    /* Account dropdown - even more compact */
+    .top-logo-bar .btn-success.dropdown-toggle {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+        min-width: auto;
     }
     
+    .top-logo-bar .btn-success.dropdown-toggle i {
+        font-size: 0.95rem;
+    }
+    
+    .top-logo-bar .btn-success.dropdown-toggle .user-name {
+        max-width: 90px;
+        font-size: 0.75rem;
+    }
+    
+    /* Login/Register buttons */
     .top-logo-bar .btn {
         padding: 5px 10px !important;
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
     }
     
-    .top-logo-bar .dropdown-toggle {
-        padding: 6px 10px !important;
+    nav.nav-main {
+        padding: 2px 8px;
+    }
+    
+    .navbar-toggler {
+        padding: 4px 6px;
+        font-size: 0.8rem;
+    }
+    
+    .navbar-toggler-icon {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .navbar-collapse {
+        margin-top: 5px !important;
+        padding: 6px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .navbar-collapse .nav-link {
+        padding: 5px 8px !important;
+        font-size: 0.8rem !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .navbar-collapse .nav-link i {
+        font-size: 0.85rem !important;
+        margin-right: 0.3rem !important;
+    }
+    
+    .navbar-collapse .nav-link:last-child {
+        margin-bottom: 0 !important;
     }
 
     .header-banner {
@@ -608,6 +694,14 @@ nav.nav-main {
     .header-title {
         font-size: 1.5rem;
         padding: 0 15px;
+    }
+    
+    .content-container {
+        padding: 20px 0 40px !important;
+    }
+    
+    .page-wrapper {
+        padding-bottom: 40px;
     }
 
     .site-footer {
@@ -632,9 +726,55 @@ nav.nav-main {
     }
 }
 
+@media (max-width: 400px) {
+    .top-logo-bar {
+        padding: 6px 10px;
+    }
+    
+    .top-logo-bar img {
+        height: 28px;
+    }
+    
+    .top-title {
+        font-size: 0.7rem;
+    }
+    
+    /* Account dropdown - icon only mode */
+    .top-logo-bar .btn-success.dropdown-toggle {
+        padding: 5px 8px !important;
+        font-size: 0.75rem !important;
+        min-width: 36px;
+    }
+    
+    .top-logo-bar .btn-success.dropdown-toggle i {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .top-logo-bar .btn-success.dropdown-toggle .user-name {
+        display: none !important;
+    }
+    
+    /* Login/Register buttons */
+    .top-logo-bar .btn {
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
+    }
+    
+    .navbar-collapse .nav-link {
+        padding: 4px 6px !important;
+        font-size: 0.75rem !important;
+    }
+}
+
 @media (max-width: 991px) {
     .nav-main {
         padding: 10px 15px;
+    }
+    
+    .nav-main .navbar-nav {
+        flex-direction: column;
+        align-items: stretch;
     }
     
     .nav-main a {
@@ -648,10 +788,22 @@ nav.nav-main {
         margin-top: 10px;
         padding: 10px;
         border-radius: 8px;
+        background: white !important;
     }
     
     .navbar-nav {
         padding: 10px 0;
+    }
+    
+    /* Override colors for mobile collapsed menu */
+    .navbar-collapse .nav-link {
+        color: var(--theme-green) !important;
+    }
+    
+    .navbar-collapse .nav-link:hover,
+    .navbar-collapse .nav-link.active {
+        background: var(--theme-green) !important;
+        color: white !important;
     }
 
     .footer-content {
@@ -673,8 +825,6 @@ nav.nav-main {
     }
 }
 
-/* Add these styles to your base.css file */
-
 /* ==================== AUTH BUTTONS RESPONSIVE ==================== */
 
 /* Desktop and larger tablets - default styles already good */
@@ -682,6 +832,17 @@ nav.nav-main {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+/* Dropdown button base styles */
+.top-logo-bar .dropdown {
+    position: relative;
+}
+
+.top-logo-bar .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 /* ==================== GREEN NAVBAR RESPONSIVE ==================== */
@@ -695,22 +856,6 @@ nav.nav-main {
     .navbar-toggler {
         padding: 6px 8px;
         font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 768px) {
-    nav.nav-main {
-        padding: 3px 10px;
-    }
-    
-    .navbar-toggler {
-        padding: 5px 7px;
-        font-size: 0.85rem;
-    }
-    
-    .navbar-toggler-icon {
-        width: 20px;
-        height: 20px;
     }
 }
 
@@ -749,148 +894,29 @@ nav.nav-main {
     }
 }
 
-@media (max-width: 768px) {
-    .navbar-collapse {
-        margin-top: 6px !important;
-        padding: 8px !important;
-    }
-    
-    .navbar-collapse .nav-link {
-        padding: 6px 10px !important;
-        font-size: 0.85rem !important;
-        margin-bottom: 3px !important;
-    }
-    
-    .navbar-collapse .nav-link i {
-        font-size: 0.9rem !important;
-        margin-right: 0.4rem !important;
-    }
-}
-
-@media (max-width: 576px) {
-    .navbar-collapse {
-        margin-top: 5px !important;
-        padding: 6px !important;
-        margin-bottom: 5px !important; /* Add bottom margin to collapse */
-    }
-    
-    .navbar-collapse .nav-link {
-        padding: 5px 8px !important;
-        font-size: 0.8rem !important;
-        margin-bottom: 2px !important;
-    }
-    
-    .navbar-collapse .nav-link i {
-        font-size: 0.85rem !important;
-        margin-right: 0.3rem !important;
-    }
-    
-    .navbar-collapse .nav-link:last-child {
-        margin-bottom: 0 !important; /* Remove margin from last item */
-    }
-    
-    /* Add more bottom margin to content */
-    .content-container {
-        padding: 20px 0 40px !important;
-    }
-    
-    .page-wrapper {
-        padding-bottom: 40px;
-    }
-}
-
-@media (max-width: 400px) {
-    .navbar-collapse .nav-link {
-        padding: 4px 6px !important;
-        font-size: 0.75rem !important;
-    }
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-    .top-logo-bar > div:last-child {
-        gap: 0.25rem;
-    }
-    
-    .top-logo-bar > div:last-child .btn {
-        padding: 6px 12px !important;
-        font-size: 0.85rem !important;
-        white-space: nowrap;
-    }
-}
-
-/* Small mobile devices */
-@media (max-width: 576px) {
-    .top-logo-bar {
-        flex-wrap: nowrap;
-        gap: 0.5rem;
-    }
-    
-    .top-logo-bar > a {
-        flex: 1;
-        min-width: 0; /* Allow flex item to shrink below content size */
-    }
-    
-    .top-logo-bar > div:last-child {
-        flex-shrink: 0;
-        gap: 0.25rem;
-    }
-    
-    .top-logo-bar > div:last-child .btn {
-        padding: 5px 10px !important;
-        font-size: 0.75rem !important;
-        white-space: nowrap;
-        min-width: auto;
-    }
-    
-    /* Make title text smaller and allow wrapping if needed */
-    .top-title {
-        font-size: 0.85rem;
-        line-height: 1.2;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
-
-/* Extra small devices */
-@media (max-width: 400px) {
-    .top-logo-bar {
-        padding: 8px 10px;
-    }
-    
-    .top-logo-bar img {
-        height: 28px;
-    }
-    
-    .top-title {
-        font-size: 0.75rem;
-    }
-    
-    .top-logo-bar > div:last-child .btn {
-        padding: 4px 8px !important;
-        font-size: 0.7rem !important;
-    }
-}
-
 /* Dropdown menu responsive improvements */
 @media (max-width: 576px) {
-    .top-logo-bar .dropdown-toggle {
-        padding: 6px 10px !important;
-        font-size: 0.75rem !important;
+    .dropdown-menu {
+        min-width: 160px;
+        font-size: 0.85rem;
     }
     
-    .top-logo-bar .dropdown-toggle .user-name {
-        max-width: 80px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: inline-block;
-        vertical-align: middle;
+    .dropdown-item {
+        padding: 8px 12px;
+    }
+    
+    .dropdown-item i {
+        font-size: 1rem;
     }
 }
 
 @media (max-width: 400px) {
-    .top-logo-bar .dropdown-toggle .user-name {
-        max-width: 60px;
+    .dropdown-menu {
+        min-width: 140px;
+        font-size: 0.8rem;
+    }
+    
+    .dropdown-item {
+        padding: 6px 10px;
     }
 }

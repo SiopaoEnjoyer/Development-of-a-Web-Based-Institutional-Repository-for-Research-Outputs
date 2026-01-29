@@ -2,6 +2,7 @@
  * Unified Verification Modal Handler
  * Supports both 6-box input and single input modes
  * Works for email verification AND password reset
+ * Fixed: Timer now continues running when switching tabs
  */
 
 function initVerificationModal(config) {
@@ -281,7 +282,7 @@ function initVerificationModal(config) {
     // Resend button with timer reset
     let resendCooldown = 60;
     let canResend = true;
-    let timerInterval;
+    let resendTimerInterval;
 
     resendBtn.addEventListener('click', function() {
         if (!canResend) return;
@@ -303,7 +304,7 @@ function initVerificationModal(config) {
             // Reset the 15-minute timer on successful resend
             if (data.success) {
                 clearInterval(timerInterval);
-                timeRemaining = 15 * 60;
+                expirationTime = Date.now() + (15 * 60 * 1000); // Reset to 15 minutes from now
                 timerInterval = setInterval(updateTimer, 1000);
                 updateTimer();
                 if (attemptCount < maxAttempts) {
@@ -316,12 +317,12 @@ function initVerificationModal(config) {
             showMessage('Failed to resend code', 'danger');
         });
         
-        const cooldownInterval = setInterval(() => {
+        resendTimerInterval = setInterval(() => {
             this.innerHTML = '<i class="bi bi-clock me-1"></i>Wait ' + resendCooldown + 's';
             resendCooldown--;
             
             if (resendCooldown < 0) {
-                clearInterval(cooldownInterval);
+                clearInterval(resendTimerInterval);
                 this.innerHTML = originalText;
                 canResend = true;
                 resendCooldown = 60;
@@ -329,9 +330,12 @@ function initVerificationModal(config) {
         }, 1000);
     });
 
-    // Timer
-    let timeRemaining = 15 * 60;
+    let expirationTime = Date.now() + (15 * 60 * 1000); 
+    let timerInterval;
+
     function updateTimer() {
+        const timeRemaining = Math.max(0, Math.floor((expirationTime - Date.now()) / 1000));
+        
         const minutes = Math.floor(timeRemaining / 60);
         const seconds = timeRemaining % 60;
         timeLeftElement.textContent = minutes + ':' + seconds.toString().padStart(2, '0');
@@ -341,8 +345,8 @@ function initVerificationModal(config) {
             verifyBtn.disabled = true;
             clearInterval(timerInterval);
         }
-        timeRemaining--;
     }
+
     timerInterval = setInterval(updateTimer, 1000);
     updateTimer();
 }

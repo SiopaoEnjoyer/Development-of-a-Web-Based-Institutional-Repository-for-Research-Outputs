@@ -198,7 +198,7 @@
                     {% if paper.author.all %}
                     <p class="authors">
                         <strong><i class="bi bi-people-fill"></i> Authors:</strong>
-                        {% for author in paper.author.all %}
+                        {% for author in paper.get_authors_alphabetically %}
                             {{ author.display_name_public }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>

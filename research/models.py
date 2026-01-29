@@ -170,9 +170,9 @@ class ResearchPaper(models.Model):
     )
 
     pdf_file = models.FileField(
-    upload_to="research_papers/",
-    storage=SupabaseStorage
-)
+        upload_to="research_papers/",
+        storage=SupabaseStorage
+    )
 
     awards = models.ManyToManyField(
         'Award', blank=True, related_name='research_papers'
@@ -245,6 +245,16 @@ class ResearchPaper(models.Model):
     def get_citation_count(self):
         '''Get total citation count'''
         return self.citations.count()
+
+    # ====================================
+    # NEW METHOD: Get authors alphabetically by last name
+    # ====================================
+    def get_authors_alphabetically(self):
+        """
+        Returns authors sorted alphabetically by last name, then first name.
+        Use this instead of paper.author.all in templates.
+        """
+        return self.author.all().order_by('last_name', 'first_name')
 
     def __str__(self):
         return self.title
