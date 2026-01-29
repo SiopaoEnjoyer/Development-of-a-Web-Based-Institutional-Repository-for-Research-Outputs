@@ -171,7 +171,8 @@ class ResearchPaper(models.Model):
 
     pdf_file = models.FileField(
         upload_to="research_papers/",
-        storage=SupabaseStorage
+        storage=SupabaseStorage,
+        max_length=300  
     )
 
     awards = models.ManyToManyField(
