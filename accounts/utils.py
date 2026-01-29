@@ -205,7 +205,7 @@ BTCSI Research Team
     """
     
     send_email_async(subject, message, html_message, [user_email])
-    return True
+    return send_email_async(subject, message, html_message, [user_email])
 
 
 def send_password_reset_email(user_email, verification_code, user_name=""):
@@ -343,7 +343,7 @@ BTCSI Research Team
     """
     
     send_email_async(subject, message, html_message, [user_email])
-    return True
+    return send_email_async(subject, message, html_message, [user_email])
 
 
 def send_approval_email(user_email, user_name="", role="", login_url=""):
@@ -423,4 +423,4 @@ BTCSI Research Team
     """
     
     send_email_async(subject, message, html_message, [user_email])
-    return True
+    return send_email_async(subject, message, html_message, [user_email])
