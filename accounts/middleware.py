@@ -308,101 +308,116 @@ class SessionCleanupMiddleware:
     
 class DatabaseConnectionMiddleware:
     """
-    Handle database connection errors gracefully without forcing connections.
-    Let Django's connection pooling handle connections naturally.
+    Handle database connection errors gracefully with automatic retries.
     """
     
     def __init__(self, get_response):
         self.get_response = get_response
     
     def __call__(self, request):
-        try:
-            # Process request normally - let Django handle DB connections
-            response = self.get_response(request)
-            return response
-            
-        except OperationalError as e:
-            # Only catch actual database errors during request processing
-            error_msg = str(e).lower()
-            is_connection_error = any(keyword in error_msg for keyword in [
-                'timeout', 'connection', 'server closed', 'terminated', 'could not connect'
-            ])
-            
-            if is_connection_error:
-                logger.error(f"Database connection error: {str(e)}")
+        max_retries = 2
+        retry_delay = 0.5  # 500ms between retries
+        
+        for attempt in range(max_retries + 1):
+            try:
+                # Close any broken connections before processing
+                if connection.connection and not connection.is_usable():
+                    connection.close()
                 
-                # Close the failed connection
-                connection.close()
+                # Process request
+                response = self.get_response(request)
+                return response
                 
-                return HttpResponse(
-                    """
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Connection Issue</title>
-                        <style>
-                            body {
-                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                min-height: 100vh;
-                                margin: 0;
-                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                color: white;
-                            }
-                            .container {
-                                text-align: center;
-                                padding: 40px;
-                                background: rgba(255, 255, 255, 0.1);
-                                border-radius: 20px;
-                                backdrop-filter: blur(10px);
-                                max-width: 500px;
-                            }
-                            h1 { font-size: 48px; margin: 0 0 20px 0; }
-                            p { font-size: 18px; margin: 10px 0; opacity: 0.9; }
-                            .refresh-btn {
-                                margin-top: 30px;
-                                padding: 15px 30px;
-                                font-size: 16px;
-                                background: white;
-                                color: #667eea;
-                                border: none;
-                                border-radius: 10px;
-                                cursor: pointer;
-                                font-weight: 600;
-                            }
-                            .refresh-btn:hover { transform: scale(1.05); transition: 0.2s; }
-                            .small { font-size: 14px; margin-top: 20px; opacity: 0.7; }
-                        </style>
-                        <script>
-                            setTimeout(function() {
-                                window.location.reload();
-                            }, 3000);
-                        </script>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h1>🔄</h1>
-                            <h1>Connection Hiccup</h1>
-                            <p>Brief network issue detected.</p>
-                            <p><strong>Auto-refreshing in 3 seconds...</strong></p>
-                            <button class="refresh-btn" onclick="window.location.reload()">
-                                Refresh Now
-                            </button>
-                            <p class="small">Free tier quirk - thanks for your patience!</p>
-                        </div>
-                    </body>
-                    </html>
-                    """,
-                    status=503,
-                    content_type="text/html"
-                )
-            else:
-                # Not a connection error, re-raise
-                raise
+            except OperationalError as e:
+                error_msg = str(e).lower()
+                is_connection_error = any(keyword in error_msg for keyword in [
+                    'timeout', 'connection', 'server closed', 'terminated', 'could not connect'
+                ])
+                
+                if is_connection_error:
+                    logger.warning(f"DB connection attempt {attempt + 1}/{max_retries + 1} failed: {str(e)[:100]}")
+                    
+                    # Close the failed connection
+                    connection.close()
+                    
+                    # If we have retries left, try again
+                    if attempt < max_retries:
+                        time.sleep(retry_delay)
+                        continue
+                    
+                    # All retries exhausted - show maintenance page
+                    logger.error(f"All DB connection attempts failed for {request.path}")
+                    
+                    return HttpResponse(
+                        """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Database Maintenance</title>
+                            <style>
+                                body {
+                                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    min-height: 100vh;
+                                    margin: 0;
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    color: white;
+                                }
+                                .container {
+                                    text-align: center;
+                                    padding: 40px;
+                                    background: rgba(255, 255, 255, 0.1);
+                                    border-radius: 20px;
+                                    backdrop-filter: blur(10px);
+                                    max-width: 500px;
+                                }
+                                h1 { font-size: 48px; margin: 0 0 20px 0; }
+                                p { font-size: 18px; margin: 10px 0; opacity: 0.9; }
+                                .refresh-btn {
+                                    margin-top: 30px;
+                                    padding: 15px 30px;
+                                    font-size: 16px;
+                                    background: white;
+                                    color: #667eea;
+                                    border: none;
+                                    border-radius: 10px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                }
+                                .refresh-btn:hover { transform: scale(1.05); transition: 0.2s; }
+                                .small { font-size: 14px; margin-top: 20px; opacity: 0.7; }
+                            </style>
+                            <script>
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 5000);
+                            </script>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <h1>🔧</h1>
+                                <h1>Database Maintenance</h1>
+                                <p>Our database provider (Supabase) is performing scheduled maintenance.</p>
+                                <p><strong>Auto-refreshing in 5 seconds...</strong></p>
+                                <button class="refresh-btn" onclick="window.location.reload()">
+                                    Refresh Now
+                                </button>
+                                <p class="small">Expected completion: February 2, 2026</p>
+                                <p class="small">Sorry for the inconvenience!</p>
+                            </div>
+                        </body>
+                        </html>
+                        """,
+                        status=503,
+                        content_type="text/html"
+                    )
+                else:
+                    # Not a connection error, re-raise
+                    raise
 
 class DatabaseConnectionCleanupMiddleware:
     """

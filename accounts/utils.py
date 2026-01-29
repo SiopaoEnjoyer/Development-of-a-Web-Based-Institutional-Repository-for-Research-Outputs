@@ -8,6 +8,23 @@ logger = logging.getLogger(__name__)
 def send_email_async(subject, message, html_message, recipient_list):
     """Send email using MailerSend API - Non-blocking version"""
     try:
+        # ✅ Validate emails properly
+        import re
+        email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        
+        valid_emails = []
+        for email in recipient_list:
+            if email and isinstance(email, str):
+                email = email.strip()
+                if email_pattern.match(email):
+                    valid_emails.append(email)
+                else:
+                    logger.warning(f"⚠️ Invalid email skipped: {email}")
+        
+        if not valid_emails:
+            logger.error("❌ No valid emails in recipient list")
+            return False
+        
         url = "https://api.mailersend.com/v1/email"
         
         headers = {
@@ -20,28 +37,27 @@ def send_email_async(subject, message, html_message, recipient_list):
                 "email": settings.DEFAULT_FROM_EMAIL,
                 "name": "BTCSI Research"
             },
-            "to": [{"email": email} for email in recipient_list],
+            "to": [{"email": email} for email in valid_emails],
             "subject": subject,
             "text": message,
             "html": html_message,
-            "reply_to": {
-                "email": "btcsirepository@gmail.com"
-            }
+            # ✅ REMOVED: reply_to might cause 422 on test domains
         }
         
-        # Fire-and-forget with short timeout
         response = requests.post(
             url, 
             headers=headers, 
             json=data,
-            timeout=5  # Fail fast if MailerSend is slow
+            timeout=10
         )
         
         if response.status_code == 202:
-            logger.info(f"✅ Email queued for {recipient_list}")
+            logger.info(f"✅ Email queued for {valid_emails}")
             return True
         else:
+            # ✅ Log detailed error so we can see what's wrong
             logger.error(f"❌ Email failed: {response.status_code}")
+            logger.error(f"MailerSend response: {response.text}")
             return False
             
     except requests.Timeout:
@@ -49,6 +65,8 @@ def send_email_async(subject, message, html_message, recipient_list):
         return False
     except Exception as e:
         logger.error(f"❌ Email error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return False
 
 # Keep all your existing email functions unchanged
