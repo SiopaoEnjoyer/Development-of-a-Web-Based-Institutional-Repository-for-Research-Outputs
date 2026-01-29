@@ -1,14 +1,14 @@
 from django.conf import settings
-import threading
 import logging
-import requests
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 logger = logging.getLogger(__name__)
 
 def send_email_async(subject, message, html_message, recipient_list):
-    """Send email using MailerSend API - Non-blocking version"""
+    """Send email using Brevo API"""
     try:
-        # ✅ Validate emails properly
+        # Validate emails
         import re
         email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
         
@@ -25,43 +25,29 @@ def send_email_async(subject, message, html_message, recipient_list):
             logger.error("❌ No valid emails in recipient list")
             return False
         
-        url = "https://api.mailersend.com/v1/email"
+        # Configure Brevo API
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key['api-key'] = settings.BREVO_API_KEY
         
-        headers = {
-            "Authorization": f"Bearer {settings.MAILERSEND_API_KEY}",
-            "Content-Type": "application/json"
-        }
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
         
-        data = {
-            "from": {
-                "email": settings.DEFAULT_FROM_EMAIL,
-                "name": "BTCSI Research"
-            },
-            "to": [{"email": email} for email in valid_emails],
-            "subject": subject,
-            "text": message,
-            "html": html_message,
-            # ✅ REMOVED: reply_to might cause 422 on test domains
-        }
-        
-        response = requests.post(
-            url, 
-            headers=headers, 
-            json=data,
-            timeout=10
+        # Prepare email
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": email} for email in valid_emails],
+            sender={"email": settings.DEFAULT_FROM_EMAIL, "name": "BTCSI Research"},
+            subject=subject,
+            html_content=html_message,
+            text_content=message
         )
         
-        if response.status_code == 202:
-            logger.info(f"✅ Email queued for {valid_emails}")
-            return True
-        else:
-            # ✅ Log detailed error so we can see what's wrong
-            logger.error(f"❌ Email failed: {response.status_code}")
-            logger.error(f"MailerSend response: {response.text}")
-            return False
-            
-    except requests.Timeout:
-        logger.error(f"⏱️ Email timeout for {recipient_list}")
+        # Send email
+        api_response = api_instance.send_transac_email(send_smtp_email)
+        logger.info(f"✅ Email sent successfully to {valid_emails}")
+        logger.info(f"Message ID: {api_response.message_id}")
+        return True
+        
+    except ApiException as e:
+        logger.error(f"❌ Brevo API error: {e}")
         return False
     except Exception as e:
         logger.error(f"❌ Email error: {e}")
@@ -69,7 +55,7 @@ def send_email_async(subject, message, html_message, recipient_list):
         logger.error(traceback.format_exc())
         return False
 
-# Keep all your existing email functions unchanged
+
 def send_verification_email(user_email, verification_code, user_name=""):
     """Send verification code email with improved design"""
     subject = 'Email Verification - BTCSI Research'
@@ -204,7 +190,6 @@ BTCSI Research Team
     </html>
     """
     
-    send_email_async(subject, message, html_message, [user_email])
     return send_email_async(subject, message, html_message, [user_email])
 
 
@@ -342,7 +327,6 @@ BTCSI Research Team
     </html>
     """
     
-    send_email_async(subject, message, html_message, [user_email])
     return send_email_async(subject, message, html_message, [user_email])
 
 
@@ -422,5 +406,4 @@ BTCSI Research Team
     </html>
     """
     
-    send_email_async(subject, message, html_message, [user_email])
     return send_email_async(subject, message, html_message, [user_email])
