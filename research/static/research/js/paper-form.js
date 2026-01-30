@@ -5,7 +5,6 @@
 const gradeSelect = document.getElementById("id_grade_level");
 const syInput = document.getElementById("id_school_year");
 const pubMonth = document.getElementById('pubMonth');
-const pubDay = document.getElementById('pubDay');
 const pubYear = document.getElementById('pubYear');
 const pubDateField = document.getElementById('pubDateField');
 const strandSelect = document.getElementById("id_strand");
@@ -88,7 +87,7 @@ function handleDjangoFormErrors() {
     // Find the Django error alert
     const errorAlert = document.getElementById('djangoErrorAlert') || document.querySelector('.alert-danger');
     
-    if (errorAlert && errorAlert.style.display !== 'none') {  // ADD THIS CHECK
+    if (errorAlert && errorAlert.style.display !== 'none') {
         // Try to extract structured errors
         const errorLists = errorAlert.querySelectorAll('ul.errorlist');
         const errors = [];
@@ -125,7 +124,7 @@ function handleDjangoFormErrors() {
         
         // Hide the error alert AND mark it as processed
         errorAlert.style.display = 'none';
-        errorAlert.dataset.processed = 'true';  // ADD THIS
+        errorAlert.dataset.processed = 'true';
     }
 }
 
@@ -138,9 +137,8 @@ document.addEventListener("DOMContentLoaded", function() {
     initPublicationDateDropdowns();
     
     // Set up publication date listeners
-    if (pubMonth) pubMonth.addEventListener('change', updatePubDay);
-    if (pubYear) pubYear.addEventListener('change', updatePubDay);
-    if (pubDay) pubDay.addEventListener('change', updatePubDateField);
+    if (pubMonth) pubMonth.addEventListener('change', updatePubDateField);
+    if (pubYear) pubYear.addEventListener('change', updatePubDateField);
     
     // Initialize research design based on current selections
     updateResearchDesignOptions();
@@ -819,55 +817,23 @@ function initPublicationDateDropdowns() {
     if (pageMode === "edit" && existingDataDiv) {
         const existingDateAttr = existingDataDiv.dataset.pubDate;
         if (existingDateAttr) {
-            const [year, month, day] = existingDateAttr.split('-');
+            const [year, month] = existingDateAttr.split('-');
             if (pubYear) pubYear.value = year;
             if (pubMonth) pubMonth.value = parseInt(month);
-            updatePubDay();
-            if (pubDay) pubDay.value = parseInt(day);
             updatePubDateField();
         }
     }
 }
 
-function updatePubDay() {
-    if (!pubMonth || !pubDay) return;
-    
-    const month = parseInt(pubMonth.value);
-    const year = parseInt(pubYear?.value) || new Date().getFullYear();
-    const currentDay = pubDay.value;
-    
-    if (month) {
-        pubDay.disabled = false;
-        pubDay.innerHTML = '<option value="">Day</option>';
-        
-        const daysInMonth = new Date(year, month, 0).getDate();
-        for (let day = 1; day <= daysInMonth; day++) {
-            const option = document.createElement('option');
-            option.value = day;
-            option.textContent = day;
-            pubDay.appendChild(option);
-        }
-        
-        if (currentDay && currentDay <= daysInMonth) {
-            pubDay.value = currentDay;
-        }
-    } else {
-        pubDay.disabled = true;
-        pubDay.innerHTML = '<option value="">Day</option>';
-    }
-    
-    updatePubDateField();
-}
-
 function updatePubDateField() {
-    if (!pubMonth || !pubDay || !pubYear || !pubDateField) return;
+    if (!pubMonth || !pubYear || !pubDateField) return;
     
     const month = pubMonth.value;
-    const day = pubDay.value;
     const year = pubYear.value;
     
-    if (month && day && year) {
-        const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    if (month && year) {
+        // Always set day to 01
+        const formattedDate = `${year}-${month.padStart(2, '0')}-01`;
         pubDateField.value = formattedDate;
     } else {
         pubDateField.value = '';
@@ -1074,9 +1040,8 @@ function validateAndShake() {
         isValid = false;
     }
     
-    if (!pubMonth?.value || !pubDay?.value || !pubYear?.value) {
+    if (!pubMonth?.value || !pubYear?.value) {
         if (pubMonth && !pubMonth.value) pubMonth.classList.add('is-invalid', 'shake');
-        if (pubDay && !pubDay.value) pubDay.classList.add('is-invalid', 'shake');
         if (pubYear && !pubYear.value) pubYear.classList.add('is-invalid', 'shake');
         const pubDateError = document.getElementById('pubDateError');
         if (pubDateError) pubDateError.style.display = 'block';
@@ -1166,7 +1131,14 @@ if (previewBtn) {
         
         const titleField = document.getElementById('titleField');
         const titleValue = titleField?.value || "";
-        const pubDate = pubDateField?.value || "Not selected";
+        
+        // Format publication date as "Month Year"
+        const monthNames = ["", "January", "February", "March", "April", "May", "June",
+                          "July", "August", "September", "October", "November", "December"];
+        const month = pubMonth?.value || "";
+        const year = pubYear?.value || "";
+        const pubDate = (month && year) ? `${monthNames[parseInt(month)]} ${year}` : "Not selected";
+        
         const abstractField = document.getElementById('abstractField');
         const abstract = abstractField?.value || "";
         const grade = gradeSelect?.value || "";
@@ -1220,39 +1192,48 @@ if (previewBtn) {
             previewContent.innerHTML = `
                 <div class="row g-3">
                     <div class="col-12">
-                        <p><strong>Title:</strong></p>
-                        <p style="font-size: 1.1rem; margin-left: 20px;">${titleValue}</p>
-                    </div>
-                    <div class="col-12">
-                        <p><strong>Publication Date:</strong> ${pubDate}</p>
-                    </div>
-                    <div class="col-12">
-                        <p><strong>Abstract:</strong></p>
-                        <p style="white-space: pre-wrap;">${abstract}</p>
+                        <strong>Title</strong>
+                        <p>${titleValue}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Grade Level:</strong> ${grade}</p>
+                        <strong>Publication Date</strong>
+                        <p>${pubDate}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>School Year:</strong> ${sy}</p>
+                        <strong>School Year</strong>
+                        <p>${sy}</p>
+                    </div>
+                    <div class="col-12">
+                        <strong>Abstract</strong>
+                        <p>${abstract}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Strand:</strong> ${strand}</p>
+                        <strong>Grade Level</strong>
+                        <p>Grade ${grade}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Research Design:</strong> ${researchDesign}</p>
+                        <strong>Strand</strong>
+                        <p>${strand}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Research Design</strong>
+                        <p>${researchDesign}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>PDF File</strong>
+                        <p>${pdf}</p>
                     </div>
                     <div class="col-12">
-                        <p><strong>Authors:</strong> ${authors}</p>
+                        <strong>Authors</strong>
+                        <p>${authors}</p>
                     </div>
                     <div class="col-12">
-                        <p><strong>Keywords:</strong> ${keywords}</p>
+                        <strong>Keywords</strong>
+                        <p>${keywords}</p>
                     </div>
                     <div class="col-12">
-                        <p><strong>Awards:</strong> ${awards}</p>
-                    </div>
-                    <div class="col-12">
-                        <p><strong>PDF File:</strong> ${pdf}</p>
+                        <strong>Awards</strong>
+                        <p>${awards}</p>
                     </div>
                 </div>
             `;

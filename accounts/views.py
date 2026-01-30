@@ -608,8 +608,14 @@ class DenyUserView(LoginRequiredMixin, RoleRequiredMixin, View):
     def post(self, request, id):
         profile = get_object_or_404(UserProfile, id=id)
         email = profile.user.email
+        user_name = f"{profile.pending_first_name or ''} {profile.pending_last_name or ''}".strip()
+        
+        # Send denial email before deleting
+        from .utils import send_denial_email
+        send_denial_email(email, user_name)
+        
         profile.user.delete()
-        messages.info(request, f"Account {email} denied and removed")
+        messages.info(request, f"Account {email} denied and removed. Denial notification sent.")
         return redirect("accounts:pending_accounts")
 
 class UpdateConsentView(LoginRequiredMixin, View):

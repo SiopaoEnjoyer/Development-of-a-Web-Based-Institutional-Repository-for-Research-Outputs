@@ -29,18 +29,18 @@
     100% { background-size: 110% 110%; }
 }
 
-/* Birthdate dropdown styles */
-.birthdate-group {
+/* Publication date dropdown styles */
+.publication-date-group {
     display: flex;
     gap: 1rem;
     align-items: center;
 }
 
-.birthdate-group .form-select {
+.publication-date-group .form-select {
     flex: 1;
 }
 
-.birthdate-group .form-select:focus {
+.publication-date-group .form-select:focus {
     transform: translateY(0);
 }
 
@@ -683,4 +683,4 @@ select.form-select::-webkit-scrollbar-thumb:hover {
 .form-select.is-invalid {
     border-color: #dc3545;
     border-width: 2px;
-}    
+}

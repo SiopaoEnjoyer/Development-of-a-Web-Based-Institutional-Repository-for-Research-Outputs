@@ -5,6 +5,9 @@ from sib_api_v3_sdk.rest import ApiException
 
 logger = logging.getLogger(__name__)
 
+# Base URL for the website
+SITE_URL = "https://btcsirepository.onrender.com"
+
 def send_email_async(subject, message, html_message, recipient_list):
     """Send email using Brevo API"""
     try:
@@ -90,6 +93,7 @@ BTCSI Research Team
                         <!-- Header -->
                         <tr>
                             <td style="background: #015726; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
+                                <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
                                 <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
                                     Email Verification
                                 </h1>
@@ -229,6 +233,7 @@ BTCSI Research Team
                         <!-- Header -->
                         <tr>
                             <td style="background: #dc3545; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
+                                <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
                                 <div style="font-size: 40px; margin-bottom: 10px;">🔐</div>
                                 <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
                                     Password Reset
@@ -307,15 +312,18 @@ BTCSI Research Team
                         
                         <!-- Footer -->
                         <tr>
-                            <td style="background: #015726; padding: 25px 40px; text-align: center; border-radius: 0 0 20px 20px;">
+                            <td style="background: #dc3545; padding: 25px 40px; text-align: center; border-radius: 0 0 20px 20px;">
                                 <p style="color: white; font-size: 14px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
                                     Best regards,<br>
                                     <strong>BTCSI Research Team</strong>
                                 </p>
-                                <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
                                     Trinity Christian School<br>
                                     Villa Angela Subd., Phase 3, Bacolod City<br>
                                     © 2024-2025 All rights reserved
+                                </p>
+                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 11px; margin: 8px 0 0 0; font-style: italic; font-family: 'Montserrat', Arial, sans-serif;">
+                                    This is a system-generated email. Please do not reply.
                                 </p>
                             </td>
                         </tr>
@@ -330,11 +338,8 @@ BTCSI Research Team
     return send_email_async(subject, message, html_message, [user_email])
 
 
-def send_approval_email(user_email, user_name="", role="", login_url=""):
-    """Send account approval notification email"""
-    from django.urls import reverse
-    from django.conf import settings
-    
+def send_approval_email(user_email, user_name="", role=""):
+    """Send account approval notification email with improved design"""
     subject = 'Account Approved - BTCSI Research'
     
     role_display = {
@@ -345,13 +350,7 @@ def send_approval_email(user_email, user_name="", role="", login_url=""):
         'admin': 'Administrator'
     }.get(role, role)
     
-    if not login_url:
-        try:
-            login_url = reverse('accounts:login')
-            if hasattr(settings, 'SITE_URL'):
-                login_url = settings.SITE_URL.rstrip('/') + login_url
-        except:
-            login_url = "/accounts/login/"
+    login_url = f"{SITE_URL}/accounts/login/"
     
     message = f"""
 Hello{' ' + user_name if user_name else ''},
@@ -374,28 +373,295 @@ BTCSI Research Team
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+    <body style="margin: 0; padding: 0; font-family: 'Montserrat', Arial, sans-serif; background-color: #f5f5f5;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 40px 20px;">
             <tr>
                 <td align="center">
-                    <table width="650" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 12px; overflow: hidden;">
+                    <table width="650" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                        
+                        <!-- Header -->
                         <tr>
-                            <td style="background: #28a745; padding: 30px; text-align: center;">
-                                <h1 style="color: white; margin: 0;">✅ Account Approved</h1>
+                            <td style="background: #28a745; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
+                                <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
+                                <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
+                                <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Account Approved!
+                                </h1>
+                                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 16px; font-family: 'Montserrat', Arial, sans-serif;">
+                                    BTCSI Research Repository
+                                </p>
                             </td>
                         </tr>
+                        
+                        <!-- Content -->
                         <tr>
-                            <td style="padding: 30px;">
-                                <p>Hello <strong>{user_name}</strong>,</p>
-                                <p>Great news! Your account has been approved.</p>
-                                <p><strong>Role:</strong> {role_display}</p>
-                                <p>You can now log in at: <a href="{login_url}">{login_url}</a></p>
+                            <td style="padding: 40px;">
+                                <p style="color: #333; font-size: 16px; margin: 0 0 15px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Hello{' <strong>' + user_name + '</strong>' if user_name else ''},
+                                </p>
+                                
+                                <p style="color: #666; font-size: 15px; line-height: 1.6; margin: 0 0 25px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Great news! Your account has been <strong style="color: #28a745;">approved</strong> by an administrator. You now have full access to the BTCSI Research Repository system.
+                                </p>
+                                
+                                <!-- Account Details -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td style="background: #f8f9fa; border-left: 4px solid #28a745; border-radius: 8px; padding: 20px;">
+                                            <p style="margin: 0 0 12px 0; color: #333; font-size: 14px; font-weight: 600; font-family: 'Montserrat', Arial, sans-serif;">
+                                                📋 Your Account Details
+                                            </p>
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                <tr>
+                                                    <td style="padding: 5px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 14px; font-family: 'Montserrat', Arial, sans-serif;">
+                                                            <strong>Email:</strong> {user_email}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 5px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 14px; font-family: 'Montserrat', Arial, sans-serif;">
+                                                            <strong>Role:</strong> {role_display}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 5px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 14px; font-family: 'Montserrat', Arial, sans-serif;">
+                                                            <strong>Status:</strong> <span style="color: #28a745; font-weight: 600;">Active</span>
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- Login Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <a href="{login_url}" style="display: inline-block; background: #28a745; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; font-family: 'Montserrat', Arial, sans-serif; box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);">
+                                                Login to Your Account
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- Next Steps -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td style="background: #e7f5ec; border-radius: 8px; padding: 20px;">
+                                            <p style="margin: 0 0 12px 0; color: #155724; font-size: 14px; font-weight: 600; font-family: 'Montserrat', Arial, sans-serif;">
+                                                🎯 What's Next?
+                                            </p>
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #155724; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• Log in using your email and password</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #155724; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• Explore the research repository and available resources</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #155724; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• Update your profile settings as needed</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #155724; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• Contact support if you need any assistance</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <p style="color: #999; font-size: 13px; margin: 20px 0 0 0; font-style: italic; font-family: 'Montserrat', Arial, sans-serif; text-align: center;">
+                                    If the button doesn't work, copy and paste this URL into your browser:<br>
+                                    <a href="{login_url}" style="color: #28a745; text-decoration: none;">{login_url}</a>
+                                </p>
                             </td>
                         </tr>
+                        
+                        <!-- Footer -->
                         <tr>
-                            <td style="background: #015726; padding: 20px; text-align: center;">
-                                <p style="color: white; margin: 0;">BTCSI Research Team</p>
+                            <td style="background: #28a745; padding: 25px 40px; text-align: center; border-radius: 0 0 20px 20px;">
+                                <p style="color: white; font-size: 14px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Best regards,<br>
+                                    <strong>BTCSI Research Team</strong>
+                                </p>
+                                <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Trinity Christian School<br>
+                                    Villa Angela Subd., Phase 3, Bacolod City<br>
+                                    © 2024-2025 All rights reserved
+                                </p>
+                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 11px; margin: 8px 0 0 0; font-style: italic; font-family: 'Montserrat', Arial, sans-serif;">
+                                    This is a system-generated email. Please do not reply.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+    
+    return send_email_async(subject, message, html_message, [user_email])
+
+
+def send_denial_email(user_email, user_name="", reason=""):
+    """Send account denial notification email"""
+    subject = 'Account Registration Update - BTCSI Research'
+    
+    message = f"""
+Hello{' ' + user_name if user_name else ''},
+
+We regret to inform you that your account registration for the BTCSI Research Repository has not been approved at this time.
+
+{f'Reason: {reason}' if reason else 'If you believe this was a mistake or have questions, please contact the administrator.'}
+
+If you would like to reapply or need more information, please contact us at the BTCSI Research office.
+
+Thank you for your interest in the BTCSI Research Repository.
+
+Best regards,
+BTCSI Research Team
+    """
+    
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Montserrat', Arial, sans-serif; background-color: #f5f5f5;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+                <td align="center">
+                    <table width="650" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                        
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: #6c757d; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
+                                <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
+                                <div style="font-size: 50px; margin-bottom: 10px;">📋</div>
+                                <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Registration Update
+                                </h1>
+                                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 16px; font-family: 'Montserrat', Arial, sans-serif;">
+                                    BTCSI Research Repository
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 40px;">
+                                <p style="color: #333; font-size: 16px; margin: 0 0 15px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Hello{' <strong>' + user_name + '</strong>' if user_name else ''},
+                                </p>
+                                
+                                <p style="color: #666; font-size: 15px; line-height: 1.6; margin: 0 0 25px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Thank you for your interest in the BTCSI Research Repository. After careful review, we regret to inform you that your account registration has not been approved at this time.
+                                </p>
+                                
+                                {f'''
+                                <!-- Reason -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 20px;">
+                                            <p style="margin: 0 0 8px 0; color: #856404; font-size: 14px; font-weight: 600; font-family: 'Montserrat', Arial, sans-serif;">
+                                                📌 Reason
+                                            </p>
+                                            <p style="margin: 0; color: #856404; font-size: 14px; font-family: 'Montserrat', Arial, sans-serif;">
+                                                {reason}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                ''' if reason else ''}
+                                
+                                <!-- Information Box -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td style="background: #f8f9fa; border-radius: 8px; padding: 20px;">
+                                            <p style="margin: 0 0 12px 0; color: #333; font-size: 14px; font-weight: 600; font-family: 'Montserrat', Arial, sans-serif;">
+                                                ℹ️ What You Can Do
+                                            </p>
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• If you believe this was a mistake, please contact the administrator</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• You may reapply in the future if your circumstances change</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• Visit the BTCSI Research office for more information</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0;">
+                                                        <p style="margin: 0; color: #666; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">• Contact your teacher or school administrator for guidance</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- Contact Info -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td style="background: #e9ecef; border-radius: 8px; padding: 20px; text-align: center;">
+                                            <p style="margin: 0 0 10px 0; color: #495057; font-size: 14px; font-weight: 600; font-family: 'Montserrat', Arial, sans-serif;">
+                                                📞 Need Help?
+                                            </p>
+                                            <p style="margin: 0; color: #6c757d; font-size: 13px; font-family: 'Montserrat', Arial, sans-serif;">
+                                                Please visit the BTCSI Research office or contact your school administrator<br>
+                                                for questions regarding this decision.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 25px 0 0 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Thank you for your understanding and interest in the BTCSI Research Repository.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background: #6c757d; padding: 25px 40px; text-align: center; border-radius: 0 0 20px 20px;">
+                                <p style="color: white; font-size: 14px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Best regards,<br>
+                                    <strong>BTCSI Research Team</strong>
+                                </p>
+                                <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0 0 8px 0; font-family: 'Montserrat', Arial, sans-serif;">
+                                    Trinity Christian School<br>
+                                    Villa Angela Subd., Phase 3, Bacolod City<br>
+                                    © 2024-2025 All rights reserved
+                                </p>
+                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 11px; margin: 8px 0 0 0; font-style: italic; font-family: 'Montserrat', Arial, sans-serif;">
+                                    This is a system-generated email. Please do not reply.
+                                </p>
                             </td>
                         </tr>
                     </table>

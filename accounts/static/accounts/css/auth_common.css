@@ -7,7 +7,7 @@
 /* Auth page background */
 .auth-bg-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, rgba(1, 87, 38, 0.85) 0%, rgba(1, 61, 28, 0.9) 100%),
+    background: linear-gradient(135deg, rgba(44, 95, 74, 0.75) 0%, rgba(30, 66, 51, 0.85) 100%),
                 url('/static/research/img/trinity.jpg');
     background-size: cover;
     background-position: center;
@@ -30,9 +30,9 @@
     bottom: 0;
     background: linear-gradient(45deg, 
         transparent 0%, 
-        rgba(1, 87, 38, 0.1) 25%, 
+        rgba(44, 95, 74, 0.1) 25%, 
         transparent 50%, 
-        rgba(1, 87, 38, 0.1) 75%, 
+        rgba(44, 95, 74, 0.1) 75%, 
         transparent 100%);
     background-size: 200% 200%;
     animation: gradientShift 15s ease infinite;
