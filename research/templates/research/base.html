@@ -156,6 +156,7 @@
     </h1>
 </header>
 
+{% block messages %}
 {% if messages %}
 <div class="messages-container">
     <div class="container mt-3">
@@ -177,6 +178,7 @@
     </div>
 </div>
 {% endif %}
+{% endblock messages %}
 
 <div class="container content-container has-header">
     {% block content %}{% endblock %}

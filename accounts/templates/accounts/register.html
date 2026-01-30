@@ -12,6 +12,17 @@
 <link rel="stylesheet" href="{% static 'research/css/toast_notifications.css' %}">
 {% endblock %}
 
+{% block messages %}
+<!-- Override base template messages - use toast notifications instead -->
+<div class="django-messages" style="display: none;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock messages %}
+
 {% block content %}
 <div class="auth-bg-container">
     <div class="card auth-card shadow-lg" id="registerCard">

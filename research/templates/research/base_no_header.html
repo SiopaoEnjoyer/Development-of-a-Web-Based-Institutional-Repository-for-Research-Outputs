@@ -211,6 +211,7 @@
     </div>
 </nav>
 
+{% block messages %}
 {% if messages %}
 <div class="messages-container">
     <div class="container mt-3">
@@ -232,6 +233,7 @@
     </div>
 </div>
 {% endif %}
+{% endblock messages %}
 
 <div class="page-wrapper">
     {% block content %}{% endblock %}

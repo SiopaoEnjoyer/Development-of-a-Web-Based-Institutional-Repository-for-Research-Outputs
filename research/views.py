@@ -603,8 +603,14 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     def get_queryset(self):
         from django.db import models
         
+        # ✅ Prefetch related papers so they're available in the template
         qs = Keyword.objects.annotate(
             usage_count=models.Count('researchpaper')
+        ).prefetch_related(
+            Prefetch(
+                'researchpaper_set',
+                queryset=ResearchPaper.objects.only('id', 'title')
+            )
         )
         
         q = self.request.GET.get("q", "").strip()
@@ -633,13 +639,14 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        # ✅ Now include the actual papers for each keyword
         keyword_data = []
         for keyword in context['keywords']:
             keyword_data.append({
                 'id': keyword.id,
                 'word': keyword.word,
                 'usage_count': keyword.usage_count,
-                'papers': []
+                'papers': list(keyword.researchpaper_set.all())  # ✅ Get the actual papers
             })
         
         context["keywords"] = keyword_data

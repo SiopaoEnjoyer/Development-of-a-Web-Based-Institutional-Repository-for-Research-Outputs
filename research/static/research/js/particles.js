@@ -43,7 +43,7 @@ if (window.__particlesState) {
     }
     resizeCanvas();
 
-    const particleCount = 75;
+    const particleCount = 50;
 
     // Optimized Particle class
     class Particle {

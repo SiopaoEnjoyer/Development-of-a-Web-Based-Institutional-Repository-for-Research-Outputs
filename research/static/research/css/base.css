@@ -64,9 +64,8 @@ nav.nav-main {
     z-index: 50;
 }
 
-/* Desktop navigation - horizontal layout */
 .nav-main .navbar-collapse {
-    background: transparent !important;
+    background: transparent;  /* Remove the !important */
 }
 
 .nav-main .navbar-nav {
@@ -512,6 +511,12 @@ nav.nav-main {
 
 /* ==================== MOBILE RESPONSIVE ==================== */
 
+@media (max-width: 991px) {
+    .navbar-collapse {
+        background: white !important;  /* This will override on mobile */
+    }
+}
+
 @media (max-width: 768px) {
     .top-logo-bar {
         padding: 10px 15px;
@@ -797,13 +802,13 @@ nav.nav-main {
     
     /* Override colors for mobile collapsed menu */
     .navbar-collapse .nav-link {
-        color: var(--theme-green) !important;
+        color: var(--theme-green) !important;  /* ✅ Green text on white background */
     }
-    
+
     .navbar-collapse .nav-link:hover,
     .navbar-collapse .nav-link.active {
         background: var(--theme-green) !important;
-        color: white !important;
+        color: white !important;  /* White text when hovering/active on green background */
     }
 
     .footer-content {

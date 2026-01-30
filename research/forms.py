@@ -47,7 +47,7 @@ class ResearchPaperForm(forms.ModelForm):
             }),
             'publication_date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'month'
             }),
             'author': forms.SelectMultiple(attrs={
                 'class': 'form-control',

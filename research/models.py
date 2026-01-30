@@ -149,7 +149,7 @@ class ResearchPaper(models.Model):
 
     title = models.CharField(max_length=200)
     abstract = models.TextField()
-    publication_date = models.DateField()
+    publication_date = models.DateField(help_text="Day will be automatically set to the 1st of the month")
 
     author = models.ManyToManyField(Author)
     keywords = models.ManyToManyField(Keyword, blank=True)
@@ -246,6 +246,12 @@ class ResearchPaper(models.Model):
     def get_citation_count(self):
         '''Get total citation count'''
         return self.citations.count()
+    
+    def save(self, *args, **kwargs):
+        # Force day to be 1st of month
+        if self.publication_date:
+            self.publication_date = self.publication_date.replace(day=1)
+        super().save(*args, **kwargs)
 
     # ====================================
     # NEW METHOD: Get authors alphabetically by last name

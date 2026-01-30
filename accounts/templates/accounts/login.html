@@ -9,6 +9,17 @@
 <link rel="stylesheet" href="{% static 'research/css/toast_notifications.css' %}">
 {% endblock %}
 
+{% block messages %}
+<!-- Override base template messages - use toast notifications instead -->
+<div class="django-messages" style="display: none;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock messages %}
+
 {% block content %}
 <div class="auth-bg-container">
     <div class="card auth-card shadow-lg" id="loginCard">
@@ -98,49 +109,39 @@
 <script src="{% static 'accounts/js/password_toggle.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize toast messages for form errors and Django messages
-        {% if not request.session.show_verification_modal %}
-            {% if form.errors %}
-                var errorCount = 0;
-                
-                {% if form.non_field_errors %}
-                    {% for error in form.non_field_errors %}
-                        showError("{{ error|escapejs }}", 4000);
-                        errorCount++;
-                    {% endfor %}
-                {% endif %}
-                
-                {% for field, errors in form.errors.items %}
-                    {% if field != '__all__' %}
-                        errorCount++;
-                    {% endif %}
-                {% endfor %}
-                
-                if (errorCount > 0 && !{{ form.non_field_errors|length }}) {
-                    showError("Invalid email or password. Please try again.", 4000);
-                }
-            {% endif %}
-            
-            {% if messages %}
-                {% for message in messages %}
-                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                        showError("{{ message|escapejs }}", 4000);
-                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                        showWarning("{{ message|escapejs }}", 3500);
-                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                        showSuccess("{{ message|escapejs }}", 3000);
-                    {% else %}
-                        showInfo("{{ message|escapejs }}", 3000);
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endif %}
+        console.log('=== Django Error Handler ===');
         
         // Initialize verification modal if needed
         var shouldShowModal = ('{{ request.session.show_verification_modal }}' === 'True');
         var verificationEmail = "{{ request.session.verification_email|default:''|escapejs }}";
         
+        console.log('Should show modal:', shouldShowModal);
+        console.log('Has form errors:', {{ form.errors|yesno:"true,false" }});
+        
+        // Only show error toasts if NOT showing verification modal
+        if (!shouldShowModal) {
+            {% if form.errors %}
+                console.log('Processing form errors...');
+                
+                // Show non-field errors (like "Invalid credentials")
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        console.log('Non-field error:', "{{ error|escapejs }}");
+                        showError("{{ error|escapejs }}", 4000);
+                    {% endfor %}
+                {% else %}
+                    // If no non-field errors but has field errors, show generic message
+                    {% if form.email.errors or form.password.errors %}
+                        console.log('Field errors detected');
+                        showError("Invalid email or password. Please try again.", 4000);
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        }
+        
+        // Initialize verification modal if needed
         if (shouldShowModal && verificationEmail) {
+            console.log('Initializing verification modal...');
             initVerificationModal({
                 showModal: true,
                 email: verificationEmail,

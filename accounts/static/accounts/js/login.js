@@ -11,21 +11,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     
-    // Shake animation if there are errors
-    const hasErrors = document.querySelector('.custom-error') !== null;
-    if (hasErrors) {
-        loginCard.classList.add('shake');
-        setTimeout(() => loginCard.classList.remove('shake'), 600);
+    if (!loginForm || !emailInput || !passwordInput) {
+        console.error('Form elements not found!');
+        return;
+    }
+    
+    // Email validation helper
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
     
     // Form validation
     loginForm.addEventListener('submit', function(e) {
+        console.log('Form submitted');
+        
         let isValid = true;
         let errorMessages = [];
         
-        emailInput.classList.remove('is-invalid');
-        passwordInput.classList.remove('is-invalid');
+        // Clear previous validation states
+        emailInput.classList.remove('is-invalid', 'is-valid');
+        passwordInput.classList.remove('is-invalid', 'is-valid');
         
+        // Validate email
         if (!emailInput.value.trim()) {
             emailInput.classList.add('is-invalid');
             document.getElementById('emailError').textContent = 'Please enter your email address';
@@ -38,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         }
         
+        // Validate password
         if (!passwordInput.value) {
             passwordInput.classList.add('is-invalid');
             document.getElementById('passwordError').textContent = 'Please enter your password';
@@ -45,19 +53,22 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         }
         
+        // If validation failed, prevent submission and show toast
         if (!isValid) {
             e.preventDefault();
+            console.log('Validation failed:', errorMessages);
+            
+            // Shake animation
             loginCard.classList.add('shake');
             setTimeout(() => loginCard.classList.remove('shake'), 600);
             
-            // Show toast notification
-            if (typeof showError === 'function') {
-                if (errorMessages.length === 1) {
-                    showError(errorMessages[0], 4000);
-                } else {
-                    showError(`Please fix ${errorMessages.length} errors`, 4000);
-                }
-            }
+            // Show toast
+            const errorMsg = errorMessages.length === 1 
+                ? errorMessages[0] 
+                : `Please fix ${errorMessages.length} errors`;
+            
+            console.log('Calling showError with:', errorMsg);
+            showError(errorMsg, 4000);
         }
     });
     
@@ -79,9 +90,4 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.remove('is-valid');
         }
     });
-    
-    // Email validation helper
-    function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
 });

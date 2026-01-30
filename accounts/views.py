@@ -175,7 +175,7 @@ class LoginView(FormView):
             login(self.request, user)
             return redirect("accounts:dashboard_redirect")
         else:
-            messages.error(self.request, "Invalid email or password.")
+            form.add_error(None, "Invalid email or password. Please try again.")
 
         return self.form_invalid(form)
 

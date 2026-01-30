@@ -9,6 +9,22 @@
 }
 
 /* ============================================
+   HEADER OVERRIDES - Prevent admin styles from affecting header
+   ============================================ */
+
+.top-logo-bar .btn-success.dropdown-toggle {
+    display: flex !important;
+    align-items: center !important;
+    padding: 8px 20px !important;
+    font-size: 0.95rem !important;
+    gap: 0.5rem !important;
+}
+
+.top-logo-bar .btn-success.dropdown-toggle i {
+    font-size: 1.1rem !important;
+}
+
+/* ============================================
    ANIMATIONS
    ============================================ */
 
