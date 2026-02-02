@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden, HttpResponse
 from django.db import connection
 from django.db.utils import OperationalError
+from django.core.cache import cache
 import logging
 import psutil
 import os
@@ -122,8 +123,7 @@ class MemoryLimiterMiddleware:
         # WARNING: Add slight delay if memory is getting high
         if current_memory >= self.WARNING_THRESHOLD_MB:
             logger.warning(f"WARNING RAM: {current_memory:.1f}MB - Slowing request")
-            import time
-            time.sleep(0.3)  # 300ms delay
+            time.sleep(0.1)  # ✅ Reduced from 0.3 to 0.1
             
             # Trigger cleanup every 5 requests when in warning zone
             if self.request_count % 5 == 0:
@@ -159,7 +159,7 @@ class MemoryLimiterMiddleware:
 
 
 # ============================================
-# YOUR EXISTING MIDDLEWARE
+# APPROVAL CHECK MIDDLEWARE WITH CACHING
 # ============================================
 
 class ApprovalCheckMiddleware:
@@ -189,10 +189,20 @@ class ApprovalCheckMiddleware:
             if request.user.is_superuser or request.user.is_staff:
                 return self.get_response(request)
 
-            if not hasattr(request.user, "userprofile"):
-                return self.get_response(request)
-
-            if request.user.userprofile.is_approved:
+            # ✅ NEW: Cache the approval status to avoid DB queries
+            cache_key = f'user_approved_{request.user.id}'
+            is_approved = cache.get(cache_key)
+            
+            if is_approved is None:
+                # Only hit DB if not in cache
+                if hasattr(request.user, "userprofile"):
+                    is_approved = request.user.userprofile.is_approved
+                    # Cache for 5 minutes
+                    cache.set(cache_key, is_approved, 60 * 5)
+                else:
+                    return self.get_response(request)
+            
+            if is_approved:
                 return self.get_response(request)
 
             if "/media/" in request.path and request.path.endswith(".pdf"):
@@ -220,92 +230,10 @@ class ApprovalCheckMiddleware:
             
             return self.get_response(request)
 
-class SessionCleanupMiddleware:
-    """
-    Cleanup temporary session data after page loads to prevent memory leaks
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
-    
-    def __call__(self, request):
-        response = self.get_response(request)
-        
-        # Clean up session data - pure cache, no DB needed
-        try:
-            # Clean up verification session data if user is already logged in and approved
-            if request.user.is_authenticated and hasattr(request.user, 'userprofile'):
-                profile = request.user.userprofile
-                
-                verification_paths = [
-                    '/accounts/register/',
-                    '/accounts/login/',
-                    '/accounts/verify-email-ajax/',
-                    '/accounts/resend-verification/',
-                    '/accounts/forgot-password/',
-                    '/accounts/verify-password-reset/',
-                    '/accounts/resend-password-reset/',
-                ]
-                
-                is_verification_page = any(request.path.startswith(path) for path in verification_paths)
-                
-                if profile.is_approved and not is_verification_page:
-                    keys_to_remove = [
-                        'show_verification_modal',
-                        'verification_email', 
-                        'verification_user_id',
-                        'show_password_reset_modal',
-                        'password_reset_email',
-                        'password_reset_user_id',
-                        'new_password_hash'
-                    ]
-                    
-                    modified = False
-                    for key in keys_to_remove:
-                        if key in request.session:
-                            del request.session[key]
-                            modified = True
-                    
-                    if modified:
-                        request.session.modified = True
-            
-            elif not request.user.is_authenticated:
-                auth_paths = [
-                    '/accounts/register/',
-                    '/accounts/login/',
-                    '/accounts/verify-email-ajax/',
-                    '/accounts/resend-verification/',
-                    '/accounts/forgot-password/',
-                ]
-                
-                is_auth_page = any(request.path.startswith(path) for path in auth_paths)
-                
-                if not is_auth_page:
-                    keys_to_remove = [
-                        'show_verification_modal',
-                        'verification_email', 
-                        'verification_user_id',
-                        'show_password_reset_modal',
-                        'password_reset_email',
-                        'password_reset_user_id',
-                        'new_password_hash'
-                    ]
-                    
-                    modified = False
-                    for key in keys_to_remove:
-                        if key in request.session:
-                            del request.session[key]
-                            modified = True
-                    
-                    if modified:
-                        request.session.modified = True
-        
-        except Exception as e:
-            # Silently fail if there's any issue with session cleanup
-            logger.debug(f"Session cleanup skipped: {e}")
-            pass
-        
-        return response
-    
+# ============================================
+# DATABASE CONNECTION MIDDLEWARE
+# ============================================
+
 class DatabaseConnectionMiddleware:
     """
     Handle database connection errors gracefully with automatic retries.
@@ -316,7 +244,7 @@ class DatabaseConnectionMiddleware:
     
     def __call__(self, request):
         max_retries = 2
-        retry_delay = 0.5  # 500ms between retries
+        retry_delay = 0.1  # ✅ CHANGED: From 0.5 to 0.1 (100ms instead of 500ms)
         
         for attempt in range(max_retries + 1):
             try:
@@ -355,7 +283,7 @@ class DatabaseConnectionMiddleware:
                         <head>
                             <meta charset="UTF-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Database Maintenance</title>
+                            <title>Database Connection Issue</title>
                             <style>
                                 body {
                                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
@@ -400,14 +328,13 @@ class DatabaseConnectionMiddleware:
                         <body>
                             <div class="container">
                                 <h1>🔧</h1>
-                                <h1>Database Maintenance</h1>
-                                <p>Our database provider (Supabase) is performing scheduled maintenance.</p>
+                                <h1>Connection Issue</h1>
+                                <p>We're experiencing a temporary database connection issue.</p>
                                 <p><strong>Auto-refreshing in 5 seconds...</strong></p>
                                 <button class="refresh-btn" onclick="window.location.reload()">
                                     Refresh Now
                                 </button>
-                                <p class="small">Expected completion: February 2, 2026</p>
-                                <p class="small">Sorry for the inconvenience!</p>
+                                <p class="small">Running on free tier - occasional slowness is normal.</p>
                             </div>
                         </body>
                         </html>
