@@ -793,10 +793,7 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # ✅ CRITICAL: Use aggregate for counts instead of loading all profiles
-        from django.db.models import Count
-        
-        # ✅ Get counts efficiently with a single query
+        # ✅ CRITICAL: Use aggregate for counts (1 query instead of 4)
         counts = UserProfile.objects.aggregate(
             total=Count('id'),
             approved=Count('id', filter=Q(is_approved=True)),
@@ -809,22 +806,20 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         context['pending_count'] = counts['pending']
         context['active_count'] = counts['active']
         
-        # ✅ Get batches efficiently using distinct values only
-        batches = set()
+        # ✅ Get batches efficiently (2 queries instead of loading all profiles)
+        g11_batches = set(
+            UserProfile.objects.exclude(
+                Q(pending_G11__isnull=True) | Q(pending_G11='')
+            ).values_list('pending_G11', flat=True).distinct()
+        )
         
-        # Use values_list to get only the batch fields
-        g11_batches = UserProfile.objects.exclude(
-            Q(pending_G11__isnull=True) | Q(pending_G11='')
-        ).values_list('pending_G11', flat=True).distinct()
+        g12_batches = set(
+            UserProfile.objects.exclude(
+                Q(pending_G12__isnull=True) | Q(pending_G12='')
+            ).values_list('pending_G12', flat=True).distinct()
+        )
         
-        g12_batches = UserProfile.objects.exclude(
-            Q(pending_G12__isnull=True) | Q(pending_G12='')
-        ).values_list('pending_G12', flat=True).distinct()
-        
-        # ✅ Force evaluation and combine
-        batches.update(g11_batches)
-        batches.update(g12_batches)
-        
+        batches = g11_batches | g12_batches
         context['batches'] = sorted(batches, reverse=True)
         
         context['role_choices'] = User.ROLE_CHOICES
@@ -835,9 +830,6 @@ class UserManagementView(LoginRequiredMixin, RoleRequiredMixin, ListView):
         context['current_batch'] = self.request.GET.get('batch', '')
         context['current_sort'] = self.request.GET.get('sort', 'id')
         context['current_order'] = self.request.GET.get('order', 'desc')
-        
-        # ✅ Force evaluation of paginated profiles
-        context['profiles'] = list(context['profiles'])
         
         return context
     

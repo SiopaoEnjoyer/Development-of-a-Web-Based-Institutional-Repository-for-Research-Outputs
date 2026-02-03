@@ -22,6 +22,8 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from storage import SupabaseStorage
 import mimetypes
+from datetime import datetime
+
 
 @login_required
 def serve_pdf(request, path):
@@ -147,13 +149,18 @@ def invalidate_keyword_caches():
     cache.delete('keywords_with_count')
 
 def invalidate_author_caches():
-    """Invalidate author caches"""
+    """Invalidate author caches - but be selective"""
     cache.delete('all_author_batches')
-    school_years = ResearchPaper.objects.values_list("school_year", flat=True).distinct()
-    for year in school_years:
-        cache.delete(f'authors_grade_11_year_{year}')
-        cache.delete(f'authors_grade_12_year_{year}')
-
+    
+    # ✅ Only delete caches for recent years (not all years ever)
+    current_year = datetime.now().year
+    
+    for year_offset in range(-2, 3):  # Current year ± 2 years
+        year1 = current_year + year_offset
+        year2 = year1 + 1
+        sy = f"{year1}-{year2}"
+        cache.delete(f'authors_grade_11_year_{sy}')
+        cache.delete(f'authors_grade_12_year_{sy}')
 # =========================
 # MIXINS
 # =========================

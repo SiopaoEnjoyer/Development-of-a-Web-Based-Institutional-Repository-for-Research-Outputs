@@ -345,21 +345,3 @@ class DatabaseConnectionMiddleware:
                 else:
                     # Not a connection error, re-raise
                     raise
-
-class DatabaseConnectionCleanupMiddleware:
-    """
-    Close database connections after each request when using Supabase pooler.
-    This prevents connection pooling conflicts.
-    """
-    
-    def __init__(self, get_response):
-        self.get_response = get_response
-    
-    def __call__(self, request):
-        try:
-            response = self.get_response(request)
-            return response
-        finally:
-            # Always close connection after request completes
-            # Pooler will manage actual connections
-            connection.close_if_unusable_or_obsolete()
