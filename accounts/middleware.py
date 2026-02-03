@@ -277,7 +277,6 @@ class DatabaseConnectionMiddleware:
     OPTIMIZED FOR NEON DB (serverless Postgres).
     """
     
-    # ✅ PATHS THAT SHOULD NEVER TOUCH THE DATABASE
     EXCLUDED_PATHS = [
         '/static/',
         '/media/',
@@ -288,16 +287,16 @@ class DatabaseConnectionMiddleware:
         '/__debug__/',
     ]
     
-    # ✅ STATIC TEMPLATE PAGES THAT DON'T NEED DB
     STATIC_PAGES = [
-        '/',  # home.html
-        '/about/',  # about.html
-        '/terms/',  # terms.html
-        '/privacy-policy/',  # privacy_policy.html
+        '/',
+        '/about/',
+        '/terms/',
+        '/privacy-policy/',
     ]
     
     def __init__(self, get_response):
         self.get_response = get_response
+        self.db_request_count = 0  # ✅ ADD COUNTER
     
     def __call__(self, request):
         # ✅ SKIP DATABASE ENTIRELY FOR STATIC FILES
@@ -308,19 +307,22 @@ class DatabaseConnectionMiddleware:
         if not request.user.is_authenticated and request.path in self.STATIC_PAGES:
             return self.get_response(request)
         
+        # ✅ LOG DB ACCESS
+        self.db_request_count += 1
+        if self.db_request_count % 10 == 0:
+            logger.info(f"DB access #{self.db_request_count}: {request.path}")
+        
         max_retries = 2
         retry_delay = 0.1
         
         for attempt in range(max_retries + 1):
             try:
-                # ✅ Only close if connection exists and is broken
                 if connection.connection is not None and not connection.is_usable():
                     connection.close()
                 
                 response = self.get_response(request)
                 
                 # ✅ CRITICAL FOR NEON: Close connection after each request
-                # This prevents connection pooling issues with serverless Postgres
                 try:
                     if connection.connection is not None:
                         connection.close()
@@ -337,20 +339,17 @@ class DatabaseConnectionMiddleware:
                 ])
                 
                 if is_connection_error:
-                    logger.warning(f"DB connection attempt {attempt + 1}/{max_retries + 1} failed: {str(e)[:100]}")
+                    logger.warning(f"DB connection attempt {attempt + 1}/{max_retries + 1} failed on {request.path}: {str(e)[:100]}")
                     
-                    # Close the failed connection
                     try:
                         connection.close()
                     except:
                         pass
                     
-                    # If we have retries left, try again
                     if attempt < max_retries:
                         time.sleep(retry_delay)
                         continue
                     
-                    # All retries exhausted - show maintenance page
                     logger.error(f"All DB connection attempts failed for {request.path}")
                     
                     return HttpResponse(
