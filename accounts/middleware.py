@@ -304,7 +304,8 @@ class DatabaseConnectionMiddleware:
             return self.get_response(request)
         
         # ✅ SKIP DATABASE FOR STATIC TEMPLATE PAGES (if user not authenticated)
-        if not request.user.is_authenticated and request.path in self.STATIC_PAGES:
+        # FIX: Check if user attribute exists first (it won't exist until AuthenticationMiddleware runs)
+        if hasattr(request, 'user') and not request.user.is_authenticated and request.path in self.STATIC_PAGES:
             return self.get_response(request)
         
         # ✅ LOG DB ACCESS
