@@ -22,6 +22,17 @@ class MemoryLimiterMiddleware:
     Place this FIRST in your MIDDLEWARE list.
     """
     
+    # ✅ PATHS THAT DON'T NEED MEMORY MONITORING (static content)
+    EXCLUDED_PATHS = [
+        '/static/',
+        '/media/',
+        '/favicon.ico',
+        '/robots.txt',
+        '/sitemap.xml',
+        '/healthcheck/',
+        '/__debug__/',  # Django Debug Toolbar
+    ]
+    
     # Configuration (in MB)
     MAX_MEMORY_MB = 500  # Render limit is 512MB
     WARNING_THRESHOLD_MB = 450  # Start slowing down at 450MB
@@ -38,6 +49,10 @@ class MemoryLimiterMiddleware:
         return mem_info.rss / 1024 / 1024
     
     def __call__(self, request):
+        # ✅ SKIP STATIC FILES AND HEALTHCHECK COMPLETELY
+        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+            return self.get_response(request)
+        
         self.request_count += 1
         current_memory = self.get_memory_mb()
         
@@ -123,7 +138,7 @@ class MemoryLimiterMiddleware:
         # WARNING: Add slight delay if memory is getting high
         if current_memory >= self.WARNING_THRESHOLD_MB:
             logger.warning(f"WARNING RAM: {current_memory:.1f}MB - Slowing request")
-            time.sleep(0.1)  # ✅ Reduced from 0.3 to 0.1
+            time.sleep(0.1)
             
             # Trigger cleanup every 5 requests when in warning zone
             if self.request_count % 5 == 0:
@@ -142,7 +157,7 @@ class MemoryLimiterMiddleware:
         """Regular cleanup operations"""
         try:
             gc.collect()
-            # ✅ ADD: Clear Django's query cache
+            # Clear Django's query cache
             from django.db import reset_queries
             reset_queries()
             logger.debug("Cleanup: GC + query cache cleared")
@@ -155,7 +170,7 @@ class MemoryLimiterMiddleware:
             gc.collect()
             gc.collect()
             gc.collect()
-            # ✅ ADD: Clear query cache
+            # Clear query cache
             from django.db import reset_queries
             reset_queries()
             logger.warning("Emergency cleanup completed")
@@ -168,10 +183,25 @@ class MemoryLimiterMiddleware:
 # ============================================
 
 class ApprovalCheckMiddleware:
+    # ✅ PATHS THAT DON'T NEED AUTHENTICATION/APPROVAL CHECKS
+    EXCLUDED_PATHS = [
+        '/static/',
+        '/media/',
+        '/favicon.ico',
+        '/robots.txt',
+        '/sitemap.xml',
+        '/healthcheck/',
+        '/__debug__/',
+    ]
+    
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # ✅ SKIP STATIC FILES COMPLETELY - NO DB ACCESS
+        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+            return self.get_response(request)
+        
         if request.path.startswith("/admin/"):
             return self.get_response(request)
 
@@ -180,6 +210,8 @@ class ApprovalCheckMiddleware:
             "/about/",
             "/papers/",
             "/authors/",
+            "/terms/",
+            "/privacy-policy/",
             "/accounts/login/",
             "/accounts/register/",
             "/accounts/forgot-password/",
@@ -194,7 +226,7 @@ class ApprovalCheckMiddleware:
             if request.user.is_superuser or request.user.is_staff:
                 return self.get_response(request)
 
-            # ✅ NEW: Cache the approval status to avoid DB queries
+            # ✅ Cache the approval status to avoid DB queries
             cache_key = f'user_approved_{request.user.id}'
             is_approved = cache.get(cache_key)
             
@@ -242,36 +274,76 @@ class ApprovalCheckMiddleware:
 class DatabaseConnectionMiddleware:
     """
     Handle database connection errors gracefully with automatic retries.
+    OPTIMIZED FOR NEON DB (serverless Postgres).
     """
+    
+    # ✅ PATHS THAT SHOULD NEVER TOUCH THE DATABASE
+    EXCLUDED_PATHS = [
+        '/static/',
+        '/media/',
+        '/favicon.ico',
+        '/robots.txt',
+        '/sitemap.xml',
+        '/healthcheck/',
+        '/__debug__/',
+    ]
+    
+    # ✅ STATIC TEMPLATE PAGES THAT DON'T NEED DB
+    STATIC_PAGES = [
+        '/',  # home.html
+        '/about/',  # about.html
+        '/terms/',  # terms.html
+        '/privacy-policy/',  # privacy_policy.html
+    ]
     
     def __init__(self, get_response):
         self.get_response = get_response
     
     def __call__(self, request):
+        # ✅ SKIP DATABASE ENTIRELY FOR STATIC FILES
+        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+            return self.get_response(request)
+        
+        # ✅ SKIP DATABASE FOR STATIC TEMPLATE PAGES (if user not authenticated)
+        if not request.user.is_authenticated and request.path in self.STATIC_PAGES:
+            return self.get_response(request)
+        
         max_retries = 2
-        retry_delay = 0.1  # ✅ CHANGED: From 0.5 to 0.1 (100ms instead of 500ms)
+        retry_delay = 0.1
         
         for attempt in range(max_retries + 1):
             try:
-                # Close any broken connections before processing
-                if connection.connection and not connection.is_usable():
+                # ✅ Only close if connection exists and is broken
+                if connection.connection is not None and not connection.is_usable():
                     connection.close()
                 
-                # Process request
                 response = self.get_response(request)
+                
+                # ✅ CRITICAL FOR NEON: Close connection after each request
+                # This prevents connection pooling issues with serverless Postgres
+                try:
+                    if connection.connection is not None:
+                        connection.close()
+                except Exception as e:
+                    logger.debug(f"Error closing connection: {e}")
+                
                 return response
                 
             except OperationalError as e:
                 error_msg = str(e).lower()
                 is_connection_error = any(keyword in error_msg for keyword in [
-                    'timeout', 'connection', 'server closed', 'terminated', 'could not connect'
+                    'timeout', 'connection', 'server closed', 'terminated', 
+                    'could not connect', 'pool', 'max_client_conn', 'too many connections'
                 ])
                 
                 if is_connection_error:
                     logger.warning(f"DB connection attempt {attempt + 1}/{max_retries + 1} failed: {str(e)[:100]}")
                     
                     # Close the failed connection
-                    connection.close()
+                    try:
+                        connection.close()
+                    except:
+                        pass
                     
                     # If we have retries left, try again
                     if attempt < max_retries:
