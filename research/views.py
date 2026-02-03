@@ -202,7 +202,7 @@ class IndexView(generic.ListView):
                 'keywords',
                 queryset=Keyword.objects.only('id', 'word')
             )
-        ).order_by('-publication_date')
+        ).defer('pdf_file').order_by('-publication_date')  
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -268,7 +268,7 @@ class SearchView(generic.ListView):
                 'awards',
                 queryset=Award.objects.only('id', 'name')
             )
-        )
+        ).defer("pdf_file")
         
         request = self.request
 
@@ -408,7 +408,7 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
             'author',
             'keywords',
             'awards'
-        )
+        ).defer('pdf_file')
         
         request = self.request
 

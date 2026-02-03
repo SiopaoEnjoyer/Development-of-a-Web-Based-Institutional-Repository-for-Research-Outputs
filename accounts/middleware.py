@@ -142,17 +142,22 @@ class MemoryLimiterMiddleware:
         """Regular cleanup operations"""
         try:
             gc.collect()
-            logger.debug("Garbage collection triggered")
+            # ✅ ADD: Clear Django's query cache
+            from django.db import reset_queries
+            reset_queries()
+            logger.debug("Cleanup: GC + query cache cleared")
         except Exception as e:
             logger.error(f"Cleanup error: {e}")
-    
+
     def emergency_cleanup(self):
         """Aggressive cleanup when memory is critical"""
         try:
-            # Force multiple garbage collections
             gc.collect()
             gc.collect()
             gc.collect()
+            # ✅ ADD: Clear query cache
+            from django.db import reset_queries
+            reset_queries()
             logger.warning("Emergency cleanup completed")
         except Exception as e:
             logger.error(f"Emergency cleanup error: {e}")

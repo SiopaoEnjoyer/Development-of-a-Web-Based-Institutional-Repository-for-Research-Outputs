@@ -383,67 +383,98 @@ class PendingAccountsView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     template_name = "accounts/pending_requests.html"
     context_object_name = "users"
     role = "admin"
-    paginate_by = 20  # ✅ ADD PAGINATION
+    paginate_by = 20
 
     def get_queryset(self):
-        # ✅ CRITICAL FIX: Use annotations instead of Python loops
-        
-        queryset = UserProfile.objects.filter(
+        return UserProfile.objects.filter(
             is_approved=False
-        ).select_related('user').prefetch_related('author_profile').order_by('-id')
-        
-        # ✅ Annotate matching author counts in SQL, not Python
-        queryset = queryset.annotate(
-            has_matching_authors=Exists(
-                Author.objects.filter(
-                    first_name__iexact=OuterRef('pending_first_name'),
-                    last_name__iexact=OuterRef('pending_last_name'),
+        ).select_related('user').prefetch_related(
+            Prefetch(
+                'author_profile',
+                queryset=Author.objects.only(
+                    'id', 'first_name', 'last_name', 
+                    'middle_initial', 'suffix'
                 )
             )
-        )
-        
-        return queryset
+        ).only(
+            'id', 'user', 'pending_first_name', 'pending_last_name',
+            'pending_middle_initial', 'pending_suffix',
+            'pending_G11', 'pending_G12', 'is_approved'
+        ).order_by('-id')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # ✅ CRITICAL: Process ONLY the current page, not all profiles
-        profiles_with_authors = []
+        # ✅ Collect all names from current page
+        profiles_data = []
+        all_names = []
         
-        for profile in context['users']:  # Only processes paginated results
-            first = profile.pending_first_name
-            last = profile.pending_last_name
-            middle = profile.pending_middle_initial or ""
-            suffix = profile.pending_suffix or ""
+        for profile in context['users']:
+            first = (profile.pending_first_name or "").strip()
+            last = (profile.pending_last_name or "").strip()
             
-            # Find matching authors efficiently
-            matching_authors = Author.objects.filter(
-                first_name__iexact=first.strip() if first else "",
-                last_name__iexact=last.strip() if last else "",
-            )
-            
-            if middle:
-                matching_authors = matching_authors.filter(middle_initial__iexact=middle)
-            else:
-                matching_authors = matching_authors.filter(
-                    Q(middle_initial__isnull=True) | Q(middle_initial="")
-                )
-            
-            if suffix:
-                matching_authors = matching_authors.filter(suffix__iexact=suffix)
-            else:
-                matching_authors = matching_authors.filter(
-                    Q(suffix__isnull=True) | Q(suffix="")
-                )
-            
-            # ✅ OPTIMIZED: Only get count and basic info
-            profile.matching_authors = list(matching_authors.only(
-                'id', 'first_name', 'last_name', 'middle_initial', 'suffix'
-            ).annotate(paper_count=Count('researchpaper'))[:5])  # Limit to 5 matches
-            
-            profiles_with_authors.append(profile)
+            if first and last:
+                all_names.append((
+                    first.lower(), 
+                    last.lower(),
+                    (profile.pending_middle_initial or "").lower(),
+                    (profile.pending_suffix or "").lower(),
+                    profile.id
+                ))
         
-        context['users'] = profiles_with_authors
+        # ✅ Fetch ALL matching authors in ONE query
+        if all_names:
+            match_filters = Q()
+            for first, last, middle, suffix, _ in all_names:
+                name_filter = Q(
+                    first_name__iexact=first,
+                    last_name__iexact=last
+                )
+                
+                if middle:
+                    name_filter &= Q(middle_initial__iexact=middle)
+                else:
+                    name_filter &= (Q(middle_initial__isnull=True) | Q(middle_initial=''))
+                
+                if suffix:
+                    name_filter &= Q(suffix__iexact=suffix)
+                else:
+                    name_filter &= (Q(suffix__isnull=True) | Q(suffix=''))
+                
+                match_filters |= name_filter
+            
+            # Single query for all matches
+            matching_authors = Author.objects.filter(match_filters).annotate(
+                paper_count=Count('researchpaper')
+            ).only('id', 'first_name', 'last_name', 'middle_initial', 'suffix')
+            
+            # Group by name
+            matches_by_name = {}
+            for author in matching_authors:
+                key = (
+                    author.first_name.lower(),
+                    author.last_name.lower(),
+                    (author.middle_initial or "").lower(),
+                    (author.suffix or "").lower()
+                )
+                if key not in matches_by_name:
+                    matches_by_name[key] = []
+                matches_by_name[key].append(author)
+        else:
+            matches_by_name = {}
+        
+        # ✅ Attach matches to profiles
+        for profile in context['users']:
+            first = (profile.pending_first_name or "").strip()
+            last = (profile.pending_last_name or "").strip()
+            middle = (profile.pending_middle_initial or "").strip()
+            suffix = (profile.pending_suffix or "").strip()
+            
+            key = (first.lower(), last.lower(), middle.lower(), suffix.lower())
+            profile.matching_authors = matches_by_name.get(key, [])[:5]
+            profiles_data.append(profile)
+        
+        context['users'] = profiles_data
         return context
 
 class ApproveUserEditView(LoginRequiredMixin, RoleRequiredMixin, View):
