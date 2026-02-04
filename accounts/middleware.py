@@ -234,11 +234,11 @@ class ApprovalCheckMiddleware:
                 # Only hit DB if not in cache
                 if hasattr(request.user, "userprofile"):
                     is_approved = request.user.userprofile.is_approved
-                    # Cache for 5 minutes
-                    cache.set(cache_key, is_approved, 60 * 5)
+                    # Cache for 30 minutes (approval status rarely changes)
+                    cache.set(cache_key, is_approved, 60 * 30)
                 else:
                     return self.get_response(request)
-            
+                        
             if is_approved:
                 return self.get_response(request)
 
@@ -299,16 +299,11 @@ class DatabaseConnectionMiddleware:
         self.db_request_count = 0  # ✅ ADD COUNTER
     
     def __call__(self, request):
-        # ✅ SKIP DATABASE ENTIRELY FOR STATIC FILES
+        # ✅ SKIP DATABASE ENTIRELY FOR STATIC FILES AND EXCLUDED PATHS
         if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
             return self.get_response(request)
         
-        # ✅ SKIP DATABASE FOR STATIC TEMPLATE PAGES (if user not authenticated)
-        # FIX: Check if user attribute exists first (it won't exist until AuthenticationMiddleware runs)
-        if hasattr(request, 'user') and not request.user.is_authenticated and request.path in self.STATIC_PAGES:
-            return self.get_response(request)
-        
-        # ✅ LOG DB ACCESS
+        # ✅ LOG DB ACCESS (for monitoring)
         self.db_request_count += 1
         if self.db_request_count % 10 == 0:
             logger.info(f"DB access #{self.db_request_count}: {request.path}")

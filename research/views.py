@@ -23,7 +23,8 @@ from django.contrib.auth.decorators import login_required
 from storage import SupabaseStorage
 import mimetypes
 from datetime import datetime
-
+from django.core.cache import cache
+from django.db import connection, models
 
 @login_required
 def serve_pdf(request, path):
@@ -60,20 +61,8 @@ def serve_pdf(request, path):
     except Exception as e:
         raise Http404(f"File not found: {str(e)}")
 
-@csrf_exempt
-@cache_page(60 * 5)  # Cache for 5 minutes
-def healthcheck(request):
-    """
-    Lightweight endpoint for uptime monitoring.
-    Doesn't touch the database to avoid connection overhead.
-    """
-    return JsonResponse({
-        "status": "ok",
-        "message": "Server is alive"
-    })
-
 # =========================
-# CACHE HELPER FUNCTIONS
+# CACHE HELPER FUNCTIONS - OPTIMIZED
 # =========================
 
 def get_cached_awards():
@@ -85,53 +74,93 @@ def get_cached_awards():
         cache.set(cache_key, awards, 60 * 60)  # 1 hour
     return awards
 
+
 def get_cached_school_years():
-    """Get all distinct school years (cached for 1 hour)"""
+    """Get all distinct school years (cached for 1 hour) - OPTIMIZED"""
     cache_key = 'all_school_years'
     school_years = cache.get(cache_key)
     if school_years is None:
-        school_years = list(
-            ResearchPaper.objects.values_list("school_year", flat=True)
-            .distinct().order_by("school_year")
-        )
+        # ✅ Use raw SQL for better performance
+        if connection.vendor == 'postgresql':
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT DISTINCT school_year FROM research_researchpaper "
+                    "WHERE school_year IS NOT NULL ORDER BY school_year"
+                )
+                school_years = [row[0] for row in cursor.fetchall()]
+        else:
+            school_years = list(
+                ResearchPaper.objects.values_list("school_year", flat=True)
+                .distinct().order_by("school_year")
+            )
         cache.set(cache_key, school_years, 60 * 60)  # 1 hour
     return school_years
 
+
 def get_cached_strands():
-    """Get all distinct strands (cached for 1 hour)"""
+    """Get all distinct strands (cached for 1 hour) - OPTIMIZED"""
     cache_key = 'all_strands'
     strands = cache.get(cache_key)
     if strands is None:
-        strands = list(
-            ResearchPaper.objects.values_list("strand", flat=True).distinct()
-        )
+        # ✅ Use raw SQL for better performance
+        if connection.vendor == 'postgresql':
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT DISTINCT strand FROM research_researchpaper "
+                    "WHERE strand IS NOT NULL ORDER BY strand"
+                )
+                strands = [row[0] for row in cursor.fetchall()]
+        else:
+            strands = list(
+                ResearchPaper.objects.values_list("strand", flat=True).distinct()
+            )
         cache.set(cache_key, strands, 60 * 60)  # 1 hour
     return strands
 
+
 def get_cached_grade_levels():
-    """Get all distinct grade levels (cached for 1 hour)"""
+    """Get all distinct grade levels (cached for 1 hour) - OPTIMIZED"""
     cache_key = 'all_grade_levels'
     grade_levels = cache.get(cache_key)
     if grade_levels is None:
-        grade_levels = list(
-            ResearchPaper.objects.values_list("grade_level", flat=True).distinct()
-        )
+        # ✅ Use raw SQL for better performance
+        if connection.vendor == 'postgresql':
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT DISTINCT grade_level FROM research_researchpaper "
+                    "WHERE grade_level IS NOT NULL ORDER BY grade_level"
+                )
+                grade_levels = [row[0] for row in cursor.fetchall()]
+        else:
+            grade_levels = list(
+                ResearchPaper.objects.values_list("grade_level", flat=True).distinct()
+            )
         cache.set(cache_key, grade_levels, 60 * 60)  # 1 hour
     return grade_levels
 
+
 def get_cached_all_batches():
-    """Get all author batches (cached for 1 hour)"""
+    """Get all author batches (cached for 1 hour) - OPTIMIZED"""
     cache_key = 'all_author_batches'
     batches = cache.get(cache_key)
     if batches is None:
-        batches = sorted({
-            b for b in (
-                list(Author.objects.values_list("G11_Batch", flat=True)) +
-                list(Author.objects.values_list("G12_Batch", flat=True))
-            ) if b
-        })
+        # ✅ ONE query instead of TWO
+        batch_pairs = Author.objects.filter(
+            Q(G11_Batch__isnull=False) | Q(G12_Batch__isnull=False)
+        ).values_list('G11_Batch', 'G12_Batch')
+        
+        # Flatten and deduplicate
+        all_batches = set()
+        for g11, g12 in batch_pairs:
+            if g11:
+                all_batches.add(g11)
+            if g12:
+                all_batches.add(g12)
+        
+        batches = sorted(all_batches)
         cache.set(cache_key, batches, 60 * 60)  # 1 hour
     return batches
+
 
 def invalidate_paper_caches():
     """Invalidate all research paper related caches"""
@@ -139,14 +168,17 @@ def invalidate_paper_caches():
     cache.delete('all_strands')
     cache.delete('all_grade_levels')
 
+
 def invalidate_award_caches():
     """Invalidate award caches"""
     cache.delete('all_awards')
+
 
 def invalidate_keyword_caches():
     """Invalidate keyword caches"""
     cache.delete('all_keywords')
     cache.delete('keywords_with_count')
+
 
 def invalidate_author_caches():
     """Invalidate author caches - but be selective"""
@@ -161,6 +193,21 @@ def invalidate_author_caches():
         sy = f"{year1}-{year2}"
         cache.delete(f'authors_grade_11_year_{sy}')
         cache.delete(f'authors_grade_12_year_{sy}')
+
+
+# =========================
+# OPTIMIZED HEALTHCHECK
+# =========================
+
+
+
+@csrf_exempt
+def healthcheck(request):
+    """
+    Ultra-lightweight endpoint for uptime monitoring.
+    NO database connection or cache access.
+    """
+    return HttpResponse("OK", content_type="text/plain")
 # =========================
 # MIXINS
 # =========================
@@ -206,7 +253,6 @@ class IndexView(generic.ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['latest_research_list'] = list(context['latest_research_list'])
         return context
 
 class DetailView(generic.DetailView):
@@ -346,8 +392,6 @@ class SearchView(generic.ListView):
             "research_designs": ResearchPaper.RESEARCH_DESIGN_CHOICES,
         })
         
-        context['papers'] = list(context['papers'])
-
         return context
     
 class StrandFilteredView(generic.ListView):
@@ -607,9 +651,7 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     context_object_name = "keywords"
     paginate_by = 10
     
-    def get_queryset(self):
-        from django.db import models
-        
+    def get_queryset(self):        
         # ✅ Prefetch related papers so they're available in the template
         qs = Keyword.objects.annotate(
             usage_count=models.Count('researchpaper')
@@ -643,20 +685,36 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
         
         return qs
     
+    def get_queryset(self):
+        
+        # ✅ Don't prefetch papers unless template actually uses them
+        qs = Keyword.objects.annotate(
+            usage_count=models.Count('researchpaper')
+        ).only('id', 'word')  # ✅ Only fetch needed fields
+        
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(word__icontains=q)
+        
+        sort_by = self.request.GET.get("sort_by", "alphabetical")
+        
+        if sort_by == "alphabetical":
+            qs = qs.order_by("word")
+        elif sort_by == "reverse_alphabetical":
+            qs = qs.order_by("-word")
+        elif sort_by == "most_used":
+            qs = qs.order_by("-usage_count")
+        elif sort_by == "least_used":
+            qs = qs.order_by("usage_count")
+        else:
+            qs = qs.order_by("word")
+        
+        return qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # ✅ Now include the actual papers for each keyword
-        keyword_data = []
-        for keyword in context['keywords']:
-            keyword_data.append({
-                'id': keyword.id,
-                'word': keyword.word,
-                'usage_count': keyword.usage_count,
-                'papers': list(keyword.researchpaper_set.all())  # ✅ Get the actual papers
-            })
-        
-        context["keywords"] = keyword_data
+        # ✅ Just return context as-is
+        # Template can access keyword.usage_count directly
         return context
 
     def post(self, request, *args, **kwargs):
