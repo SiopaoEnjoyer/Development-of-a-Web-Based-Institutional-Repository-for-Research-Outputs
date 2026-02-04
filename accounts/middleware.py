@@ -420,3 +420,29 @@ class DatabaseConnectionMiddleware:
                 else:
                     # Not a connection error, re-raise
                     raise
+
+class DatabaseCleanupMiddleware:
+    """Close all DB connections after each request"""
+    
+    EXCLUDED_PATHS = [
+        '/static/', '/media/', '/favicon.ico', '/robots.txt',
+        '/sitemap.xml', '/healthcheck/', '/__debug__/',
+    ]
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+            return self.get_response(request)
+        
+        try:
+            response = self.get_response(request)
+            return response
+        finally:
+            from django.db import connections
+            for conn in connections.all():
+                try:
+                    conn.close()
+                except:
+                    pass

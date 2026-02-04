@@ -7,8 +7,8 @@ workers = 1  # Keep at 1 for 512MB RAM limit
 threads = 2  # Handle 2 requests concurrently per worker
 worker_class = 'gthread'  # Use threaded worker (changed from 'sync')
 
-max_requests = 50
-max_requests_jitter = 10
+max_requests = 200
+max_requests_jitter = 40
 
 # ============================================
 # Timeout settings

@@ -4,10 +4,3 @@ services:
     env: python
     buildCommand: ./build.sh
     startCommand: gunicorn G12Research.wsgi:application
-    
-  - type: cron
-    name: sample-cron-job
-    env: python
-    schedule: "*/5 * * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python manage.py sample_cron
