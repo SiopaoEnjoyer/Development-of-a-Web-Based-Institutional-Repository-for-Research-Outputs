@@ -29,7 +29,6 @@ class MemoryLimiterMiddleware:
         '/favicon.ico',
         '/robots.txt',
         '/sitemap.xml',
-        '/healthcheck/',
         '/__debug__/',  # Django Debug Toolbar
     ]
     
@@ -49,7 +48,11 @@ class MemoryLimiterMiddleware:
         return mem_info.rss / 1024 / 1024
     
     def __call__(self, request):
-        # ✅ SKIP STATIC FILES AND HEALTHCHECK COMPLETELY
+        # ✅ CHECK HEALTHCHECK FIRST - BEFORE ANY OTHER PROCESSING
+        if request.path == '/healthcheck/':
+            return self.get_response(request)
+        
+        # ✅ SKIP STATIC FILES COMPLETELY
         if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
             return self.get_response(request)
         

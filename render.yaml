@@ -5,7 +5,7 @@ services:
     buildCommand: ./build.sh
     startCommand: gunicorn G12Research.wsgi:application
     healthCheckPath: /healthcheck/
-    healthCheckInterval: 30
+    healthCheckInterval: 600
     healthCheckTimeout: 10
     
   - type: cron
