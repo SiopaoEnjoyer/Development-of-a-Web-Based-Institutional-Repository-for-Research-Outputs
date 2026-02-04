@@ -4,6 +4,9 @@ services:
     env: python
     buildCommand: ./build.sh
     startCommand: gunicorn G12Research.wsgi:application
+    healthCheckPath: /healthcheck/
+    healthCheckInterval: 30
+    healthCheckTimeout: 10
     
   - type: cron
     name: sample-cron-job
