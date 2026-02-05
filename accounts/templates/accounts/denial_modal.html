@@ -1,0 +1,71 @@
+<div class="modal" id="denyModal_{{ profile.id }}">
+    <div class="modal-dialog" style="max-width: 500px;">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                <h5>
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Deny Account Registration
+                </h5>
+                <button type="button" class="close" onclick="closeDenyModal('{{ profile.id }}')">&times;</button>
+            </div>
+            
+            <form method="post" action="{% url 'accounts:deny_user' profile.id %}" onsubmit="return handleDenySubmit(event, this, '{{ profile.pending_first_name }} {{ profile.pending_last_name }}')">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <strong>Warning:</strong> This action cannot be undone. The user account will be permanently deleted and a denial notification will be sent to their email.
+                        </p>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #333; margin-bottom: 8px; display: block;">
+                            User to Deny:
+                        </label>
+                        <div style="background: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <strong>{{ profile.pending_last_name }}, {{ profile.pending_first_name }}</strong>
+                            <br>
+                            <small style="color: #6c757d;">{{ profile.user.email }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="denial_reason_{{ profile.id }}" style="font-weight: 600; color: #333; margin-bottom: 8px; display: block;">
+                            Reason for Denial: <span style="color: #dc3545;">*</span>
+                        </label>
+                        <select 
+                            name="denial_reason" 
+                            id="denial_reason_{{ profile.id }}" 
+                            class="form-control" 
+                            required
+                            style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 0.9rem;"
+                        >
+                            <option value="">-- Select a reason --</option>
+                            <option value="Not affiliated with BTCS">Not affiliated with BTCSI (Bacolod Trinity Christian School, Inc.)</option>
+                            <option value="Incorrect role selected">Incorrect role selected</option>
+                            <option value="Duplicate account">Duplicate account detected</option>
+                            <option value="Incomplete information">Incomplete or inaccurate information provided</option>
+                            <option value="Invalid email">Invalid or non-institutional email address</option>
+                            <option value="Not eligible">Not eligible for the selected role</option>
+                            <option value="Suspicious activity">Suspicious or fraudulent activity detected</option>
+                            <option value="Other">Other administrative reason</option>
+                        </select>
+                        <small style="color: #6c757d; margin-top: 5px; display: block;">
+                            This reason will be included in the denial email sent to the user.
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeDenyModal('{{ profile.id }}')">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill"></i> Confirm Denial
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

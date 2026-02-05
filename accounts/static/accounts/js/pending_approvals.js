@@ -29,31 +29,61 @@ function handleApprove(event, form, userName) {
     return false;
 }
 
-// Handle deny with confirmation and toast
-function handleDeny(event, form, userName) {
+// Open denial modal
+function openDenyModal(profileId) {
+    const modal = document.getElementById('denyModal_' + profileId);
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Reset the reason dropdown
+        const reasonSelect = document.getElementById('denial_reason_' + profileId);
+        if (reasonSelect) {
+            reasonSelect.value = '';
+        }
+    }
+}
+
+// Close denial modal
+function closeDenyModal(profileId) {
+    const modal = document.getElementById('denyModal_' + profileId);
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Handle deny form submission
+function handleDenySubmit(event, form, userName) {
     event.preventDefault();
     
-    if (confirm(`Are you sure you want to deny the account for ${userName}? This action cannot be undone.`)) {
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                showSuccess(`${userName}'s account has been denied.`);
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                showError('Failed to deny user.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('An error occurred. Please try again.');
-        });
+    const formData = new FormData(form);
+    const reason = formData.get('denial_reason');
+    
+    if (!reason) {
+        showError('Please select a reason for denial.');
+        return false;
     }
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            showSuccess(`${userName}'s account has been denied.`);
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showError('Failed to deny user.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('An error occurred. Please try again.');
+    });
     
     return false;
 }

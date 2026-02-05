@@ -1,3 +1,45 @@
+# Main access - allow discovery
 User-agent: *
 Allow: /
+
+# Specific rules for AI crawlers
+User-agent: ChatGPT-User
+User-agent: OAI-SearchBot
+User-agent: GPTBot
+Allow: /
+Allow: /research/
+Allow: /search/
+Allow: /about/
+Allow: /terms/
+Allow: /privacy-policy/
+Allow: /favicon.ico
+Allow: /apple-touch-icon.png
+
+# Block all bots from these endpoints
+User-agent: *
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /ajax/
+Disallow: /api/
+Disallow: /research-dashboard/
+Disallow: /healthcheck/
+Disallow: /verify-email-ajax/
+Disallow: /resend-verification/
+Disallow: /update_consent/
+Disallow: /forgot-password/
+Disallow: /verify-password-reset/
+Disallow: /resend-password-reset/
+
+# Block PDF serving endpoints (auth required anyway)
+Disallow: /media/research_papers/
+Disallow: /media/parental_consents/
+
+# Allow public research pages
+Allow: /research/$
+Allow: /research/*/
+Allow: /search/$
+
+# Crawl rate to be nice to your server
+Crawl-delay: 1
+
 Sitemap: https://btcsirepository.onrender.com/sitemap.xml

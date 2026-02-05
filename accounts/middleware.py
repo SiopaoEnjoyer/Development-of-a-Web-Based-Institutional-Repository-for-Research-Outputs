@@ -8,12 +8,9 @@ import psutil
 import os
 import gc
 import time
+import re
 
 logger = logging.getLogger(__name__)
-
-# ============================================
-# RAM LIMITER MIDDLEWARE (Add this FIRST)
-# ============================================
 
 class MemoryLimiterMiddleware:
     """
@@ -22,20 +19,18 @@ class MemoryLimiterMiddleware:
     Place this FIRST in your MIDDLEWARE list.
     """
     
-    # ✅ PATHS THAT DON'T NEED MEMORY MONITORING (static content)
     EXCLUDED_PATHS = [
         '/static/',
         '/media/',
         '/favicon.ico',
         '/robots.txt',
         '/sitemap.xml',
-        '/__debug__/',  # Django Debug Toolbar
+        '/__debug__/',  
     ]
     
-    # Configuration (in MB)
-    MAX_MEMORY_MB = 500  # Render limit is 512MB
-    WARNING_THRESHOLD_MB = 450  # Start slowing down at 450MB
-    CRITICAL_THRESHOLD_MB = 480  # Block new requests at 480MB
+    MAX_MEMORY_MB = 500  
+    WARNING_THRESHOLD_MB = 450  
+    CRITICAL_THRESHOLD_MB = 480  
     
     def __init__(self, get_response):
         self.get_response = get_response
@@ -48,26 +43,21 @@ class MemoryLimiterMiddleware:
         return mem_info.rss / 1024 / 1024
     
     def __call__(self, request):
-        # ✅ CHECK HEALTHCHECK FIRST - BEFORE ANY OTHER PROCESSING
         if request.path == '/healthcheck/':
             return self.get_response(request)
         
-        # ✅ SKIP STATIC FILES COMPLETELY
         if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
             return self.get_response(request)
         
         self.request_count += 1
         current_memory = self.get_memory_mb()
         
-        # Log memory every 50 requests
         if self.request_count % 50 == 0:
             logger.info(f"RAM: {current_memory:.1f}MB / {self.MAX_MEMORY_MB}MB ({(current_memory/self.MAX_MEMORY_MB*100):.1f}%)")
         
-        # CRITICAL: Block requests if memory is dangerously high
         if current_memory >= self.CRITICAL_THRESHOLD_MB:
             logger.error(f"CRITICAL RAM: {current_memory:.1f}MB - Blocking request from {request.path}")
             
-            # Trigger emergency cleanup
             self.emergency_cleanup()
             
             return HttpResponse(
@@ -138,19 +128,15 @@ class MemoryLimiterMiddleware:
                 content_type="text/html"
             )
         
-        # WARNING: Add slight delay if memory is getting high
         if current_memory >= self.WARNING_THRESHOLD_MB:
             logger.warning(f"WARNING RAM: {current_memory:.1f}MB - Slowing request")
             time.sleep(0.1)
             
-            # Trigger cleanup every 5 requests when in warning zone
             if self.request_count % 5 == 0:
                 self.cleanup()
         
-        # Process request normally
         response = self.get_response(request)
         
-        # Periodic cleanup every 20 requests
         if self.request_count % 20 == 0:
             self.cleanup()
         
@@ -160,7 +146,6 @@ class MemoryLimiterMiddleware:
         """Regular cleanup operations"""
         try:
             gc.collect()
-            # Clear Django's query cache
             from django.db import reset_queries
             reset_queries()
             logger.debug("Cleanup: GC + query cache cleared")
@@ -173,20 +158,13 @@ class MemoryLimiterMiddleware:
             gc.collect()
             gc.collect()
             gc.collect()
-            # Clear query cache
             from django.db import reset_queries
             reset_queries()
             logger.warning("Emergency cleanup completed")
         except Exception as e:
             logger.error(f"Emergency cleanup error: {e}")
 
-
-# ============================================
-# APPROVAL CHECK MIDDLEWARE WITH CACHING
-# ============================================
-
 class ApprovalCheckMiddleware:
-    # ✅ PATHS THAT DON'T NEED AUTHENTICATION/APPROVAL CHECKS
     EXCLUDED_PATHS = [
         '/static/',
         '/media/',
@@ -196,12 +174,13 @@ class ApprovalCheckMiddleware:
         '/healthcheck/',
         '/__debug__/',
     ]
+
+    STATIC_CACHED_PATHS = ['/', '/about/', '/terms/', '/privacy-policy/']
     
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # ✅ SKIP STATIC FILES COMPLETELY - NO DB ACCESS
         if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
             return self.get_response(request)
         
@@ -229,15 +208,12 @@ class ApprovalCheckMiddleware:
             if request.user.is_superuser or request.user.is_staff:
                 return self.get_response(request)
 
-            # ✅ Cache the approval status to avoid DB queries
             cache_key = f'user_approved_{request.user.id}'
             is_approved = cache.get(cache_key)
             
             if is_approved is None:
-                # Only hit DB if not in cache
                 if hasattr(request.user, "userprofile"):
                     is_approved = request.user.userprofile.is_approved
-                    # Cache for 30 minutes (approval status rarely changes)
                     cache.set(cache_key, is_approved, 60 * 30)
                 else:
                     return self.get_response(request)
@@ -270,10 +246,6 @@ class ApprovalCheckMiddleware:
             
             return self.get_response(request)
 
-# ============================================
-# DATABASE CONNECTION MIDDLEWARE
-# ============================================
-
 class DatabaseConnectionMiddleware:
     """
     Handle database connection errors gracefully with automatic retries.
@@ -299,14 +271,12 @@ class DatabaseConnectionMiddleware:
     
     def __init__(self, get_response):
         self.get_response = get_response
-        self.db_request_count = 0  # ✅ ADD COUNTER
+        self.db_request_count = 0  
     
     def __call__(self, request):
-        # ✅ SKIP DATABASE ENTIRELY FOR STATIC FILES AND EXCLUDED PATHS
         if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
             return self.get_response(request)
         
-        # ✅ LOG DB ACCESS (for monitoring)
         self.db_request_count += 1
         if self.db_request_count % 10 == 0:
             logger.info(f"DB access #{self.db_request_count}: {request.path}")
@@ -321,7 +291,6 @@ class DatabaseConnectionMiddleware:
                 
                 response = self.get_response(request)
                 
-                # ✅ CRITICAL FOR NEON: Close connection after each request
                 try:
                     if connection.connection is not None:
                         connection.close()
@@ -418,31 +387,58 @@ class DatabaseConnectionMiddleware:
                         content_type="text/html"
                     )
                 else:
-                    # Not a connection error, re-raise
                     raise
 
-class DatabaseCleanupMiddleware:
-    """Close all DB connections after each request"""
+class BotBlockerMiddleware:
+    """Block bots from sensitive endpoints only"""
     
-    EXCLUDED_PATHS = [
-        '/static/', '/media/', '/favicon.ico', '/robots.txt',
-        '/sitemap.xml', '/healthcheck/', '/__debug__/',
+    BLOCKED_PATHS = [
+        r'^/ajax/',
+        r'^/accounts/admin/',
+        r'^/admin/',
+        r'^/research-dashboard/',
+        r'^/accounts/pending/',
+        r'^/accounts/verify-email-ajax/',
+        r'^/accounts/resend-verification/',
+        r'^/accounts/update_consent/',
+    ]
+    
+    ALLOWED_BOT_PATHS = [
+        r'^/$',
+        r'^/about/',
+        r'^/research/',
+        r'^/search/',
+        r'^/terms/',
+        r'^/privacy-policy/',
+        r'^/accounts/login/$',
+        r'^/accounts/register/$',
+    ]
+    
+    BOT_USER_AGENTS = [
+        'bot', 'crawler', 'spider', 'scraper',
+        'ChatGPT-User', 'OAI-SearchBot', 'GPTBot'
     ]
     
     def __init__(self, get_response):
         self.get_response = get_response
+        self.blocked_patterns = [re.compile(p) for p in self.BLOCKED_PATHS]
+        self.allowed_patterns = [re.compile(p) for p in self.ALLOWED_BOT_PATHS]
     
     def __call__(self, request):
-        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+        user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
+        path = request.path
+        
+        is_bot = any(bot in user_agent for bot in self.BOT_USER_AGENTS)
+        
+        if not is_bot:
             return self.get_response(request)
         
-        try:
-            response = self.get_response(request)
-            return response
-        finally:
-            from django.db import connections
-            for conn in connections.all():
-                try:
-                    conn.close()
-                except:
-                    pass
+        is_allowed = any(pattern.match(path) for pattern in self.allowed_patterns)
+        if is_allowed:
+            return self.get_response(request)
+        
+        is_blocked = any(pattern.match(path) for pattern in self.blocked_patterns)
+        if is_blocked:
+            return HttpResponseForbidden("Access denied for bots")
+        
+        return self.get_response(request)

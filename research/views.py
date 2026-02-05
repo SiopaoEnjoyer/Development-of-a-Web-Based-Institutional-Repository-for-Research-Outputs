@@ -1,13 +1,13 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.views import generic
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Q, Prefetch
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.core.cache import cache
 from .models import ResearchPaper, Author, Keyword, Award
 from .forms import ResearchPaperForm
-from accounts.decorators import is_teacher, is_student
+from accounts.decorators import is_teacher
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.shortcuts import redirect, render
@@ -16,15 +16,32 @@ from django.db.models import Value
 from django.db.models.functions import Replace
 from django.views import View
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 from storage import SupabaseStorage
 import mimetypes
 from datetime import datetime
 from django.core.cache import cache
 from django.db import connection, models
+from django_ratelimit.decorators import ratelimit
+
+@method_decorator(cache_page(60 * 60 * 24), name='dispatch')
+class StaticPageView(generic.TemplateView):
+    pass
+
+class HomeView(StaticPageView):
+    template_name = "research/home.html"
+
+class AboutView(StaticPageView):
+    template_name = "research/about.html"
+
+class TermsView(StaticPageView):
+    template_name = "research/terms.html"
+
+class PrivacyPolicyView(StaticPageView):
+    template_name = "research/privacy_policy.html"
 
 @login_required
 def serve_pdf(request, path):
@@ -32,13 +49,10 @@ def serve_pdf(request, path):
     try:
         storage = SupabaseStorage()
         
-        # Check if path is a research paper PDF
         if path.startswith('research_papers/'):
-            # Any authenticated user can view research papers
             file_content = storage.get_file_content(path)
             
         elif path.startswith('parental_consents/'):
-            # Only the user can view their own consent file (or staff)
             path_parts = path.split('/')
             if len(path_parts) >= 2:
                 file_user_id = path_parts[1]
@@ -49,7 +63,6 @@ def serve_pdf(request, path):
         else:
             raise Http404("File not found")
         
-        # Determine content type
         content_type, _ = mimetypes.guess_type(path)
         if not content_type:
             content_type = 'application/pdf'
@@ -61,26 +74,20 @@ def serve_pdf(request, path):
     except Exception as e:
         raise Http404(f"File not found: {str(e)}")
 
-# =========================
-# CACHE HELPER FUNCTIONS - OPTIMIZED
-# =========================
-
 def get_cached_awards():
     """Get all awards (cached for 1 hour)"""
     cache_key = 'all_awards'
     awards = cache.get(cache_key)
     if awards is None:
         awards = list(Award.objects.only('id', 'name').order_by('name'))
-        cache.set(cache_key, awards, 60 * 60)  # 1 hour
+        cache.set(cache_key, awards, 60 * 60)
     return awards
-
 
 def get_cached_school_years():
     """Get all distinct school years (cached for 1 hour) - OPTIMIZED"""
     cache_key = 'all_school_years'
     school_years = cache.get(cache_key)
     if school_years is None:
-        # ✅ Use raw SQL for better performance
         if connection.vendor == 'postgresql':
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -93,7 +100,7 @@ def get_cached_school_years():
                 ResearchPaper.objects.values_list("school_year", flat=True)
                 .distinct().order_by("school_year")
             )
-        cache.set(cache_key, school_years, 60 * 60)  # 1 hour
+        cache.set(cache_key, school_years, 60 * 60) 
     return school_years
 
 
@@ -102,7 +109,6 @@ def get_cached_strands():
     cache_key = 'all_strands'
     strands = cache.get(cache_key)
     if strands is None:
-        # ✅ Use raw SQL for better performance
         if connection.vendor == 'postgresql':
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -114,7 +120,7 @@ def get_cached_strands():
             strands = list(
                 ResearchPaper.objects.values_list("strand", flat=True).distinct()
             )
-        cache.set(cache_key, strands, 60 * 60)  # 1 hour
+        cache.set(cache_key, strands, 60 * 60) 
     return strands
 
 
@@ -123,7 +129,6 @@ def get_cached_grade_levels():
     cache_key = 'all_grade_levels'
     grade_levels = cache.get(cache_key)
     if grade_levels is None:
-        # ✅ Use raw SQL for better performance
         if connection.vendor == 'postgresql':
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -135,21 +140,18 @@ def get_cached_grade_levels():
             grade_levels = list(
                 ResearchPaper.objects.values_list("grade_level", flat=True).distinct()
             )
-        cache.set(cache_key, grade_levels, 60 * 60)  # 1 hour
+        cache.set(cache_key, grade_levels, 60 * 60) 
     return grade_levels
-
 
 def get_cached_all_batches():
     """Get all author batches (cached for 1 hour) - OPTIMIZED"""
     cache_key = 'all_author_batches'
     batches = cache.get(cache_key)
     if batches is None:
-        # ✅ ONE query instead of TWO
         batch_pairs = Author.objects.filter(
             Q(G11_Batch__isnull=False) | Q(G12_Batch__isnull=False)
         ).values_list('G11_Batch', 'G12_Batch')
         
-        # Flatten and deduplicate
         all_batches = set()
         for g11, g12 in batch_pairs:
             if g11:
@@ -158,7 +160,7 @@ def get_cached_all_batches():
                 all_batches.add(g12)
         
         batches = sorted(all_batches)
-        cache.set(cache_key, batches, 60 * 60)  # 1 hour
+        cache.set(cache_key, batches, 60 * 60)  
     return batches
 
 
@@ -179,38 +181,28 @@ def invalidate_keyword_caches():
     cache.delete('all_keywords')
     cache.delete('keywords_with_count')
 
-
 def invalidate_author_caches():
     """Invalidate author caches - but be selective"""
     cache.delete('all_author_batches')
     
-    # ✅ Only delete caches for recent years (not all years ever)
     current_year = datetime.now().year
     
-    for year_offset in range(-2, 3):  # Current year ± 2 years
+    for year_offset in range(-2, 3):  
         year1 = current_year + year_offset
         year2 = year1 + 1
         sy = f"{year1}-{year2}"
         cache.delete(f'authors_grade_11_year_{sy}')
         cache.delete(f'authors_grade_12_year_{sy}')
 
-
-# =========================
-# OPTIMIZED HEALTHCHECK
-# =========================
-
-
-
 @csrf_exempt
 def healthcheck(request):
-    """
-    Ultra-lightweight endpoint for uptime monitoring.
-    NO database connection or cache access.
-    """
+    user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
+    
+    allowed = ['uptimerobot', 'pingdom', 'statuspage']
+    if not any(service in user_agent for service in allowed):
+        return HttpResponse("Forbidden", status=403)
+    
     return HttpResponse("OK", content_type="text/plain")
-# =========================
-# MIXINS
-# =========================
 
 class LoginRequiredMessageMixin(LoginRequiredMixin):
     redirect_field_name = None
@@ -228,10 +220,7 @@ class TeacherRequiredMixin:
         view = super().as_view(**initkwargs)
         return is_teacher(view)
 
-# =========================
-# PUBLIC VIEWS
-# =========================
-
+@method_decorator(ratelimit(key='ip', rate='100/h', method='GET'), name='dispatch')
 class IndexView(generic.ListView):
     model = ResearchPaper
     template_name = "research/index.html"
@@ -255,6 +244,7 @@ class IndexView(generic.ListView):
         context = super().get_context_data(**kwargs)
         return context
 
+@method_decorator(ratelimit(key='ip', rate='60/h', method='GET'), name='dispatch')
 class DetailView(generic.DetailView):
     model = ResearchPaper
     template_name = "research/detail.html"
@@ -292,6 +282,7 @@ class DetailView(generic.DetailView):
         
         return context
 
+@method_decorator(ratelimit(key='ip', rate='60/h', method='GET'), name='dispatch')
 class SearchView(generic.ListView):
     model = ResearchPaper
     template_name = "research/search.html"
@@ -331,12 +322,9 @@ class SearchView(generic.ListView):
             qs = qs.filter(
                 Q(title__icontains=q) |
                 Q(keywords__word__icontains=q) |
-                Q(
+                Q(author__last_name__icontains=q) |  
+                Q(  
                     author__first_name__icontains=q,
-                    author__user__userprofile__consent_status='consented'
-                ) |
-                Q(
-                    author__last_name__icontains=q,
                     author__user__userprofile__consent_status='consented'
                 ) |
                 Q(
@@ -348,7 +336,6 @@ class SearchView(generic.ListView):
                     author__user__userprofile__consent_status='consented'
                 )
             ).distinct()
-
         if school_year:
             qs = qs.filter(school_year=school_year)
 
@@ -365,10 +352,7 @@ class SearchView(generic.ListView):
             qs = qs.filter(awards__id=award)
 
         if author_ids:
-            qs = qs.filter(
-                author__id__in=author_ids,
-                author__user__userprofile__consent_status='consented'
-            ).distinct()
+            qs = qs.filter(author__id__in=author_ids).distinct() 
 
         if keyword_ids:
             qs = qs.filter(keywords__id__in=keyword_ids).distinct()
@@ -378,7 +362,6 @@ class SearchView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # ✅ USE CACHED DATA
         context.update({
             "query": self.request.GET.get("q", ""),
             "school_year": self.request.GET.get("school_year", ""),
@@ -387,7 +370,7 @@ class SearchView(generic.ListView):
             "grade_level": self.request.GET.get("grade_level", ""),
             "selected_award": self.request.GET.get("award", ""),
             "awards": get_cached_awards(),
-            "authors": [],  # Load via AJAX only - more efficient
+            "authors": [],  
             "school_years": get_cached_school_years(),
             "research_designs": ResearchPaper.RESEARCH_DESIGN_CHOICES,
         })
@@ -436,10 +419,6 @@ class StrandDesignFilteredView(generic.ListView):
         design_dict = dict(ResearchPaper.RESEARCH_DESIGN_CHOICES)
         ctx["selected_design_display"] = design_dict.get(self.kwargs["design"], self.kwargs["design"])
         return ctx
-
-# =========================
-# ADMIN / TEACHER VIEWS
-# =========================
 
 class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
     model = ResearchPaper
@@ -498,7 +477,6 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
         if keyword_ids:
             qs = qs.filter(keywords__id__in=keyword_ids).distinct()
 
-        # SORTING 
         if sort_by == "alphabetical":
             qs = qs.annotate(
                 clean_title=Replace('title', Value('*'), Value(''))
@@ -509,7 +487,7 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
             ).order_by("-clean_title")
         elif sort_by == "oldest":
             qs = qs.order_by("publication_date")
-        else:  # "latest" or anything else
+        else:  
             qs = qs.order_by("-publication_date")
 
         return qs
@@ -521,7 +499,6 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
         grade_level = request.GET.get("grade_level")
         school_year = request.GET.get("school_year")
 
-        # Only load authors when needed
         authors = Author.objects.none()
         if grade_level and school_year:
             if grade_level == "11":
@@ -529,7 +506,6 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
             elif grade_level == "12":
                 authors = Author.objects.filter(G12_Batch=school_year).only('id', 'first_name', 'last_name')
 
-        # ✅ USE CACHED DATA
         context.update({
             "selected_authors": request.GET.getlist("authors"),
             "selected_strand": request.GET.get("strand", ""),
@@ -545,7 +521,6 @@ class AdminDashboardView(TeacherRequiredMixin, generic.ListView):
             "research_designs": ResearchPaper.RESEARCH_DESIGN_CHOICES,
         })
 
-        # Filter tokens
         filters = []
 
         if context["selected_strand"]:
@@ -591,7 +566,6 @@ class ResearchPaperCreateView(TeacherRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         messages.success(self.request, f"'{form.instance.title}' uploaded successfully.")
-        # ✅ Invalidate cache when new paper is created
         invalidate_paper_caches()
         return super().form_valid(form)
     
@@ -626,7 +600,6 @@ class ResearchPaperUpdateView(TeacherRequiredMixin, generic.UpdateView):
 
     def form_valid(self, form):
         messages.success(self.request, f"'{form.instance.title}' updated successfully.")
-        # ✅ Invalidate cache when paper is updated
         invalidate_paper_caches()
         return super().form_valid(form)
 
@@ -637,12 +610,10 @@ class ResearchPaperDeleteView(TeacherRequiredMixin, generic.DeleteView):
     def delete(self, request, *args, **kwargs):
         paper = self.get_object()
         messages.success(request, f"'{paper.title}' deleted successfully.")
-        # ✅ Invalidate cache when paper is deleted
         invalidate_paper_caches()
         return super().delete(request, *args, **kwargs)
 
     def get(self, request, pk):
-        # Redirect GET requests to show confirmation in the dashboard instead
         messages.warning(request, "Use the delete button to confirm deletion.")
         return redirect('research:admin_dashboard')
 
@@ -652,7 +623,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     paginate_by = 10
     
     def get_queryset(self):        
-        # ✅ Prefetch related papers so they're available in the template
         qs = Keyword.objects.annotate(
             usage_count=models.Count('researchpaper')
         ).prefetch_related(
@@ -686,11 +656,9 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
         return qs
     
     def get_queryset(self):
-        
-        # ✅ Don't prefetch papers unless template actually uses them
         qs = Keyword.objects.annotate(
             usage_count=models.Count('researchpaper')
-        ).only('id', 'word')  # ✅ Only fetch needed fields
+        ).only('id', 'word')  
         
         q = self.request.GET.get("q", "").strip()
         if q:
@@ -713,14 +681,11 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # ✅ Just return context as-is
-        # Template can access keyword.usage_count directly
         return context
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action", "").strip()
         
-        # ADD KEYWORD
         if action == "add" or "add_keyword" in request.POST:
             keyword_name = request.POST.get("keyword_name", "").strip()
             
@@ -746,7 +711,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
             
             Keyword.objects.create(word=keyword_name)
             
-            # ✅ Invalidate keyword cache
             invalidate_keyword_caches()
             
             if is_ajax:
@@ -755,7 +719,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
             messages.success(request, f"Keyword '{keyword_name}' added successfully.")
             return redirect("research:manage_keywords")
         
-        # EDIT KEYWORD
         elif action == "edit" or "edit_keyword" in request.POST:
             keyword_id = request.POST.get("keyword_id")
             keyword_name = request.POST.get("keyword_name", "").strip()
@@ -787,7 +750,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
                 keyword.word = keyword_name
                 keyword.save()
                 
-                # ✅ Invalidate keyword cache
                 invalidate_keyword_caches()
                 
                 if is_ajax:
@@ -813,7 +775,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
                 keyword_name = keyword.word
                 keyword.delete()
                 
-                # ✅ Invalidate keyword cache
                 invalidate_keyword_caches()
                 
                 if usage_count > 0:
@@ -829,10 +790,6 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
             return redirect("research:manage_keywords")
 
         return super().get(request, *args, **kwargs)
-
-# =========================
-# STUDENT VIEWS
-# =========================
 
 class MyResearchView(LoginRequiredMessageMixin, generic.ListView):
     template_name = "research/my_papers.html"
@@ -914,7 +871,6 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # ✅ USE CACHED DATA
         context["all_batches"] = get_cached_all_batches()
         context["selected_grade_level"] = self.request.GET.get("grade_level", "")
         context["selected_school_year"] = self.request.GET.get("school_year", "")
@@ -925,7 +881,6 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action")
         
-        # ADD AUTHOR
         if "add_author" in request.POST or action == "add":
             first_name = request.POST.get("first_name", "").strip()
             middle_initial = request.POST.get("middle_initial", "").strip()
@@ -975,14 +930,12 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
                     G12_Batch=g12_batch if g12_batch else None,
                 )
                 
-                # ✅ Invalidate author cache
                 invalidate_author_caches()
                 
                 messages.success(request, f"Author '{first_name} {last_name}' added successfully.")
             
             return redirect("research:manage_authors")
         
-        # EDIT AUTHOR
         elif "edit_author" in request.POST or action == "edit":
             author_id = request.POST.get("author_id")
             first_name = request.POST.get("first_name", "").strip()
@@ -1024,7 +977,6 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
                     author.G12_Batch = g12_batch if g12_batch else None
                     author.save()
                     
-                    # ✅ Invalidate author cache
                     invalidate_author_caches()
                     
                     messages.success(request, f"Author '{first_name} {last_name}' updated successfully.")
@@ -1040,7 +992,6 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
         if delete_id:
             Author.objects.filter(id=delete_id).delete()
             
-            # ✅ Invalidate author cache
             invalidate_author_caches()
             
             messages.success(request, "Author deleted successfully.")
@@ -1048,9 +999,7 @@ class ManageAuthorsView(TeacherRequiredMixin, ListView):
 
         return super().get(request, *args, **kwargs)
 
-# =========================
-# AJAX ENDPOINTS
-# =========================
+@method_decorator(csrf_protect, name='dispatch')
 class GetAuthorsByBatchView(View):
     def get(self, request, *args, **kwargs):
         grade = request.GET.get("grade")
@@ -1059,7 +1008,6 @@ class GetAuthorsByBatchView(View):
         if not grade or not school_year:
             return JsonResponse([], safe=False)
 
-        # ✅ CACHE AUTHORS BY GRADE/YEAR
         cache_key = f'authors_grade_{grade}_year_{school_year}'
         data = cache.get(cache_key)
         
@@ -1084,15 +1032,14 @@ class GetAuthorsByBatchView(View):
                     "name": author.display_name_public()
                 })
             
-            # Cache for 1 hour
             cache.set(cache_key, data, 60 * 60)
 
         return JsonResponse(data, safe=False)
 
+@method_decorator(csrf_protect, name='dispatch')
 class GetAllKeywordsView(View):
     """Return all keywords for the keyword dropdown"""
     def get(self, request, *args, **kwargs):
-        # ✅ CACHE ALL KEYWORDS
         cache_key = 'all_keywords'
         data = cache.get(cache_key)
         
@@ -1105,18 +1052,17 @@ class GetAllKeywordsView(View):
                     "name": keyword.word
                 })
             
-            # Cache for 1 hour
             cache.set(cache_key, data, 60 * 60)
         
         return JsonResponse(data, safe=False)
-    
+
+@method_decorator(csrf_protect, name='dispatch')
 class AddKeywordAjaxView(View):
     def post(self, request, *args, **kwargs):
         try:
             keyword_text = request.POST.get("name", "").strip()
             kw, created = Keyword.objects.get_or_create(word=keyword_text)
             
-            # ✅ Invalidate keyword cache when adding
             if created:
                 invalidate_keyword_caches()
             
@@ -1156,7 +1102,8 @@ def fetch_authors_ajax(request):
         "authors": [{"id": a.id, "name": str(a)} for a in qs]
     })
 
-class AddAuthorAjaxView(View):
+@method_decorator(csrf_protect, name='dispatch')
+class AddAuthorAjaxView(LoginRequiredMixin, TeacherRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             first_name = request.POST.get("first", "").strip()
@@ -1181,20 +1128,19 @@ class AddAuthorAjaxView(View):
                 G12_Batch=g12_batch if g12_batch else None,
             )
             
-            # ✅ Invalidate author cache
             invalidate_author_caches()
             
             return JsonResponse({"id": a.id, "name": str(a)})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-        
+
+@method_decorator(csrf_protect, name='dispatch')
 class AddAwardAjaxView(View):
     def post(self, request, *args, **kwargs):
         try:
             award_name = request.POST.get("name", "").strip()
             award, created = Award.objects.get_or_create(name=award_name)
             
-            # ✅ Invalidate award cache when adding
             if created:
                 invalidate_award_caches()
             

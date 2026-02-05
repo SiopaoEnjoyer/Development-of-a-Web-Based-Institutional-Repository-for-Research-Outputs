@@ -640,13 +640,17 @@ class DenyUserView(LoginRequiredMixin, RoleRequiredMixin, View):
         profile = get_object_or_404(UserProfile, id=id)
         email = profile.user.email
         user_name = f"{profile.pending_first_name or ''} {profile.pending_last_name or ''}".strip()
+        denial_reason = request.POST.get('denial_reason', '').strip()
         
-        # Send denial email before deleting
+        if not denial_reason:
+            messages.error(request, "Please select a reason for denial.")
+            return redirect("accounts:pending_accounts")
+        
         from .utils import send_denial_email
-        send_denial_email(email, user_name)
+        send_denial_email(email, user_name, denial_reason)
         
         profile.user.delete()
-        messages.info(request, f"Account {email} denied and removed. Denial notification sent.")
+        messages.info(request, f"Account {email} denied and removed. Denial notification sent with reason: {denial_reason}")
         return redirect("accounts:pending_accounts")
 
 class UpdateConsentView(LoginRequiredMixin, View):
@@ -1253,7 +1257,6 @@ class ConsentApprovalsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return redirect("accounts:no_access")
     
     def get_queryset(self):
-        # ✅ OPTIMIZED: select_related
         return UserProfile.objects.filter(
             consent_status='pending_approval',
             parental_consent_file__isnull=False

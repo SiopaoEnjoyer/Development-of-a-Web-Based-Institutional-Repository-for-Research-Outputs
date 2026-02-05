@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from datetime import date
-from django.contrib.auth.models import User
 from storage import SupabaseStorage
 
 class Keyword(models.Model):
@@ -29,7 +28,7 @@ class Keyword(models.Model):
     class Meta:
         ordering = ['word']
         indexes = [
-            models.Index(fields=['word']),  # For search/filtering
+            models.Index(fields=['word']),  
         ]
 
 class Author(models.Model):
@@ -74,9 +73,9 @@ class Author(models.Model):
         ]
 
         indexes = [
-            models.Index(fields=['last_name', 'first_name']),  # For sorting/filtering
-            models.Index(fields=['G11_Batch']),  # For batch filtering
-            models.Index(fields=['G12_Batch']),  # For batch filtering
+            models.Index(fields=['last_name', 'first_name']),  
+            models.Index(fields=['G11_Batch']),  
+            models.Index(fields=['G12_Batch']),  
         ]
 
     def save(self, *args, **kwargs):
@@ -137,7 +136,6 @@ class ResearchPaper(models.Model):
         ("ABM", "ABM"),
     ]
 
-    # NEW: Research Design choices based on grade level and strand
     RESEARCH_DESIGN_CHOICES = [
         ("QUALITATIVE", "Qualitative"),
         ("SURVEY", "Survey"),
@@ -157,7 +155,6 @@ class ResearchPaper(models.Model):
     grade_level = models.IntegerField(choices=GRADE_LEVEL)
     strand = models.CharField(max_length=10, choices=STRAND_CHOICES)
     
-    # CHANGED: From specialization to research_design
     research_design = models.CharField(
         max_length=50, 
         choices=RESEARCH_DESIGN_CHOICES,
@@ -180,14 +177,15 @@ class ResearchPaper(models.Model):
     )
 
     class Meta:
+        ordering = ['-publication_date', 'id'] 
         indexes = [
-            models.Index(fields=['-publication_date']),  # For default ordering
-            models.Index(fields=['strand']),  # For strand filtering
-            models.Index(fields=['grade_level']),  # For grade filtering
-            models.Index(fields=['school_year']),  # For year filtering
-            models.Index(fields=['research_design']),  # For design filtering
-            models.Index(fields=['strand', 'research_design']),  # Composite index
-            models.Index(fields=['title']),  # For search
+            models.Index(fields=['-publication_date']),  
+            models.Index(fields=['strand']),  
+            models.Index(fields=['grade_level']),  
+            models.Index(fields=['school_year']),  
+            models.Index(fields=['research_design']),  
+            models.Index(fields=['strand', 'research_design']),  
+            models.Index(fields=['title']),  
         ]
  
     def clean(self):
@@ -198,7 +196,6 @@ class ResearchPaper(models.Model):
         - Grade 12 non-STEM: SURVEY only
         """
         if self.grade_level == 11:
-            # Grade 11 must be QUALITATIVE
             if self.research_design != 'QUALITATIVE':
                 raise ValidationError({
                     'research_design': 'Grade 11 papers must use Qualitative research design.'
@@ -206,14 +203,12 @@ class ResearchPaper(models.Model):
         
         elif self.grade_level == 12:
             if self.strand == 'STEM':
-                # Grade 12 STEM: SURVEY, EXPERIMENTAL, or CAPSTONE
                 allowed = ['SURVEY', 'EXPERIMENTAL', 'CAPSTONE']
                 if self.research_design not in allowed:
                     raise ValidationError({
                         'research_design': 'Grade 12 STEM papers must use Survey, Experimental, or Capstone research design.'
                     })
             else:
-                # Grade 12 non-STEM: SURVEY only
                 if self.research_design != 'SURVEY':
                     raise ValidationError({
                         'research_design': 'Grade 12 HUMSS/ABM papers must use Survey research design.'
@@ -234,7 +229,7 @@ class ResearchPaper(models.Model):
                     ('EXPERIMENTAL', 'Experimental'),
                     ('CAPSTONE', 'Capstone'),
                 ]
-            else:  # HUMSS or ABM
+            else:  
                 return [('SURVEY', 'Survey')]
         return []
 
@@ -248,14 +243,11 @@ class ResearchPaper(models.Model):
         return self.citations.count()
     
     def save(self, *args, **kwargs):
-        # Force day to be 1st of month
         if self.publication_date:
             self.publication_date = self.publication_date.replace(day=1)
         super().save(*args, **kwargs)
 
-    # ====================================
-    # NEW METHOD: Get authors alphabetically by last name
-    # ====================================
+
     def get_authors_alphabetically(self):
         """
         Returns authors sorted alphabetically by last name, then first name.
@@ -283,7 +275,7 @@ class PaperCitation(models.Model):
     """Track citations of papers"""
     paper = models.ForeignKey('ResearchPaper', on_delete=models.CASCADE, related_name='citations')
     cited_by_paper = models.ForeignKey('ResearchPaper', on_delete=models.CASCADE, null=True, blank=True, related_name='cites')
-    cited_by_external = models.CharField(max_length=500, null=True, blank=True)  # External citation source
+    cited_by_external = models.CharField(max_length=500, null=True, blank=True)  
     citation_date = models.DateField(auto_now_add=True)
     notes = models.TextField(blank=True)
     
