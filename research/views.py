@@ -26,7 +26,9 @@ from datetime import datetime
 from django.core.cache import cache
 from django.db import connection, models
 from django_ratelimit.decorators import ratelimit
+from django.views.decorators.vary import vary_on_cookie
 
+@method_decorator(vary_on_cookie, name='dispatch')
 @method_decorator(cache_page(60 * 60 * 24), name='dispatch')
 class StaticPageView(generic.TemplateView):
     pass
