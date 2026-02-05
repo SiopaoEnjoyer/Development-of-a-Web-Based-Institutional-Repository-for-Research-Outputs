@@ -28,7 +28,7 @@ class Keyword(models.Model):
     class Meta:
         ordering = ['word']
         indexes = [
-            models.Index(fields=['word']),  
+            models.Index(fields=['word'], name='idx_keyword_word'),  
         ]
 
 class Author(models.Model):
@@ -73,9 +73,10 @@ class Author(models.Model):
         ]
 
         indexes = [
-            models.Index(fields=['last_name', 'first_name']),  
-            models.Index(fields=['G11_Batch']),  
-            models.Index(fields=['G12_Batch']),  
+            models.Index(fields=['last_name', 'first_name'], name='idx_author_name'),  
+            models.Index(fields=['G11_Batch'], name='idx_author_g11'),  
+            models.Index(fields=['G12_Batch'], name='idx_author_g12'),
+            models.Index(fields=['user'], name='idx_author_user'),
         ]
 
     def save(self, *args, **kwargs):
@@ -179,13 +180,13 @@ class ResearchPaper(models.Model):
     class Meta:
         ordering = ['-publication_date', 'id'] 
         indexes = [
-            models.Index(fields=['-publication_date']),  
-            models.Index(fields=['strand']),  
-            models.Index(fields=['grade_level']),  
-            models.Index(fields=['school_year']),  
-            models.Index(fields=['research_design']),  
-            models.Index(fields=['strand', 'research_design']),  
-            models.Index(fields=['title']),  
+            models.Index(fields=['-publication_date'], name='idx_paper_pubdate'),  
+            models.Index(fields=['strand'], name='idx_paper_strand'),  
+            models.Index(fields=['grade_level'], name='idx_paper_grade'),  
+            models.Index(fields=['school_year'], name='idx_paper_sy'),  
+            models.Index(fields=['research_design'], name='idx_paper_design'),  
+            models.Index(fields=['school_year', 'grade_level'], name='idx_paper_sy_grade'),  
+            models.Index(fields=['title'], name='idx_paper_title'),  
         ]
  
     def clean(self):
@@ -269,6 +270,11 @@ class Award(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['name'], name='idx_award_name'),
+        ]
 
 
 class PaperCitation(models.Model):
