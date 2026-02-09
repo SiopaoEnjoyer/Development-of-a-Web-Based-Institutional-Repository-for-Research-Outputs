@@ -206,7 +206,7 @@
 
                     {% if paper.abstract %}
                     <p class="abstract-text">
-                        <strong>Abstract:</strong> {{ paper.abstract|truncatewords:30 }}
+                        <strong>Abstract:</strong> {{ paper.abstract|truncatewords:30|format_italics }}
                     </p>
                     {% endif %}
 

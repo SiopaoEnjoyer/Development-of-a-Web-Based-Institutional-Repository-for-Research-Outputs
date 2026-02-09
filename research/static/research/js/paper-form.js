@@ -475,7 +475,11 @@ function renderKeywordDropdown(searchQuery = "") {
 function addKeyword(id, name) {
     selectedKeywords.add(id);
     renderSelectedKeywords();
-    if (keywordSearchInput) renderKeywordDropdown(keywordSearchInput.value);
+    // Reset search input
+    if (keywordSearchInput) {
+        keywordSearchInput.value = '';
+        renderKeywordDropdown('');
+    }
 }
 
 function removeKeyword(id) {
@@ -725,9 +729,14 @@ if (awardSearchInput && awardDropdown) {
     });
 }
 
+// Award Save Button Handler - WITH LOADING STATE
+let isAwardSubmitting = false;
+
 const saveAwardBtn = document.getElementById("saveAwardBtn");
 if (saveAwardBtn) {
     saveAwardBtn.addEventListener("click", async function() {
+        if (isAwardSubmitting) return;
+        
         const modalErrors = document.getElementById("awardModalErrors");
         if (modalErrors) {
             modalErrors.style.display = "none";
@@ -755,6 +764,10 @@ if (saveAwardBtn) {
             }
             return;
         }
+        
+        isAwardSubmitting = true;
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
         
         try {
             const formData = new FormData();
@@ -797,6 +810,10 @@ if (saveAwardBtn) {
                 modalErrors.innerHTML = 'An error occurred while adding the award.';
                 modalErrors.style.display = 'block';
             }
+        } finally {
+            isAwardSubmitting = false;
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-plus-circle"></i> Add Award';
         }
     });
 }
@@ -842,9 +859,13 @@ function updatePubDateField() {
 
 // ==================== ADD AUTHOR MODAL ====================
 
+let isAuthorSubmitting = false;
+
 const saveAuthorBtn = document.getElementById("saveAuthorBtn");
 if (saveAuthorBtn) {
     saveAuthorBtn.addEventListener("click", async function() {
+        if (isAuthorSubmitting) return;
+        
         const modalErrors = document.getElementById("authorModalErrors");
         if (modalErrors) {
             modalErrors.style.display = "none";
@@ -894,6 +915,10 @@ if (saveAuthorBtn) {
             }
             return;
         }
+        
+        isAuthorSubmitting = true;
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
         
         try {
             const formData = new FormData();
@@ -951,6 +976,10 @@ if (saveAuthorBtn) {
                 modalErrors.innerHTML = 'An error occurred while adding the author.';
                 modalErrors.style.display = 'block';
             }
+        } finally {
+            isAuthorSubmitting = false;
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-plus-circle"></i> Add Author';
         }
     });
 }

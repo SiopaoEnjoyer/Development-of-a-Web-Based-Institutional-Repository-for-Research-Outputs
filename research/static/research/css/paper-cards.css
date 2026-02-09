@@ -110,13 +110,13 @@
 }
 
 .authors {
-    color: #475569;
+    color: #2d3748;
     font-size: 0.9rem;
     margin-bottom: 0.75rem;
 }
 
 .abstract-text {
-    color: #64748b;
+    color: #2d3748;
     font-size: 0.9rem;
     line-height: 1.6;
     margin-bottom: 1rem;
@@ -431,4 +431,3 @@
         font-size: 0.75rem;
     }
 }
-

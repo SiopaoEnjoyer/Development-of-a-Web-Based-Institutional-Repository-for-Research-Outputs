@@ -148,10 +148,12 @@
 
 .authors {
     font-size: .85rem;
+    color: #2d3748;
 }
 
 .abstract-text {
     font-size: .95rem;
+    color: #2d3748;
 }
 
 /* ==============================
@@ -247,5 +249,3 @@
 .filter-token button:hover {
     color: #ffd966;
 }
-
-

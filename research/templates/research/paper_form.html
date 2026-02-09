@@ -150,17 +150,18 @@
         <small class="text-danger validation-error" id="pubDateError" style="display: none; font-size: 0.75rem;">This field is required</small>
     </div>
 
-    <!-- Abstract - Direct Edit -->
     <div class="col-md-12">
-        <label class="form-label">Abstract <span class="required-asterisk">*</span></label>
-        <textarea name="abstract" 
-                  id="abstractField"
-                  class="form-control" 
-                  rows="6"
-                  placeholder="Enter the research paper abstract..."
-                  required>{{ form.instance.abstract }}</textarea>
-        <small class="text-danger validation-error" id="abstractError" style="display: none; font-size: 0.75rem;">This field is required</small>
-    </div>
+      <label class="form-label">Abstract <span class="required-asterisk">*</span></label>
+      <textarea name="abstract" 
+                id="abstractField"
+                class="form-control" 
+                rows="6"
+                placeholder="Enter the research paper abstract (use *asterisks* for italics)..."
+                required>{{ form.instance.abstract }}</textarea>
+      <small class="form-text text-muted">Use *asterisks* around text for italics (e.g., *Escherichia coli*)</small>
+      
+      <small class="text-danger validation-error" id="abstractError" style="display: none; font-size: 0.75rem;">This field is required</small>
+  </div>
 
     <!-- Grade Level -->
       <div class="col-md-3">
@@ -205,33 +206,41 @@
 
     <!-- Authors Section -->
     <div class="col-md-12">
-        <div class="author-header">
-        <label class="form-label">Authors <span class="required-asterisk">*</span></label>
-        <button type="button" 
-                class="btn btn-add-item btn-sm" 
-                id="addAuthorBtn"
-                data-bs-toggle="modal" 
-                data-bs-target="#addAuthorModal"
-                disabled>
-            <i class="bi bi-person-plus"></i> Add New Author
-        </button>
-        </div>
-        <div class="author-dropdown-container">
-        <input
-            type="text"
-            class="form-control"
-            id="authorSearchInput"
-            placeholder="Select Grade Level and School Year first"
-            autocomplete="off"
-            disabled
-        />
-        <div class="author-dropdown" id="authorDropdown"></div>
-        </div>
-        <small class="text-danger validation-error" id="authorError" style="display: none; font-size: 0.75rem;">At least one author is required</small>
-        <div class="selected-items-box mt-3" id="selectedAuthorsBox">
-        <small class="text-muted">No authors selected yet</small>
-        </div>
-    </div>
+      <div class="author-header">
+      <label class="form-label">Authors <span class="required-asterisk">*</span></label>
+      <button type="button" 
+              class="btn btn-add-item btn-sm" 
+              id="addAuthorBtn"
+              data-bs-toggle="modal" 
+              data-bs-target="#addAuthorModal"
+              disabled>
+          <i class="bi bi-person-plus"></i> Add New Author
+      </button>
+      </div>
+      
+      
+      
+      <div class="author-dropdown-container">
+      <input
+          type="text"
+          class="form-control"
+          id="authorSearchInput"
+          placeholder="Select Grade Level and School Year first"
+          autocomplete="off"
+          disabled
+      />
+      <div class="author-dropdown" id="authorDropdown"></div>
+      </div>
+      <small class="text-danger validation-error" id="authorError" style="display: none; font-size: 0.75rem;">At least one author is required</small>
+      <div class="selected-items-box mt-3" id="selectedAuthorsBox">
+      <small class="text-muted">No authors selected yet</small>
+      </div>
+      <!-- Helper text -->
+      <small class="search-helper-text">
+          <i class="bi bi-info-circle-fill"></i>
+          Search for existing authors before adding a new one
+      </small>
+  </div>
 
       <!-- Keywords Section -->
       <div class="col-md-12">
@@ -241,6 +250,8 @@
             <i class="bi bi-tag"></i> Add New Keyword
           </button>
         </div>
+      
+        
         <div class="keyword-dropdown-container">
           <input
             type="text"
@@ -254,16 +265,22 @@
         <div class="selected-items-box mt-3" id="selectedKeywordsBox">
           <small class="text-muted">No keywords selected yet</small>
         </div>
-      </div>
+        <!-- Helper text -->
+        <small class="search-helper-text">
+            <i class="bi bi-info-circle-fill"></i>
+            Search for existing keywords before adding a new one
+        </small>
+    </div>
 
       <!-- Awards Section -->
-        <div class="col-md-12">
+      <div class="col-md-12">
         <div class="author-header">
             <label class="form-label">Awards</label>
             <button type="button" class="btn btn-add-item btn-sm" data-bs-toggle="modal" data-bs-target="#addAwardModal">
             <i class="bi bi-trophy"></i> Add New Award
             </button>
         </div>
+        
         <div class="award-dropdown-container">
             <input
             type="text"
@@ -277,7 +294,12 @@
         <div class="selected-items-box mt-3" id="selectedAwardsBox">
             <small class="text-muted">No awards selected yet</small>
         </div>
-        </div>
+        <!-- Helper text -->
+        <small class="search-helper-text">
+            <i class="bi bi-info-circle-fill"></i>
+            Search for existing awards before adding a new one
+        </small>
+    </div>
 
     <!-- PDF File -->
     <div class="col-md-12">

@@ -269,7 +269,7 @@
 
 .detail-section p {
   line-height: 1.9;
-  color: #475569;
+  color: #1e293b;
   text-align: justify;
   font-size: 1rem;
   text-indent: 2rem;
@@ -397,7 +397,7 @@
 
 .modal-body p {
   font-size: 1.05rem;
-  color: #475569;
+  color: #1e293b;
   margin-bottom: 1rem;
   line-height: 1.7;
 }
@@ -579,7 +579,7 @@
 
 #loginModal .modal-body p {
   font-size: 1rem;
-  color: #475569;
+  color: #1e293b;
   margin-bottom: 0.75rem;
   line-height: 1.6;
 }

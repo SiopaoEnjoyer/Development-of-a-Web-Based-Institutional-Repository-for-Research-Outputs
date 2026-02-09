@@ -113,6 +113,23 @@ small.text-muted {
     font-style: normal;
 }
 
+/* Helper text for search before add */
+.search-helper-text {
+    font-size: 0.85rem;
+    color: #2d3748;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.search-helper-text i {
+    color: var(--primary-green);
+    font-size: 1rem;
+}
+
 .form-control::placeholder,
 .form-select::placeholder {
     color: #adb5bd;
@@ -152,6 +169,7 @@ small.text-muted {
     font-weight: 500;
     font-family: 'Montserrat', sans-serif;
     transition: all 0.3s ease;
+    color: #1e293b;
 }
 
 .form-control:focus,
@@ -461,6 +479,40 @@ select.form-select::-webkit-scrollbar-thumb:hover {
 .author-header .form-label,
 .abstract-header .form-label {
     margin-bottom: 0;
+}
+
+/* Abstract preview box */
+.abstract-preview-box {
+    margin-top: 10px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    display: none;
+}
+
+.abstract-preview-box.show {
+    display: block;
+}
+
+.abstract-preview-label {
+    font-size: 0.8rem;
+    color: var(--primary-green);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.abstract-preview-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #1e293b;
+}
+
+.abstract-preview-text i {
+    font-style: italic;
 }
 
 /* Buttons */

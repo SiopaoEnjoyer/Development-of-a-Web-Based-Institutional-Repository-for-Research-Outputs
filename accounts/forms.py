@@ -5,17 +5,6 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 class RegistrationForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Debug POST data
-        if args and args[0]:
-            print("\n" + "="*80)
-            print("RAW POST DATA RECEIVED:")
-            print("="*80)
-            for key, value in args[0].items():
-                print(f"  {key}: '{value}'")
-            print("="*80 + "\n")
-    
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'minlength': '8',
@@ -233,15 +222,6 @@ class RegistrationForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        print("\n" + "="*80)
-        print("FORM SAVE METHOD - DEBUG INFO")
-        print("="*80)
-        print("cleaned_data keys:", list(self.cleaned_data.keys()))
-        print("\nField values:")
-        for key, value in self.cleaned_data.items():
-            print(f"  {key}: '{value}' (type: {type(value).__name__})")
-        print("="*80 + "\n")
-        
         # Create user instance
         user = User(
             email=self.cleaned_data["email"],
@@ -253,15 +233,12 @@ class RegistrationForm(forms.ModelForm):
         if commit:
             # Save the user first
             user.save()
-            print(f"✅ User saved with ID: {user.id}")
             
             # Get or create profile (signal should create it)
             try:
                 profile = UserProfile.objects.get(user=user)
-                print(f"✅ Profile retrieved from signal: {profile.id}")
             except UserProfile.DoesNotExist:
                 profile = UserProfile.objects.create(user=user)
-                print(f"⚠️ Profile created manually: {profile.id}")
             
             # Update profile fields with cleaned data
             first_name = self.cleaned_data.get("first_name", "")
@@ -271,15 +248,6 @@ class RegistrationForm(forms.ModelForm):
             g11 = self.cleaned_data.get("g11", "")
             g12 = self.cleaned_data.get("g12", "")
             took_shs = self.cleaned_data.get("took_shs", False)
-            
-            print(f"\nValues before saving to profile:")
-            print(f"  first_name: '{first_name}'")
-            print(f"  last_name: '{last_name}'")
-            print(f"  middle_initial: '{middle_initial}'")
-            print(f"  suffix: '{suffix}'")
-            print(f"  g11: '{g11}'")
-            print(f"  g12: '{g12}'")
-            print(f"  took_shs: {took_shs}")
             
             profile.pending_first_name = first_name.strip() if first_name else ""
             profile.pending_middle_initial = middle_initial.strip() or None
@@ -293,15 +261,6 @@ class RegistrationForm(forms.ModelForm):
             
             # Save the updated profile
             profile.save()
-            print(f"\n✅ Profile saved successfully!")
-            print(f"  - pending_first_name: '{profile.pending_first_name}'")
-            print(f"  - pending_last_name: '{profile.pending_last_name}'")
-            print(f"  - pending_middle_initial: '{profile.pending_middle_initial}'")
-            print(f"  - pending_suffix: '{profile.pending_suffix}'")
-            print(f"  - pending_G11: '{profile.pending_G11}'")
-            print(f"  - pending_G12: '{profile.pending_G12}'")
-            print(f"  - took_shs: {profile.took_shs}")
-            print("="*80 + "\n")
 
         return user
 
