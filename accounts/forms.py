@@ -125,7 +125,10 @@ class RegistrationForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("An account with this email already exists.")
+            raise forms.ValidationError(
+                "An account with this email already exists. "
+                "If this is you, please use the 'Forgot Password' option to recover your account."
+            )
         return email
     
     def clean_first_name(self):
@@ -148,6 +151,39 @@ class RegistrationForm(forms.ModelForm):
         
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match. Please try again.")
+
+        # ✅ Check for duplicate name with existing account
+        first_name = cleaned_data.get('first_name', '').strip()
+        last_name = cleaned_data.get('last_name', '').strip()
+        middle_initial = cleaned_data.get('middle_initial', '').strip() or ""
+        suffix = cleaned_data.get('suffix', '').strip() or ""
+        
+        if first_name and last_name:
+            from research.models import Author
+            
+            # Check if an author with this exact name already has an account
+            existing_author = Author.objects.filter(
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+                middle_initial__iexact=middle_initial,
+                suffix__iexact=suffix,
+                user__isnull=False  # Only check authors who already have accounts
+            ).first()
+            
+            if existing_author:
+                # Build the full name for the error message
+                full_name = f"{first_name}"
+                if middle_initial:
+                    full_name += f" {middle_initial}."
+                full_name += f" {last_name}"
+                if suffix:
+                    full_name += f", {suffix}"
+                
+                raise forms.ValidationError(
+                    f"This name already has an account. "
+                    f"If you are '{full_name}', please use the 'Forgot Password' option to recover your account. "
+                    f"If this is not you, please contact the administrator."
+                )
 
         # Combine birthdate fields into a single date
         birth_month = cleaned_data.get('birth_month')
@@ -179,7 +215,7 @@ class RegistrationForm(forms.ModelForm):
         if not agree_terms:
             raise forms.ValidationError("You must agree to the Terms and Conditions to register.")
         
-        # NEW: Validate batch years for SHS students and alumni who took SHS
+        # Validate batch years for SHS students and alumni who took SHS
         role = cleaned_data.get('role')
         took_shs = cleaned_data.get('took_shs', False)
         g11 = cleaned_data.get('g11', '').strip()
