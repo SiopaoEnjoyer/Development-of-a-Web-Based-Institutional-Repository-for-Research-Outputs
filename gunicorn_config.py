@@ -1,50 +1,34 @@
 import multiprocessing
 import os
 
-workers = 1  # Keep at 1 for 512MB RAM limit
+workers = 1  
 
-# ✅ ADD THREADS - Better concurrency without doubling memory
-threads = 2  # Handle 2 requests concurrently per worker
-worker_class = 'gthread'  # Use threaded worker (changed from 'sync')
+threads = 2  
+worker_class = 'gthread'  
 
 max_requests = 200
 max_requests_jitter = 40
 
-# ============================================
-# Timeout settings
-# ============================================
 timeout = 120
 graceful_timeout = 30
 keepalive = 5
 
-# ============================================
-# Connection settings
-# ============================================
 worker_connections = 50
 
-# Preload app = False is better for memory on single worker
 preload_app = False
 
-# ============================================
-# Logging (reduce memory from logs)
-# ============================================
-loglevel = 'warning'
-accesslog = None
-errorlog = '-'
-disable_access_log = True
+loglevel = 'info'          
+accesslog = '-'            
+errorlog = '-'             
+disable_access_log = False 
 
-# ============================================
-# Memory and process limits
-# ============================================
 worker_tmp_dir = '/dev/shm'
 
 limit_request_line = 4096
 limit_request_fields = 100
 limit_request_field_size = 8190
 
-# ============================================
-# Server hooks for monitoring
-# ============================================
+
 def on_starting(server):
     """Called just before the master process is initialized."""
     print("=" * 50)
@@ -84,9 +68,6 @@ def worker_exit(server, worker):
     import gc
     gc.collect()
 
-# ============================================
-# Additional optimizations
-# ============================================
 backlog = 64
 daemon = False
 proc_name = 'django_app'
