@@ -1,4 +1,4 @@
-// Home Page - Fixed Implementation
+// Home Page - Simplified Implementation
 if (window.__homeState) {
     try {
         window.__homeState.cleanup();
@@ -21,20 +21,12 @@ if (window.__homeState) {
         // ========== MOUSE GLOW EFFECT ==========
         const glow = document.getElementById('heroGlow');
         if (glow) {
-            let lastMoveTime = 0;
-            const THROTTLE_MS = 16;
-            
             const mouseHandler = (e) => {
                 if (!state.isActive) return;
-                
-                const now = performance.now();
-                if (now - lastMoveTime < THROTTLE_MS) return;
-                lastMoveTime = now;
-                
                 glow.style.background = `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, rgba(1,87,38,0.3), transparent 40%)`;
             };
             
-            document.addEventListener('mousemove', mouseHandler, { passive: true });
+            document.addEventListener('mousemove', mouseHandler);
             state.handlers.push({ target: document, type: 'mousemove', handler: mouseHandler });
         }
 
@@ -55,8 +47,6 @@ if (window.__homeState) {
 
                         let current = 0;
                         const increment = target / 60;
-                        let frames = 0;
-                        const maxFrames = 60;
                         
                         const timer = setInterval(() => {
                             if (!state.isActive) {
@@ -65,9 +55,8 @@ if (window.__homeState) {
                             }
                             
                             current += increment;
-                            frames++;
                             
-                            if (frames >= maxFrames || current >= target) {
+                            if (current >= target) {
                                 stat.textContent = target + '+';
                                 clearInterval(timer);
                                 const idx = state.intervals.indexOf(timer);
@@ -150,31 +139,15 @@ if (window.__homeState) {
         // ========== HERO PARALLAX ==========
         const hero = document.querySelector('.hero-section');
         if (hero) {
-            let lastScrollTime = 0;
-            const SCROLL_THROTTLE = 16;
-            let ticking = false;
-            
             const scrollHandler = () => {
                 if (!state.isActive) return;
-                
-                const now = performance.now();
-                if (now - lastScrollTime < SCROLL_THROTTLE) return;
-                
-                if (!ticking) {
-                    requestAnimationFrame(() => {
-                        hero.style.opacity = Math.max(0, 1 - window.scrollY / 600);
-                        lastScrollTime = performance.now();
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
+                hero.style.opacity = Math.max(0, 1 - window.scrollY / 600);
             };
             
-            window.addEventListener('scroll', scrollHandler, { passive: true });
+            window.addEventListener('scroll', scrollHandler);
             state.handlers.push({ target: window, type: 'scroll', handler: scrollHandler });
         }
 
-        // Store cleanup reference for interactionTimeout
         state.interactionTimeout = interactionTimeout;
     }
 
@@ -218,7 +191,6 @@ if (window.__homeState) {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        // DOM already loaded, run immediately
         setTimeout(init, 0);
     }
 

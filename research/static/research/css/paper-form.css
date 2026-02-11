@@ -641,6 +641,25 @@ select.form-select::-webkit-scrollbar-thumb:hover {
     border-top: none;
 }
 
+/* Modal Body - Prevent text overflow for long filenames */
+.modal-body {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.modal-body #selectedFilePreview {
+    max-width: 100%;
+}
+
+.modal-body #selectedFileNameDisplay {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    display: block;
+}
+
 /* Modal Footer Buttons - Consistent styling */
 .modal-footer .btn {
     border: none !important;
@@ -712,6 +731,81 @@ select.form-select::-webkit-scrollbar-thumb:hover {
 
 .modal.show .modal-dialog {
     transform: none;
+}
+
+/* Preview Modal Specific Styles */
+#previewModal .modal-dialog {
+    max-width: 800px;
+}
+
+#previewModal .modal-body {
+    padding: 2rem;
+    background: #f8f9fa;
+}
+
+#previewContent .row {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+#previewContent .col-12,
+#previewContent .col-md-6 {
+    margin-bottom: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#previewContent .col-12:last-child,
+#previewContent .col-md-6:last-child {
+    margin-bottom: 0;
+}
+
+#previewContent strong {
+    color: var(--primary-green);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#previewContent p {
+    margin: 0;
+    color: #2d3748;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+#previewContent p:not(:has(strong)) {
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-left: 3px solid var(--primary-green);
+    border-radius: 6px;
+    margin-top: 0.25rem;
+}
+
+#previewContent .col-12 > p:first-child strong {
+    font-size: 1.1rem;
+    color: var(--theme-green);
+}
+
+/* Grid layout for two-column items */
+#previewContent .row > .col-md-6 {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #previewContent .col-md-6 {
+        margin-bottom: 1rem;
+    }
 }
 
 /* Alerts */

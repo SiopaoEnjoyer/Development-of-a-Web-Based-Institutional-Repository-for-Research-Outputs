@@ -14,11 +14,7 @@ if (window.__particlesState) {
         return;
     }
     
-    const ctx = canvas.getContext('2d', { 
-        alpha: true,
-        desynchronized: true,
-        willReadFrequently: false
-    });
+    const ctx = canvas.getContext('2d');
     
     if (!ctx) {
         console.error('❌ PARTICLES: Could not get 2D context');
@@ -29,23 +25,17 @@ if (window.__particlesState) {
     let animationFrameId = null;
     let isRunning = true;
     let particles = [];
-    let lastFrameTime = performance.now();
-    const MAX_FRAME_TIME = 100; // Skip frames if too slow
     
     // Set canvas size
     function resizeCanvas() {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = window.innerWidth * dpr;
-        canvas.height = window.innerHeight * dpr;
-        canvas.style.width = window.innerWidth + 'px';
-        canvas.style.height = window.innerHeight + 'px';
-        ctx.scale(dpr, dpr);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
     resizeCanvas();
 
     const particleCount = 50;
 
-    // Optimized Particle class
+    // Simple Particle class
     class Particle {
         constructor() {
             this.reset();
@@ -78,7 +68,6 @@ if (window.__particlesState) {
         }
         
         destroy() {
-            // Nullify all properties to help GC
             this.x = null;
             this.y = null;
             this.size = null;
@@ -88,50 +77,37 @@ if (window.__particlesState) {
         }
     }
 
-    // Initialize particles once
+    // Initialize particles
     for (let i = 0; i < particleCount; i++) {
         particles.push(new Particle());
     }
 
-    // Optimized animation loop with frame skipping
-    function animate(currentTime) {
-        // CRITICAL: Check if we should still be running
+    // Simple animation loop
+    function animate() {
         if (!isRunning) {
             return;
         }
         
-        // Frame rate limiting
-        const deltaTime = currentTime - lastFrameTime;
-        if (deltaTime > MAX_FRAME_TIME) {
-            lastFrameTime = currentTime;
-            animationFrameId = requestAnimationFrame(animate);
-            return; // Skip this frame
-        }
-        lastFrameTime = currentTime;
-        
         // Clear canvas
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
         
-        // Update and draw particles (optimized loop)
-        const len = particles.length;
-        for (let i = 0; i < len; i++) {
+        // Update and draw particles
+        for (let i = 0; i < particles.length; i++) {
             particles[i].update();
             particles[i].draw();
         }
 
-        // Draw connections (optimized)
-        for (let i = 0; i < len - 1; i++) {
+        // Draw connections
+        for (let i = 0; i < particles.length - 1; i++) {
             const p1 = particles[i];
-            for (let j = i + 1; j < len; j++) {
+            for (let j = i + 1; j < particles.length; j++) {
                 const p2 = particles[j];
                 
                 const dx = p1.x - p2.x;
                 const dy = p1.y - p2.y;
-                const distSq = dx * dx + dy * dy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                // Use squared distance to avoid sqrt
-                if (distSq < 22500) { // 150 * 150
-                    const distance = Math.sqrt(distSq);
+                if (distance < 150) {
                     const opacity = 0.3 * (1 - distance / 150);
                     ctx.strokeStyle = `rgba(1, 150, 70, ${opacity})`;
                     ctx.lineWidth = 1;
@@ -146,65 +122,46 @@ if (window.__particlesState) {
         animationFrameId = requestAnimationFrame(animate);
     }
 
-    // Debounced resize handler
-    let resizeTimeout;
-    const resizeHandler = () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (isRunning) {
-                resizeCanvas();
-            }
-        }, 150);
-    };
-    window.addEventListener('resize', resizeHandler, { passive: true });
+    // Resize handler
+    window.addEventListener('resize', function() {
+        if (isRunning) {
+            resizeCanvas();
+        }
+    });
 
     // Start animation
     animationFrameId = requestAnimationFrame(animate);
 
-    // AGGRESSIVE cleanup function
+    // Cleanup function
     function cleanup() {
-        // STOP EVERYTHING IMMEDIATELY
         isRunning = false;
         
-        // Cancel animation frame (it's being tracked globally now)
         if (animationFrameId !== null) {
             window.cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
         }
         
-        // Remove event listeners
-        window.removeEventListener('resize', resizeHandler);
-        if (resizeTimeout) {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = null;
-        }
+        window.removeEventListener('resize', resizeCanvas);
         
-        // Destroy all particles IMMEDIATELY
         if (particles && particles.length > 0) {
-            const count = particles.length;
-            for (let i = 0; i < count; i++) {
+            for (let i = 0; i < particles.length; i++) {
                 if (particles[i] && typeof particles[i].destroy === 'function') {
                     particles[i].destroy();
                 }
-                particles[i] = null; // Explicit null
+                particles[i] = null;
             }
             particles.length = 0;
             particles = null;
         }
         
-        // Clear and minimize canvas to free GPU memory
         if (ctx && canvas) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Reset transform
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
             canvas.width = 1;
             canvas.height = 1;
-            canvas.style.width = '1px';
-            canvas.style.height = '1px';
         }
     }
 
-    // Store state globally with read-only checks
+    // Store state globally
     const state = {
         cleanup,
         isRunning: () => isRunning,
@@ -213,7 +170,6 @@ if (window.__particlesState) {
     
     window.__particlesState = state;
     
-    // Register with global cleanup system
     if (window.registerCleanup) {
         window.registerCleanup('particles', cleanup);
     }

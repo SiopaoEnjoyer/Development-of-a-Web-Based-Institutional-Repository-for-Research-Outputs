@@ -39,6 +39,13 @@ async function updateResults() {
         document.querySelector("#keywordTableBody").innerHTML = newTableBody.innerHTML;
     }
 
+    // Update pagination if it exists
+    const newPagination = temp.querySelector(".card-footer");
+    const currentPagination = document.querySelector(".card-footer");
+    if (newPagination && currentPagination) {
+        currentPagination.innerHTML = newPagination.innerHTML;
+    }
+
     history.replaceState(null, "", `?${params.toString()}`);
     renderAppliedFilters();
     
@@ -121,6 +128,14 @@ function removeFilter(key) {
             if (newTableBody) {
                 document.querySelector("#keywordTableBody").innerHTML = newTableBody.innerHTML;
             }
+            
+            // Update pagination if it exists
+            const newPagination = temp.querySelector(".card-footer");
+            const currentPagination = document.querySelector(".card-footer");
+            if (newPagination && currentPagination) {
+                currentPagination.innerHTML = newPagination.innerHTML;
+            }
+            
             history.replaceState(null, "", `?${url.toString()}`);
             renderAppliedFilters();
         });

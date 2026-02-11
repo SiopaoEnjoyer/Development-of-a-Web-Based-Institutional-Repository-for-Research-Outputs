@@ -21,6 +21,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Re-initialize delete buttons for the new content
                 initializeDeleteButtons();
             }
+            
+            // Update pagination if it exists
+            const newPagination = tempDiv.querySelector(".card-footer");
+            const currentPagination = document.querySelector(".card-footer");
+            if (newPagination && currentPagination) {
+                currentPagination.innerHTML = newPagination.innerHTML;
+            }
         }
     });
     

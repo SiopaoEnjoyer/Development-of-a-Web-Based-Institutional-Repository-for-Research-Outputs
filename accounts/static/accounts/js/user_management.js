@@ -82,7 +82,7 @@ async function updateResults(includeSort = false) {
 
         const data = await res.json();
         
-        // Update ONLY table, not modals
+        // Update table
         if (data.table_html) {
             document.querySelector("#tableContainer").innerHTML = data.table_html;
             
@@ -91,6 +91,15 @@ async function updateResults(includeSort = false) {
             
             if (includeSort) {
                 updateSortIndicators();
+            }
+        }
+        
+        // Update pagination if it exists (for HTML-based pagination)
+        // If your backend returns pagination separately, handle it here
+        if (data.pagination_html) {
+            const paginationContainer = document.querySelector(".card-footer");
+            if (paginationContainer) {
+                paginationContainer.innerHTML = data.pagination_html;
             }
         }
 

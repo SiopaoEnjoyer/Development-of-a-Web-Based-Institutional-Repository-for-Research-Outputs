@@ -1,418 +1,226 @@
-/* static/research/js/author-manage.js */
-/* Author management page functionality */
+/* static/research/js/keyword-manage.js */
+/* Keyword management page functionality */
 
-(function() {
-    'use strict';
-    
-    // Filter elements
-    const filterElements = {};
+const filterElements = {
+    sortBy: document.getElementById("sort_by"),
+    searchQuery: document.getElementById("searchQuery")
+};
 
-    // Wait for DOM to be ready
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeFilters();
-        initializeModals();
-        renderAppliedFilters();
-        
-        // Initialize Bootstrap tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Update results via AJAX
+async function updateResults() {
+    const params = new URLSearchParams();
+
+    if (filterElements.searchQuery.value) params.set("q", filterElements.searchQuery.value);
+    if (filterElements.sortBy.value) params.set("sort_by", filterElements.sortBy.value);
+
+    const res = await fetch(`?${params.toString()}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
     });
 
-    function initializeFilters() {
-        // Populate the filterElements object
-        filterElements.gradeLevel = document.getElementById("grade_level");
-        filterElements.schoolYear = document.getElementById("school_year");
-        filterElements.hasAccount = document.getElementById("has_account");
-        filterElements.hasConsented = document.getElementById("has_consented");
-        filterElements.sortBy = document.getElementById("sort_by");
-        filterElements.searchQuery = document.getElementById("searchQuery");
+    const html = await res.text();
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
 
-        // Add change listeners
-        if (filterElements.gradeLevel) filterElements.gradeLevel.addEventListener("change", updateResults);
-        if (filterElements.schoolYear) filterElements.schoolYear.addEventListener("change", updateResults);
-        if (filterElements.hasAccount) filterElements.hasAccount.addEventListener("change", updateResults);
-        if (filterElements.hasConsented) filterElements.hasConsented.addEventListener("change", updateResults);
-        if (filterElements.sortBy) filterElements.sortBy.addEventListener("change", updateResults);
-        
-        if (filterElements.searchQuery) {
-            filterElements.searchQuery.addEventListener("input", debounce(() => {
-                updateResults();
-            }, 500));
-        }
-        
-        // Reset button
-        const resetBtn = document.getElementById("resetAllBtn");
-        if (resetBtn) {
-            resetBtn.addEventListener("click", () => {
-                const form = document.getElementById("filtersForm");
-                if (form) form.reset();
-                window.location = window.location.pathname;
-            });
-        }
+    const newTableBody = temp.querySelector("#keywordTableBody");
+    if (newTableBody) {
+        document.querySelector("#keywordTableBody").innerHTML = newTableBody.innerHTML;
     }
 
-    // Debounce function
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    // Update pagination if it exists
+    const newPagination = temp.querySelector(".card-footer");
+    const currentPagination = document.querySelector(".card-footer");
+    if (newPagination && currentPagination) {
+        currentPagination.innerHTML = newPagination.innerHTML;
     }
 
-    // Update results via AJAX
-    async function updateResults() {
-        const params = new URLSearchParams();
+    history.replaceState(null, "", `?${params.toString()}`);
+    renderAppliedFilters();
+    
+    // Reinitialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
 
-        if (filterElements.searchQuery && filterElements.searchQuery.value) {
-            params.set("q", filterElements.searchQuery.value);
-        }
-        if (filterElements.gradeLevel && filterElements.gradeLevel.value) {
-            params.set("grade_level", filterElements.gradeLevel.value);
-        }
-        if (filterElements.schoolYear && filterElements.schoolYear.value) {
-            params.set("school_year", filterElements.schoolYear.value);
-        }
-        if (filterElements.hasAccount && filterElements.hasAccount.value) {
-            params.set("has_account", filterElements.hasAccount.value);
-        }
-        if (filterElements.hasConsented && filterElements.hasConsented.value) {
-            params.set("has_consented", filterElements.hasConsented.value);
-        }
-        if (filterElements.sortBy && filterElements.sortBy.value) {
-            params.set("sort_by", filterElements.sortBy.value);
-        }
+// Add change listeners
+filterElements.sortBy.addEventListener("change", updateResults);
 
-        const res = await fetch(`?${params.toString()}`, {
-            headers: { "X-Requested-With": "XMLHttpRequest" }
+filterElements.searchQuery.addEventListener("input", debounce(() => {
+    updateResults();
+}, 500));
+
+/* FILTER TOKENS */
+function renderAppliedFilters() {
+    const activeFiltersSection = document.getElementById("activeFiltersSection");
+    const tokens = document.getElementById("active-filters");
+    tokens.innerHTML = "";
+
+    const url = new URLSearchParams(window.location.search);
+
+    const filterLabels = {
+        "q": "Search",
+        "sort_by": "Sort By"
+    };
+
+    let hasFilters = false;
+
+    for (const [key, label] of Object.entries(filterLabels)) {
+        if (url.has(key) && url.get(key)) {
+            hasFilters = true;
+            let displayValue = url.get(key);
+            
+            if (key === "sort_by") {
+                const sortMap = {
+                    "alphabetical": "A-Z",
+                    "reverse_alphabetical": "Z-A",
+                    "most_used": "Most Used",
+                    "least_used": "Least Used"
+                };
+                displayValue = sortMap[displayValue] || displayValue;
+            }
+
+            const token = document.createElement("span");
+            token.className = "filter-token";
+            token.innerHTML = `
+                ${label}: ${displayValue}
+                <button onclick="removeFilter('${key}')">×</button>
+            `;
+            tokens.appendChild(token);
+        }
+    }
+    
+    if (hasFilters) {
+        activeFiltersSection.style.display = 'block';
+    } else {
+        activeFiltersSection.style.display = 'none';
+    }
+}
+
+function removeFilter(key) {
+    const url = new URLSearchParams(window.location.search);
+    url.delete(key);
+
+    const element = document.querySelector(`[name="${key}"]`);
+    if (element) {
+        element.value = "";
+    }
+
+    fetch(`?${url.toString()}`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(r => r.text())
+        .then(html => {
+            const temp = document.createElement("div");
+            temp.innerHTML = html;
+            const newTableBody = temp.querySelector("#keywordTableBody");
+            if (newTableBody) {
+                document.querySelector("#keywordTableBody").innerHTML = newTableBody.innerHTML;
+            }
+            
+            // Update pagination if it exists
+            const newPagination = temp.querySelector(".card-footer");
+            const currentPagination = document.querySelector(".card-footer");
+            if (newPagination && currentPagination) {
+                currentPagination.innerHTML = newPagination.innerHTML;
+            }
+            
+            history.replaceState(null, "", `?${url.toString()}`);
+            renderAppliedFilters();
         });
+}
 
-        const html = await res.text();
-        const temp = document.createElement("div");
-        temp.innerHTML = html;
+/* RESET ALL */
+document.getElementById("resetAllBtn").addEventListener("click", () => {
+    document.getElementById("filtersForm").reset();
+    window.location = window.location.pathname;
+});
 
-        const newTableBody = temp.querySelector("#authorTableBody");
-        if (newTableBody) {
-            document.querySelector("#authorTableBody").innerHTML = newTableBody.innerHTML;
-        }
-
-        history.replaceState(null, "", `?${params.toString()}`);
-        renderAppliedFilters();
+// Format keyword with italics (converts *text* to <em>text</em>)
+function formatKeyword(text) {
+    if (!text || text.trim() === '') {
+        return '<span class="keyword-preview-empty">Type to see preview...</span>';
     }
+    return text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
 
-    /* FILTER TOKENS */
-    function renderAppliedFilters() {
-        const activeFiltersSection = document.getElementById("activeFiltersSection");
-        const tokens = document.getElementById("active-filters");
-        
-        if (!activeFiltersSection || !tokens) return;
-        
-        tokens.innerHTML = "";
+// Live preview for Add Keyword
+const addKeywordInput = document.getElementById('keyword_name');
+const addPreviewContent = document.getElementById('keyword_preview_text');
 
-        const url = new URLSearchParams(window.location.search);
-
-        const filterLabels = {
-            "q": "Search",
-            "grade_level": "Grade Level",
-            "school_year": "School Year",
-            "has_account": "Has Account",
-            "has_consented": "Has Consented",
-            "sort_by": "Sort By"
-        };
-
-        let hasFilters = false;
-
-        for (const [key, label] of Object.entries(filterLabels)) {
-            if (url.has(key) && url.get(key)) {
-                hasFilters = true;
-                let displayValue = url.get(key);
-                
-                if (key === "grade_level") {
-                    displayValue = "Grade " + displayValue;
-                } else if (key === "sort_by") {
-                    const sortMap = {
-                        "alphabetical": "A-Z",
-                        "reverse_alphabetical": "Z-A",
-                        "latest": "Newest First",
-                        "oldest": "Oldest First"
-                    };
-                    displayValue = sortMap[displayValue] || displayValue;
-                } else if (key === "has_account") {
-                    displayValue = displayValue === "yes" ? "Yes" : "No";
-                } else if (key === "has_consented") {
-                    if (displayValue === "yes") displayValue = "Yes";
-                    else if (displayValue === "pending") displayValue = "Pending";
-                    else displayValue = "No";
-                }
-
-                const token = document.createElement("span");
-                token.className = "filter-token";
-                token.innerHTML = `
-                    ${label}: ${displayValue}
-                    <button onclick="window.removeFilter('${key}')">×</button>
-                `;
-                tokens.appendChild(token);
-            }
-        }
-        
-        if (hasFilters) {
-            activeFiltersSection.style.display = 'block';
+if (addKeywordInput && addPreviewContent) {
+    addKeywordInput.addEventListener('input', function() {
+        const preview = document.getElementById('keyword_preview');
+        if (this.value.trim()) {
+            if (preview) preview.style.display = 'block';
+            const formattedText = formatKeyword(this.value);
+            addPreviewContent.innerHTML = formattedText;
         } else {
-            activeFiltersSection.style.display = 'none';
+            if (preview) preview.style.display = 'none';
         }
-    }
+    });
+}
 
-    function removeFilter(key) {
-        const url = new URLSearchParams(window.location.search);
-        url.delete(key);
+// Live preview for Edit Keyword
+const editKeywordInput = document.getElementById('edit_keyword_name');
+const editPreviewContent = document.getElementById('editPreviewContent');
 
-        const element = document.querySelector(`[name="${key}"]`);
-        if (element) {
-            element.value = "";
-        }
+if (editKeywordInput && editPreviewContent) {
+    editKeywordInput.addEventListener('input', function() {
+        const formattedText = formatKeyword(this.value);
+        editPreviewContent.innerHTML = formattedText;
+    });
+}
 
-        fetch(`?${url.toString()}`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-            .then(r => r.text())
-            .then(html => {
-                const temp = document.createElement("div");
-                temp.innerHTML = html;
-                const newTableBody = temp.querySelector("#authorTableBody");
-                if (newTableBody) {
-                    document.querySelector("#authorTableBody").innerHTML = newTableBody.innerHTML;
-                }
-                history.replaceState(null, "", `?${url.toString()}`);
-                renderAppliedFilters();
-            });
-    }
+// ==================== ADD KEYWORD (AJAX) ====================
+const saveKeywordBtn = document.getElementById('saveKeywordBtn');
+const keywordModalErrors = document.getElementById('keywordModalErrors');
 
-    /* MODAL FUNCTIONS */
-    function initializeModals() {
-        const addAuthorBtn = document.getElementById('saveAuthorBtn');
-        const updateAuthorBtn = document.getElementById('updateAuthorBtn');
-        
-        if (addAuthorBtn) {
-            addAuthorBtn.addEventListener('click', handleAddAuthor);
-        }
-        
-        if (updateAuthorBtn) {
-            updateAuthorBtn.addEventListener('click', handleUpdateAuthor);
-        }
-        
-        // Reset modals when closed
-        const addAuthorModal = document.getElementById('addAuthorModal');
-        if (addAuthorModal) {
-            addAuthorModal.addEventListener('hidden.bs.modal', function () {
-                resetAddForm();
-            });
-        }
-        
-        const editAuthorModal = document.getElementById('editAuthorModal');
-        if (editAuthorModal) {
-            editAuthorModal.addEventListener('hidden.bs.modal', function () {
-                resetEditForm();
-            });
-        }
-    }
-
-    // Edit author function
-    function editAuthor(id, firstName, middleInitial, lastName, suffix, g11Batch, g12Batch) {
-        document.getElementById('edit_author_id').value = id;
-        document.getElementById('edit_first_name').value = firstName;
-        document.getElementById('edit_middle_initial').value = middleInitial || '';
-        document.getElementById('edit_last_name').value = lastName;
-        document.getElementById('edit_suffix').value = suffix || '';
-        document.getElementById('edit_G11_Batch').value = g11Batch || '';
-        document.getElementById('edit_G12_Batch').value = g12Batch || '';
-        
-        const editModal = new bootstrap.Modal(document.getElementById('editAuthorModal'));
-        editModal.show();
-    }
-
-    // Validation helper
-    function validateAuthorForm(firstName, lastName, g11Batch, g12Batch) {
-        const errors = [];
-        
-        if (!firstName) errors.push('First Name is required.');
-        if (!lastName) errors.push('Last Name is required.');
-        
-        // At least one batch is required
-        if (!g11Batch && !g12Batch) {
-            errors.push('At least one batch (Grade 11 or Grade 12) is required.');
-        }
-        
-        const batchPattern = /^\d{4}-\d{4}$/;
-        
-        // Only validate format if the field is filled
-        if (g11Batch && !batchPattern.test(g11Batch)) {
-            errors.push('Grade 11 Batch must be in format YYYY-YYYY (e.g., 2023-2024).');
-        }
-        if (g12Batch && !batchPattern.test(g12Batch)) {
-            errors.push('Grade 12 Batch must be in format YYYY-YYYY (e.g., 2024-2025).');
-        }
-        
-        return errors;
-    }
-
-    // Helper function to get CSRF token from cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    // Handle Add Author
-    async function handleAddAuthor(e) {
+if (saveKeywordBtn) {
+    saveKeywordBtn.addEventListener('click', async function(e) {
         e.preventDefault();
         
-        const addAuthorModalErrors = document.getElementById('authorModalErrors');
-        if (addAuthorModalErrors) {
-            addAuthorModalErrors.style.display = 'none';
-            addAuthorModalErrors.innerHTML = '';
+        if (keywordModalErrors) {
+            keywordModalErrors.style.display = 'none';
+            keywordModalErrors.innerHTML = '';
         }
         
-        const firstName = document.getElementById('author_first_name')?.value.trim();
-        const lastName = document.getElementById('author_last_name')?.value.trim();
-        const middleInitial = document.getElementById('author_middle_initial')?.value.trim();
-        const suffix = document.getElementById('author_suffix')?.value.trim();
-        const g11Batch = document.getElementById('author_G11_Batch')?.value.trim();
-        const g12Batch = document.getElementById('author_G12_Batch')?.value.trim();
+        const keywordName = document.getElementById('keyword_name')?.value.trim();
         
-        const errors = validateAuthorForm(firstName, lastName, g11Batch, g12Batch);
-        
-        if (errors.length > 0) {
-            if (addAuthorModalErrors) {
-                addAuthorModalErrors.innerHTML = '<ul class="mb-0">' + 
-                    errors.map(err => `<li>${err}</li>`).join('') + 
-                    '</ul>';
-                addAuthorModalErrors.style.display = 'block';
+        if (!keywordName) {
+            if (keywordModalErrors) {
+                keywordModalErrors.innerHTML = 'Keyword is required.';
+                keywordModalErrors.style.display = 'block';
             }
             return;
         }
         
-        e.currentTarget.disabled = true;
-        e.currentTarget.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-        
-        try {
-            const formData = new FormData();
-            formData.append('first', firstName);
-            formData.append('middle', middleInitial);
-            formData.append('last', lastName);
-            formData.append('suffix', suffix);
-            formData.append('G11', g11Batch);
-            formData.append('G12', g12Batch);
-            
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-            if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
-            
-            const response = await fetch('/ajax/add-author/', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                const fullName = data.name || `${firstName} ${lastName}`;
-                
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addAuthorModal'));
-                if (modal) modal.hide();
-                
-                resetAddForm();
-                
-                if (typeof showSuccess === 'function') {
-                    showSuccess(`Author "${fullName}" added successfully!`);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    alert(`✓ Author "${fullName}" added successfully!`);
-                    window.location.reload();
-                }
-            } else {
-                let errorMessage = 'An error occurred while adding the author.';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || errorMessage;
-                } catch (e) {
-                    console.error('Response was not JSON:', e);
-                }
-                
-                if (addAuthorModalErrors) {
-                    addAuthorModalErrors.innerHTML = errorMessage;
-                    addAuthorModalErrors.style.display = 'block';
-                }
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            if (addAuthorModalErrors) {
-                addAuthorModalErrors.innerHTML = 'An error occurred while adding the author.';
-                addAuthorModalErrors.style.display = 'block';
-            }
-        } finally {
-            e.currentTarget.disabled = false;
-            e.currentTarget.innerHTML = '<i class="bi bi-plus-circle"></i> Add Author';
-        }
-    }
-
-    // Handle Update Author
-    async function handleUpdateAuthor(e) {
-        e.preventDefault();
-        
-        const editAuthorModalErrors = document.getElementById('editAuthorModalErrors');
-        if (editAuthorModalErrors) {
-            editAuthorModalErrors.style.display = 'none';
-            editAuthorModalErrors.innerHTML = '';
-        }
-        
-        const authorId = document.getElementById('edit_author_id')?.value;
-        const firstName = document.getElementById('edit_first_name')?.value.trim();
-        const lastName = document.getElementById('edit_last_name')?.value.trim();
-        const middleInitial = document.getElementById('edit_middle_initial')?.value.trim();
-        const suffix = document.getElementById('edit_suffix')?.value.trim();
-        const g11Batch = document.getElementById('edit_G11_Batch')?.value.trim();
-        const g12Batch = document.getElementById('edit_G12_Batch')?.value.trim();
-        
-        const errors = validateAuthorForm(firstName, lastName, g11Batch, g12Batch);
-        
-        if (errors.length > 0) {
-            if (editAuthorModalErrors) {
-                editAuthorModalErrors.innerHTML = '<ul class="mb-0">' + 
-                    errors.map(err => `<li>${err}</li>`).join('') + 
-                    '</ul>';
-                editAuthorModalErrors.style.display = 'block';
+        if (keywordName.length < 2) {
+            if (keywordModalErrors) {
+                keywordModalErrors.innerHTML = 'Keyword must be at least 2 characters long.';
+                keywordModalErrors.style.display = 'block';
             }
             return;
         }
         
-        e.currentTarget.disabled = true;
-        e.currentTarget.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
         
         try {
             const formData = new FormData();
-            formData.append('author_id', authorId);
-            formData.append('first_name', firstName);
-            formData.append('middle_initial', middleInitial);
-            formData.append('last_name', lastName);
-            formData.append('suffix', suffix);
-            formData.append('G11_Batch', g11Batch);
-            formData.append('G12_Batch', g12Batch);
-            formData.append('action', 'edit');
-            formData.append('edit_author', '1');
-            
+            formData.append('keyword_name', keywordName);
+            formData.append('add_keyword', '1');
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
             if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
             
@@ -425,71 +233,197 @@
             });
             
             if (response.ok) {
-                const fullName = `${firstName} ${middleInitial ? middleInitial + '.' : ''} ${lastName}${suffix ? ' ' + suffix : ''}`.trim();
-                
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editAuthorModal'));
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addKeywordModal'));
                 if (modal) modal.hide();
                 
-                resetEditForm();
+                document.getElementById('keyword_name').value = '';
+                const preview = document.getElementById('keyword_preview');
+                if (preview) preview.style.display = 'none';
                 
+                // Show success toast if available, otherwise alert
                 if (typeof showSuccess === 'function') {
-                    showSuccess(`Author "${fullName}" updated successfully!`);
+                    showSuccess(`Keyword "${keywordName}" added successfully!`);
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
                 } else {
-                    alert(`✓ Author "${fullName}" updated successfully!`);
+                    alert(`✓ Keyword "${keywordName}" added successfully!`);
                     window.location.reload();
                 }
             } else {
-                if (editAuthorModalErrors) {
-                    editAuthorModalErrors.innerHTML = 'An error occurred while updating the author.';
-                    editAuthorModalErrors.style.display = 'block';
+                const text = await response.text();
+                if (keywordModalErrors) {
+                    keywordModalErrors.innerHTML = 'An error occurred while adding the keyword.';
+                    keywordModalErrors.style.display = 'block';
                 }
             }
         } catch (error) {
             console.error('Error:', error);
-            if (editAuthorModalErrors) {
-                editAuthorModalErrors.innerHTML = 'An error occurred while updating the author.';
-                editAuthorModalErrors.style.display = 'block';
+            if (keywordModalErrors) {
+                keywordModalErrors.innerHTML = 'An error occurred while adding the keyword.';
+                keywordModalErrors.style.display = 'block';
             }
         } finally {
-            e.currentTarget.disabled = false;
-            e.currentTarget.innerHTML = '<i class="bi bi-check-circle"></i> Save Changes';
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-plus-circle"></i> Add Keyword';
         }
-    }
+    });
+}
 
-    function resetAddForm() {
-        document.getElementById('author_first_name').value = '';
-        document.getElementById('author_middle_initial').value = '';
-        document.getElementById('author_last_name').value = '';
-        document.getElementById('author_suffix').value = '';
-        document.getElementById('author_G11_Batch').value = '';
-        document.getElementById('author_G12_Batch').value = '';
+// ==================== EDIT KEYWORD ====================
+const updateKeywordBtn = document.getElementById('updateKeywordBtn');
+const editModalErrors = document.getElementById('editModalErrors');
+
+// Use event delegation for edit buttons
+document.addEventListener('click', function(e) {
+    const editBtn = e.target.closest('.edit-keyword-btn');
+    if (!editBtn) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const keywordId = editBtn.dataset.id;
+    const keywordName = editBtn.dataset.name;
+    const usageCount = editBtn.dataset.count;
+    
+    if (editModalErrors) {
+        editModalErrors.style.display = 'none';
+        editModalErrors.innerHTML = '';
+    }
+    
+    document.getElementById('edit_keyword_id').value = keywordId;
+    document.getElementById('edit_keyword_name').value = keywordName;
+    document.getElementById('edit_usage_count').textContent = usageCount;
+    
+    if (editPreviewContent) {
+        const formattedText = formatKeyword(keywordName);
+        editPreviewContent.innerHTML = formattedText;
+    }
+    
+    const modalElement = document.getElementById('editKeywordModal');
+    const bsModal = new bootstrap.Modal(modalElement);
+    bsModal.show();
+});
+
+if (updateKeywordBtn) {
+    updateKeywordBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
         
-        const addAuthorModalErrors = document.getElementById('authorModalErrors');
-        if (addAuthorModalErrors) {
-            addAuthorModalErrors.style.display = 'none';
-            addAuthorModalErrors.innerHTML = '';
+        if (editModalErrors) {
+            editModalErrors.style.display = 'none';
+            editModalErrors.innerHTML = '';
         }
-    }
-
-    function resetEditForm() {
-        document.getElementById('edit_first_name').value = '';
-        document.getElementById('edit_middle_initial').value = '';
-        document.getElementById('edit_last_name').value = '';
-        document.getElementById('edit_suffix').value = '';
-        document.getElementById('edit_G11_Batch').value = '';
-        document.getElementById('edit_G12_Batch').value = '';
         
-        const editAuthorModalErrors = document.getElementById('editAuthorModalErrors');
-        if (editAuthorModalErrors) {
-            editAuthorModalErrors.style.display = 'none';
-            editAuthorModalErrors.innerHTML = '';
+        const keywordId = document.getElementById('edit_keyword_id')?.value;
+        const keywordName = document.getElementById('edit_keyword_name')?.value.trim();
+        
+        if (!keywordName) {
+            if (editModalErrors) {
+                editModalErrors.innerHTML = 'Keyword is required.';
+                editModalErrors.style.display = 'block';
+            }
+            return;
         }
-    }
+        
+        if (keywordName.length < 2) {
+            if (editModalErrors) {
+                editModalErrors.innerHTML = 'Keyword must be at least 2 characters long.';
+                editModalErrors.style.display = 'block';
+            }
+            return;
+        }
+        
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+        
+        try {
+            const formData = new FormData();
+            formData.append('keyword_id', keywordId);
+            formData.append('keyword_name', keywordName);
+            formData.append('edit_keyword', '1');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
+            
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editKeywordModal'));
+                if (modal) modal.hide();
+                
+                if (typeof showSuccess === 'function') {
+                    showSuccess(`Keyword "${keywordName}" updated successfully!`);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert(`✓ Keyword "${keywordName}" updated successfully!`);
+                    window.location.reload();
+                }
+            } else {
+                if (editModalErrors) {
+                    editModalErrors.innerHTML = 'An error occurred while updating the keyword.';
+                    editModalErrors.style.display = 'block';
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (editModalErrors) {
+                editModalErrors.innerHTML = 'An error occurred while updating the keyword.';
+                editModalErrors.style.display = 'block';
+            }
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-check-circle"></i> Update Keyword';
+        }
+    });
+}
 
-    // Make functions available globally
-    window.editAuthor = editAuthor;
-    window.removeFilter = removeFilter;
-})();
+// Reset modals when closed
+const addKeywordModal = document.getElementById('addKeywordModal');
+if (addKeywordModal) {
+    addKeywordModal.addEventListener('hidden.bs.modal', function () {
+        document.getElementById('keyword_name').value = '';
+        if (keywordModalErrors) {
+            keywordModalErrors.style.display = 'none';
+            keywordModalErrors.innerHTML = '';
+        }
+        const preview = document.getElementById('keyword_preview');
+        if (preview) preview.style.display = 'none';
+        if (addPreviewContent) {
+            addPreviewContent.innerHTML = '<span class="keyword-preview-empty">Type to see preview...</span>';
+        }
+    });
+}
+
+const editKeywordModal = document.getElementById('editKeywordModal');
+if (editKeywordModal) {
+    editKeywordModal.addEventListener('hidden.bs.modal', function () {
+        document.getElementById('edit_keyword_name').value = '';
+        if (editModalErrors) {
+            editModalErrors.style.display = 'none';
+            editModalErrors.innerHTML = '';
+        }
+        if (editPreviewContent) {
+            editPreviewContent.innerHTML = '<span class="keyword-preview-empty">Type to see preview...</span>';
+        }
+    });
+}
+
+// Initialize Bootstrap tooltips and filters
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    renderAppliedFilters();
+});
+
+// Make removeFilter available globally
+window.removeFilter = removeFilter;

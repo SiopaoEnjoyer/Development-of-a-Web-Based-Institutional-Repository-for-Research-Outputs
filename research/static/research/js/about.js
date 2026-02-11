@@ -1,4 +1,4 @@
-// About Page - Fixed Implementation
+// About Page - Simplified Implementation
 if (window.aboutPageCleanup) {
     window.aboutPageCleanup();
 }
@@ -14,7 +14,6 @@ if (window.aboutPageCleanup) {
         isActive: true
     };
 
-    // Wait for DOM to be fully ready
     function init() {
         // ========== PARTICLE ANIMATION ==========
         const canvas = document.getElementById('particleCanvas');
@@ -73,11 +72,8 @@ if (window.aboutPageCleanup) {
         
         animate();
 
-        const resizeHandler = () => {
-            resizeCanvas();
-        };
-        window.addEventListener('resize', resizeHandler);
-        state.handlers.push({ target: window, type: 'resize', handler: resizeHandler });
+        window.addEventListener('resize', resizeCanvas);
+        state.handlers.push({ target: window, type: 'resize', handler: resizeCanvas });
 
         // ========== SECTION ANIMATIONS ==========
         const sections = document.querySelectorAll('.content-section');
@@ -89,10 +85,7 @@ if (window.aboutPageCleanup) {
                         entry.target.classList.add('visible');
                     }
                 });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            });
+            }, { threshold: 0.1 });
 
             sections.forEach(section => {
                 sectionObserver.observe(section);
@@ -112,9 +105,7 @@ if (window.aboutPageCleanup) {
                         animateStats();
                     }
                 });
-            }, {
-                threshold: 0.5
-            });
+            }, { threshold: 0.5 });
 
             statsObserver.observe(statsSection);
             state.observers.push(statsObserver);
@@ -127,9 +118,8 @@ if (window.aboutPageCleanup) {
                 const target = parseInt(stat.getAttribute('data-target'));
                 if (isNaN(target)) return;
                 
-                const duration = 2000;
-                const increment = target / (duration / 16);
                 let current = 0;
+                const increment = target / 60;
 
                 const updateCounter = () => {
                     if (!state.isActive) return;
@@ -137,8 +127,7 @@ if (window.aboutPageCleanup) {
                     current += increment;
                     if (current < target) {
                         stat.textContent = Math.floor(current);
-                        const frameId = requestAnimationFrame(updateCounter);
-                        state.animationFrames.push(frameId);
+                        requestAnimationFrame(updateCounter);
                     } else {
                         stat.textContent = target;
                     }
@@ -153,15 +142,8 @@ if (window.aboutPageCleanup) {
         const hero = document.querySelector('.about-hero');
         
         if (heroGlow && hero) {
-            let lastMoveTime = 0;
-            const THROTTLE_MS = 16;
-            
             const mouseMoveHandler = (e) => {
                 if (!state.isActive) return;
-                
-                const now = performance.now();
-                if (now - lastMoveTime < THROTTLE_MS) return;
-                lastMoveTime = now;
                 
                 const rect = hero.getBoundingClientRect();
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -170,36 +152,22 @@ if (window.aboutPageCleanup) {
                 heroGlow.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15) 0%, transparent 50%)`;
             };
             
-            hero.addEventListener('mousemove', mouseMoveHandler, { passive: true });
+            hero.addEventListener('mousemove', mouseMoveHandler);
             state.handlers.push({ target: hero, type: 'mousemove', handler: mouseMoveHandler });
         }
 
         // ========== SCROLL FADE EFFECT ==========
-        let lastScrollTime = 0;
-        const SCROLL_THROTTLE = 16;
-        let ticking = false;
-        
         const scrollHandler = () => {
             if (!state.isActive || !hero) return;
             
-            const now = performance.now();
-            if (now - lastScrollTime < SCROLL_THROTTLE) return;
+            const scrolled = window.scrollY;
+            const heroHeight = hero.offsetHeight;
+            const opacity = Math.max(0, 1 - (scrolled / heroHeight) * 1.5);
             
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    const scrolled = window.scrollY;
-                    const heroHeight = hero.offsetHeight;
-                    const opacity = Math.max(0, 1 - (scrolled / heroHeight) * 1.5);
-                    
-                    hero.style.opacity = opacity;
-                    lastScrollTime = performance.now();
-                    ticking = false;
-                });
-                ticking = true;
-            }
+            hero.style.opacity = opacity;
         };
         
-        window.addEventListener('scroll', scrollHandler, { passive: true });
+        window.addEventListener('scroll', scrollHandler);
         state.handlers.push({ target: window, type: 'scroll', handler: scrollHandler });
     }
 
@@ -238,7 +206,6 @@ if (window.aboutPageCleanup) {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        // DOM already loaded, run immediately
         setTimeout(init, 0);
     }
 
