@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.core.cache import cache
 from .models import ResearchPaper, Author, Keyword, Award
 from .forms import ResearchPaperForm
-from accounts.decorators import is_teacher
+from accounts.decorators import is_research_teacher_only
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.shortcuts import redirect, render
@@ -216,11 +216,11 @@ class LoginRequiredMessageMixin(LoginRequiredMixin):
         return redirect("/accounts/no-access/")
 
 class TeacherRequiredMixin:
-    """Mixin for @is_teacher decorator compatibility"""
+    """Mixin for research teachers only (and admins)"""
     @classmethod
     def as_view(cls, **initkwargs):
         view = super().as_view(**initkwargs)
-        return is_teacher(view)
+        return is_research_teacher_only(view)
 
 @method_decorator(ratelimit(key='ip', rate='100/h', method='GET'), name='dispatch')
 class IndexView(generic.ListView):

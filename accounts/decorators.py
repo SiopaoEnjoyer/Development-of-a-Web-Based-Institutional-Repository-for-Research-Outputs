@@ -20,11 +20,19 @@ def roles_required(*allowed_roles):
         return _wrapped_view
     return decorator
 
+# Admin only
 is_admin = roles_required("admin")
-is_research_teacher = roles_required("research_teacher")
-is_nonresearch_teacher = roles_required("nonresearch_teacher")
+
+# Research teacher only (for research management)
+is_research_teacher_only = roles_required("research_teacher", "admin")
+
+# Non-research teacher only
+is_nonresearch_teacher = roles_required("nonresearch_teacher", "admin")
+
+# Any teacher (for consent approvals, shared features)
+is_teacher = roles_required("research_teacher", "nonresearch_teacher", "admin")
+
+# Student roles
 is_alumni = roles_required("alumni")
 is_shs_student = roles_required("shs_student")
-
-is_teacher = roles_required("research_teacher", "nonresearch_teacher")
 is_student = roles_required("shs_student", "alumni")

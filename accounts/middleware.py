@@ -205,7 +205,15 @@ class ApprovalCheckMiddleware:
             if request.path in ["/accounts/login/", "/accounts/register/"]:
                 return redirect("/accounts/already-logged-in/")
             
-            if request.user.is_superuser or request.user.is_staff:
+            # Admins and staff get full access (except student-only pages)
+            if request.user.is_superuser or request.user.is_staff or request.user.role == 'admin':
+                # Block admins from student-only pages
+                student_only_paths = [
+                    "/accounts/student-dashboard/",
+                    "/accounts/update_consent/",
+                ]
+                if any(request.path.startswith(path) for path in student_only_paths):
+                    return redirect("/accounts/admin-dashboard/")
                 return self.get_response(request)
 
             cache_key = f'user_approved_{request.user.id}'
@@ -217,7 +225,7 @@ class ApprovalCheckMiddleware:
                     cache.set(cache_key, is_approved, 60 * 30)
                 else:
                     return self.get_response(request)
-                        
+                            
             if is_approved:
                 return self.get_response(request)
 

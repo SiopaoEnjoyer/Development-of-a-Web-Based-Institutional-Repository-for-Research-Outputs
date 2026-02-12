@@ -17,7 +17,9 @@ urlpatterns = [
 
     path("student/", views.StudentDashboardView.as_view(), name="student_dashboard"),
     path("teacher/", views.TeacherDashboardView.as_view(), name="teacher_dashboard"),
-    path("admin/", views.AdminDashboardView.as_view(), name="admin_dashboard"),
+    path("admin/", views.AdminDashboardView.as_view(), name="admin_dashboard"),\
+    path('nonresearch-teacher-dashboard/', views.NonResearchTeacherDashboardView.as_view(), name='nonresearch_teacher_dashboard'),
+
 
     # Admin - User Account Approvals Only
     path("admin/pending/", views.PendingAccountsView.as_view(), name="pending_accounts"),

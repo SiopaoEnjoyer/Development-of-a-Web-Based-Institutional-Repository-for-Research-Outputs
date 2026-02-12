@@ -5,6 +5,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+/research/templates/research/partials/gantt_chart.html
+
 # Django
 db.sqlite3
 db.sqlite3-journal

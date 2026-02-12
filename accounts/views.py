@@ -277,10 +277,20 @@ class DashboardRedirectView(LoginRequiredMixin, View):
             "shs_student": "accounts:student_dashboard",
             "alumni": "accounts:student_dashboard",
             "research_teacher": "accounts:teacher_dashboard",
-            "nonresearch_teacher": "accounts:teacher_dashboard",
+            "nonresearch_teacher": "accounts:nonresearch_teacher_dashboard",
             "admin": "accounts:admin_dashboard",
         }
         return redirect(mapping.get(role, "accounts:no_access"))
+    
+class NonResearchTeacherDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
+    template_name = "accounts/teacher_dashboard.html"
+    role = "nonresearch_teacher"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # Flag to indicate this is non-research teacher viewing
+        ctx['is_nonresearch_teacher'] = True
+        return ctx
 
 class ResendVerificationCodeView(View):
     def post(self, request):
@@ -1250,7 +1260,7 @@ class ConsentApprovalsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     context_object_name = "pending_consents"
     
     def test_func(self):
-        return self.request.user.role in ['research_teacher', 'nonresearch_teacher']
+        return self.request.user.role in ['research_teacher', 'nonresearch_teacher', 'admin']
     
     def handle_no_permission(self):
         messages.error(self.request, "You do not have access to this page.")
