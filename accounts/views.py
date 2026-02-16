@@ -61,11 +61,18 @@ def serve_pdf(request, path):
 
 class RoleRequiredMixin(UserPassesTestMixin):
     role = None
+    roles = None
+    
     def test_func(self):
-        return self.request.user.role == self.role
+        if self.roles:  
+            return self.request.user.role in self.roles  
+        elif self.role:
+            return self.request.user.role == self.role
+        return False
 
     def handle_no_permission(self):
         return redirect("accounts:no_access")
+
 
 class RegisterView(FormView):
     template_name = "accounts/register.html"
@@ -367,13 +374,12 @@ class NoAccessView(TemplateView):
 
 class StudentDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
     template_name = "accounts/student_dashboard.html"
-    role = "shs_student"
+    roles = ["shs_student", "alumni"]  # ✅ Use 'roles' not 'role'!
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         profile = self.request.user.userprofile
         
-        # ✅ OPTIMIZED: Prefetch related data
         ctx.update({
             "papers": profile.assigned_papers.prefetch_related('keywords', 'awards'),
             "authors": profile.author_profile.all()

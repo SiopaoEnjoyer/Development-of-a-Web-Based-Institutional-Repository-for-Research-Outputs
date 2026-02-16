@@ -543,3 +543,49 @@ function initializeDropdowns() {
         loadAuthors();
     }
 }
+
+/* Make loadKeywords return a Promise so we can wait for it */
+async function loadKeywords() {
+    try {
+        const response = await fetch(filterConfig.keywordsApiUrl);
+        availableKeywords = await response.json();
+        availableKeywords.sort((a, b) => a.name.localeCompare(b.name));
+        return availableKeywords;
+    } catch (error) {
+        console.error("Error loading keywords:", error);
+        availableKeywords = [];
+        return [];
+    }
+}
+
+/* Make loadAuthors return a Promise so we can wait for it */
+async function loadAuthors() {
+    const grade = filterElements.gradeLevel?.value;
+    const schoolYear = filterElements.schoolYear?.value;
+
+    if (!grade || !schoolYear || !authorSearchInput) {
+        if (authorSearchInput) {
+            authorSearchInput.disabled = true;
+            authorSearchInput.placeholder = "Select Grade Level and School Year first";
+        }
+        if (authorDropdown) {
+            authorDropdown.classList.remove("show");
+        }
+        availableAuthors = [];
+        return [];
+    }
+
+    authorSearchInput.disabled = false;
+    authorSearchInput.placeholder = "Search authors by name...";
+
+    try {
+        const response = await fetch(`${filterConfig.authorsApiUrl}?grade=${grade}&school_year=${schoolYear}`);
+        availableAuthors = await response.json();
+        availableAuthors.sort((a, b) => a.name.localeCompare(b.name));
+        return availableAuthors;
+    } catch (error) {
+        console.error("Error loading authors:", error);
+        availableAuthors = [];
+        return [];
+    }
+}

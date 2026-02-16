@@ -273,7 +273,7 @@
                     {% endif %}
                 </div>
                 
-                <button type="submit" class="btn btn-success w-100 submit-button">
+                <button type="submit" class="btn btn-success w-100 submit-button" id="registerButton">
                     <i class="bi bi-person-plus me-2"></i>Register
                 </button>
 
@@ -335,5 +335,69 @@
 <script src="{% static 'accounts/js/register.js' %}"></script>
 <script src="{% static 'accounts/js/verification_modal.js' %}"></script>
 <script src="{% static 'accounts/js/password_toggle.js' %}"></script>
+
+<script>
+    // ===== PREVENT DOUBLE SUBMISSION WITH LOADING STATE =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('registerForm');
+        const registerButton = document.getElementById('registerButton');
+        let isSubmitting = false;
+        
+        registerForm.addEventListener('submit', function(e) {
+            // Prevent double submission
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Basic validation check
+            if (!registerForm.checkValidity()) {
+                e.preventDefault();
+                registerForm.classList.add('was-validated');
+                return false;
+            }
+            
+            // Check reCAPTCHA (if visible)
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                e.preventDefault();
+                showError('Please complete the reCAPTCHA verification', 4000);
+                return false;
+            }
+            
+            // Set submitting flag
+            isSubmitting = true;
+            
+            // Store original button content
+            const originalContent = registerButton.innerHTML;
+            
+            // Disable button and show loading state
+            registerButton.disabled = true;
+            registerButton.style.cursor = 'not-allowed';
+            registerButton.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Creating Account...
+            `;
+            
+            // Add visual feedback
+            registerButton.style.opacity = '0.7';
+            
+            // Fallback: re-enable if still on page after 10 seconds (server error)
+            setTimeout(() => {
+                if (document.getElementById('registerForm')) {
+                    registerButton.disabled = false;
+                    registerButton.style.cursor = 'pointer';
+                    registerButton.innerHTML = originalContent;
+                    registerButton.style.opacity = '1';
+                    isSubmitting = false;
+                    // Reset reCAPTCHA
+                    if (typeof grecaptcha !== 'undefined') {
+                        grecaptcha.reset();
+                    }
+                }
+            }, 10000);
+        });
+    });
+</script>
 
 {% endblock %}

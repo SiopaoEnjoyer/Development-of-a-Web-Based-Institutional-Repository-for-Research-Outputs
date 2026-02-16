@@ -164,22 +164,34 @@
     <div class="row g-4 justify-content-center">
         {% for paper in papers %}
         <div class="col-lg-10 paper-wrapper">
-            <div class="paper-card" onclick="window.location.href='{% url 'research:detail' paper.id %}'">
+            <div class="paper-card">
                 <!-- Paper content - same as before -->
                 <div class="mb-2">
                     {% if paper.strand %}
-                        <span class="badge strand-badge">{{ paper.strand }}</span>
+                        <a href="{% url 'research:search' %}?strand={{ paper.strand }}" 
+                        class="badge strand-badge" 
+                        style="text-decoration: none; cursor: pointer;">
+                            {{ paper.strand }}
+                        </a>
                     {% endif %}
                     {% if paper.research_design %}
-                        <span class="badge spec-badge">{{ paper.get_research_design_display }}</span>
+                        <a href="{% url 'research:search' %}?research_design={{ paper.research_design }}" 
+                        class="badge spec-badge" 
+                        style="text-decoration: none; cursor: pointer;">
+                            {{ paper.get_research_design_display }}
+                        </a>
                     {% endif %}
                     {% for award in paper.awards.all %}
-                        <span class="badge award-badge">{{ award.name }}</span>
+                        <a href="{% url 'research:search' %}?award={{ award.id }}" 
+                        class="badge award-badge" 
+                        style="text-decoration: none; cursor: pointer;">
+                            {{ award.name }}
+                        </a>
                     {% endfor %}
                 </div>
 
                 <h5 class="paper-title">
-                    <a href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                    <a href="{% url 'research:detail' paper.id %}">
                         {{ paper.title|format_italics }}
                     </a>
                 </h5>
@@ -209,12 +221,16 @@
                         <i class="bi bi-tags-fill"></i> Keywords:
                     </strong>
                     {% for keyword in paper.keywords.all %}
-                        <span class="badge keyword-badge">{{ keyword.word|format_italics }}</span>
+                        <a href="{% url 'research:search' %}?keywords={{ keyword.id }}" 
+                            class="badge keyword-badge" 
+                            style="text-decoration: none; cursor: pointer;">
+                                {{ keyword.word|format_italics }}
+                        </a>
                     {% endfor %}
                 </div>
                 {% endif %}
 
-                <a class="read-more" href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                <a class="read-more" href="{% url 'research:detail' paper.id %}">
                     Read full paper
                 </a>
             </div>

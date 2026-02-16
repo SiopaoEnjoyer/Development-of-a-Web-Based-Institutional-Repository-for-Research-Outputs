@@ -855,3 +855,109 @@
     width: 100%;
   }
 }
+
+/* Make info pills clickable with hover effects */
+.info-pill {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0.25rem;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.info-pill:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+}
+
+/* Strand badges - Enhanced hover */
+.info-pill.strand-stem:hover,
+.info-pill.strand-humss:hover,
+.info-pill.strand-abm:hover { 
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  box-shadow: 0 6px 16px rgba(1, 87, 38, 0.4);
+}
+
+/* Research Design pills - Enhanced hover */
+.info-pill.research-qualitative:hover,
+.info-pill.research-survey:hover,
+.info-pill.research-experimental:hover,
+.info-pill.research-capstone:hover { 
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: white;
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+}
+
+/* Grade level pills - Enhanced hover */
+.info-pill.grade-11:hover { 
+  background: #343a40 !important;
+  color: white !important;
+  box-shadow: 0 6px 16px rgba(33, 37, 41, 0.5);
+}
+
+.info-pill.grade-12:hover { 
+  background: #f8f9fa !important;
+  color: #212529 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 0 6px 16px rgba(33, 37, 41, 0.3);
+}
+
+/* Award badges - Enhanced hover */
+.info-pill.award:hover { 
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: white;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+}
+
+/* School year badge - Enhanced hover */
+.school-year-badge {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.school-year-badge:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+  text-decoration: none;
+}
+
+/* Keyword badges - Enhanced hover */
+.keyword-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+  color: white;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  margin: 4px;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 2px 4px rgba(1, 87, 38, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.keyword-badge:hover {
+  background: linear-gradient(135deg, #018a3d, #059669);
+  color: white;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(1, 87, 38, 0.4);
+  text-decoration: none;
+}

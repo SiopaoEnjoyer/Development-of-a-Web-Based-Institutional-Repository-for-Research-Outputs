@@ -149,9 +149,27 @@
 }
 
 .keyword-badge {
-    background: rgba(100, 116, 139, 0.1);
-    color: #475569;
-    border: 1px solid rgba(100, 116, 139, 0.2);
+    background: linear-gradient(135deg, #015726 0%, #018a3d 100%);
+    color: white;
+    border: none;
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    box-shadow: 0 2px 4px rgba(1, 87, 38, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.keyword-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(1, 87, 38, 0.4);
+    background: linear-gradient(135deg, #018a3d 0%, #01a347 100%);
+    text-decoration: none;
+    color: white;
 }
 
 .read-more {
@@ -163,12 +181,13 @@
     font-size: 0.9rem;
     text-decoration: none;
     transition: all 0.3s ease;
-    pointer-events: none; /* Prevent double-click when card is clickable */
+    cursor: pointer;
 }
 
 .read-more:hover {
+    color: #018a3d;
     gap: 0.75rem;
-    color: #059669;
+    text-decoration: none;
 }
 
 .read-more::after {
@@ -430,4 +449,45 @@
         padding: 0.35rem 0.75rem !important;
         font-size: 0.75rem;
     }
+}
+
+/* Make the card NOT look clickable */
+.paper-card {
+  cursor: default !important;
+}
+
+/* Make title look clickable */
+.paper-title a {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.paper-title a:hover {
+  color: #015726;
+}
+
+/* Make badges look clickable */
+.strand-badge,
+.spec-badge,
+.award-badge {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.strand-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(1, 87, 38, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.spec-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.4);
+    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+}
+
+.award-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4);
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
 }

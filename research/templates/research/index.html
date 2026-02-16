@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{% static 'research/css/paper-cards.css' %}">
 <link rel="stylesheet" href="{% static 'research/css/index-strands.css' %}">
 {% endblock %}
+
 {% block content %}
     <!-- STRAND SELECTION - Only show on main research page without any filters -->
     {% if not selected_strand and not selected_design %}
@@ -171,25 +172,31 @@
         <div class="row g-4 justify-content-center">
             {% for paper in latest_research_list %}
             <div class="col-lg-10 paper-wrapper">
-                <div class="paper-card" onclick="window.location.href='{% url 'research:detail' paper.id %}'">
-                    <!-- BADGES -->
-                    <div class="mb-2">
-                        {% if paper.strand %}
-                            <span class="badge strand-badge">{{ paper.strand }}</span>
-                        {% endif %}
-                        {% if paper.research_design %}
-                            <span class="badge spec-badge">{{ paper.get_research_design_display }}</span>
-                        {% endif %}
-                        {% for award in paper.awards.all %}
-                            <span class="badge award-badge">{{ award.name }}</span>
-                        {% endfor %}
-                    </div>
-
-                    <h5 class="paper-title">
-                        <a href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
-                            {{ paper.title|format_italics }}
+                <div class="paper-card">
+                <!-- BADGES -->
+                <div class="mb-2">
+                    {% if paper.strand %}
+                        <a href="{% url 'research:search' %}?strand={{ paper.strand }}" 
+                        class="badge strand-badge" 
+                        style="text-decoration: none; cursor: pointer;">
+                            {{ paper.strand }}
                         </a>
-                    </h5>
+                    {% endif %}
+                    {% if paper.research_design %}
+                        <a href="{% url 'research:search' %}?research_design={{ paper.research_design }}" 
+                        class="badge spec-badge" 
+                        style="text-decoration: none; cursor: pointer;">
+                            {{ paper.get_research_design_display }}
+                        </a>
+                    {% endif %}
+                    {% for award in paper.awards.all %}
+                        <a href="{% url 'research:search' %}?award={{ award.id }}" 
+                        class="badge award-badge" 
+                        style="text-decoration: none; cursor: pointer;">
+                            {{ award.name }}
+                        </a>
+                    {% endfor %}
+                </div>
 
                     <p class="pub-date">
                         <i class="bi bi-calendar3"></i> Finished on {{ paper.publication_date|date:"F Y" }}
@@ -216,12 +223,16 @@
                             <i class="bi bi-tags-fill"></i> Keywords:
                         </strong>
                         {% for keyword in paper.keywords.all %}
-                            <span class="badge keyword-badge">{{ keyword.word|format_italics }}</span>
+                            <a href="{% url 'research:search' %}?keywords={{ keyword.id }}" 
+                                class="badge keyword-badge" 
+                                style="text-decoration: none; cursor: pointer;">
+                                    {{ keyword.word|format_italics }}
+                            </a>
                         {% endfor %}
                     </div>
                     {% endif %}
 
-                    <a class="read-more" href="{% url 'research:detail' paper.id %}" onclick="event.stopPropagation()">
+                    <a class="read-more" href="{% url 'research:detail' paper.id %}">
                         Read full paper
                     </a>
                 </div>

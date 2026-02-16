@@ -84,7 +84,7 @@
                     <span><span class="required-asterisk">*</span> Required field</span>
                 </div>
 
-                <button type="submit" class="btn btn-success w-100 mt-3">
+                <button type="submit" class="btn btn-success w-100 mt-3" id="loginButton">
                     <i class="bi bi-box-arrow-in-right me-2"></i>Login
                 </button>
 
@@ -109,7 +109,54 @@
 <script src="{% static 'accounts/js/password_toggle.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('=== Django Error Handler ===');
+        
+        // ===== PREVENT DOUBLE SUBMISSION =====
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        let isSubmitting = false;
+        
+        loginForm.addEventListener('submit', function(e) {
+            // Prevent double submission
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Validate form
+            if (!loginForm.checkValidity()) {
+                e.preventDefault();
+                loginForm.classList.add('was-validated');
+                return false;
+            }
+            
+            // Set submitting flag
+            isSubmitting = true;
+            
+            // Store original button content
+            const originalContent = loginButton.innerHTML;
+            
+            // Disable button and show loading state
+            loginButton.disabled = true;
+            loginButton.style.cursor = 'not-allowed';
+            loginButton.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Signing In...
+            `;
+            
+            // Add visual feedback
+            loginButton.style.opacity = '0.7';
+            
+            // Fallback: re-enable if still on page after 8 seconds (server error)
+            setTimeout(() => {
+                if (document.getElementById('loginForm')) {
+                    loginButton.disabled = false;
+                    loginButton.style.cursor = 'pointer';
+                    loginButton.innerHTML = originalContent;
+                    loginButton.style.opacity = '1';
+                    isSubmitting = false;
+                }
+            }, 8000);
+        });
         
         // Initialize verification modal if needed
         var shouldShowModal = ('{{ request.session.show_verification_modal }}' === 'True');

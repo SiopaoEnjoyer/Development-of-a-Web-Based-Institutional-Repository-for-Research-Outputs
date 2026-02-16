@@ -172,3 +172,78 @@ function clearAllFieldErrors(form) {
         div.style.display = 'none';
     });
 }
+
+function handleFormSubmit(formId, buttonSelector, loadingText = 'Loading...') {
+    const form = document.getElementById(formId);
+    const submitButton = form.querySelector(buttonSelector);
+    
+    if (!form || !submitButton) {
+        console.error('Form or button not found');
+        return;
+    }
+    
+    let isSubmitting = false;
+    
+    form.addEventListener('submit', function(e) {
+        // Prevent double submission
+        if (isSubmitting) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Validate form before showing loading state
+        if (!form.checkValidity()) {
+            // Let browser handle validation
+            return true;
+        }
+        
+        // Set submitting flag
+        isSubmitting = true;
+        
+        // Store original button content
+        const originalContent = submitButton.innerHTML;
+        
+        // Disable button and show loading state
+        submitButton.disabled = true;
+        submitButton.style.cursor = 'not-allowed';
+        submitButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            ${loadingText}
+        `;
+        
+        // Add visual feedback
+        submitButton.style.opacity = '0.7';
+        
+        // If form validation fails on server side, re-enable button
+        // This is a fallback - the page will reload on success
+        setTimeout(() => {
+            // Only re-enable if we're still on the same page (server validation failed)
+            if (document.getElementById(formId)) {
+                submitButton.disabled = false;
+                submitButton.style.cursor = 'pointer';
+                submitButton.innerHTML = originalContent;
+                submitButton.style.opacity = '1';
+                isSubmitting = false;
+            }
+        }, 5000);
+    });
+}
+
+// Initialize for Login Page
+function initLoginSubmitHandler() {
+    handleFormSubmit('loginForm', 'button[type="submit"]', 'Signing In...');
+}
+
+// Initialize for Register Page
+function initRegisterSubmitHandler() {
+    handleFormSubmit('registerForm', 'button[type="submit"]', 'Creating Account...');
+}
+
+// Export functions for use in page-specific scripts
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        handleFormSubmit,
+        initLoginSubmitHandler,
+        initRegisterSubmitHandler
+    };
+}

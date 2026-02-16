@@ -318,7 +318,7 @@
   <div class="card shadow-sm detail-content">
     <div class="card-body p-4 p-md-5">
       
-      <!-- Research Information -->
+<!-- Research Information -->
 <div class="detail-section">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 3px solid #015726; padding-bottom: 0.75rem; flex-wrap: wrap; gap: 1rem;">
     <h4 style="margin: 0; border: none; padding: 0;"><i class="bi bi-info-circle"></i>Research Information</h4>
@@ -354,53 +354,69 @@
     </div>
   </div>
         
-        <div class="info-grid">
-          <div class="info-row">
-            <span class="info-label"><i class="bi bi-bookmark-star"></i> Strand:</span>
-            <div>
-              <span class="info-pill strand-{{ object.strand|lower }}">{{ object.get_strand_display }}</span>
-            </div>
-          </div>
-          
-          <div class="info-row">
-            <span class="info-label"><i class="bi bi-mortarboard"></i> Grade Level:</span>
-            <span class="info-pill grade grade-{{ object.grade_level }}">{{ object.get_grade_level_display }}</span>
-          </div>
-          
-          <div class="info-row">
-            <span class="info-label"><i class="bi bi-clipboard-data"></i> Research Design:</span>
-            <div>
-              {% if object.research_design %}
-                <span class="info-pill research-{{ object.research_design|lower }}">{{ object.get_research_design_display }}</span>
-              {% else %}
-                <span class="text-muted">Not specified</span>
-              {% endif %}
-            </div>
-          </div>
-          
-          <div class="info-row">
-            <span class="info-label"><i class="bi bi-calendar3"></i> School Year:</span>
-            <span class="school-year-badge">
-              <i class="bi bi-calendar-range"></i>
-              {{ object.school_year }}
-            </span>
-          </div>
-        </div>
-        
-        <!-- Awards (if any) -->
-        {% if object.awards.all %}
-        <div class="info-row">
-          <span class="info-label"><i class="bi bi-trophy"></i> Awards:</span>
-          <div>
-            {% for award in object.awards.all %}
-              <span class="info-pill award">
-                <i class="bi bi-award-fill"></i>{{ award.name }}
-              </span>
-            {% endfor %}
-          </div>
-        </div>
+  <div class="info-grid">
+    <div class="info-row">
+      <span class="info-label"><i class="bi bi-bookmark-star"></i> Strand:</span>
+      <div>
+        <a href="{% url 'research:search' %}?strand={{ object.strand }}" 
+           class="info-pill strand-{{ object.strand|lower }}" 
+           style="text-decoration: none; cursor: pointer;">
+          {{ object.get_strand_display }}
+        </a>
+      </div>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label"><i class="bi bi-mortarboard"></i> Grade Level:</span>
+      <a href="{% url 'research:search' %}?grade_level={{ object.grade_level }}" 
+         class="info-pill grade grade-{{ object.grade_level }}" 
+         style="text-decoration: none; cursor: pointer;">
+        {{ object.get_grade_level_display }}
+      </a>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label"><i class="bi bi-clipboard-data"></i> Research Design:</span>
+      <div>
+        {% if object.research_design %}
+          <a href="{% url 'research:search' %}?research_design={{ object.research_design }}" 
+             class="info-pill research-{{ object.research_design|lower }}" 
+             style="text-decoration: none; cursor: pointer;">
+            {{ object.get_research_design_display }}
+          </a>
+        {% else %}
+          <span class="text-muted">Not specified</span>
         {% endif %}
       </div>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label"><i class="bi bi-calendar3"></i> School Year:</span>
+      <a href="{% url 'research:search' %}?school_year={{ object.school_year }}" 
+         class="school-year-badge" 
+         style="text-decoration: none; cursor: pointer;">
+        <i class="bi bi-calendar-range"></i>
+        {{ object.school_year }}
+      </a>
+    </div>
+  </div>
+  
+  <!-- Awards (if any) -->
+  {% if object.awards.all %}
+  <div class="info-row">
+    <span class="info-label"><i class="bi bi-trophy"></i> Awards:</span>
+    <div>
+      {% for award in object.awards.all %}
+        <a href="{% url 'research:search' %}?award={{ award.id }}" 
+           class="info-pill award" 
+           style="text-decoration: none; cursor: pointer;">
+          <i class="bi bi-award-fill"></i>{{ award.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
 
       <!-- Abstract -->
       <div class="detail-section">
@@ -413,7 +429,9 @@
         <h4><i class="bi bi-tags"></i>Keywords</h4>
         <div>
           {% for keyword in object.keywords.all %}
-            <span class="keyword-badge">{{ keyword.name|format_italics }}</span>
+            <a href="{% url 'research:search' %}?keywords={{ keyword.id }}" class="keyword-badge" style="text-decoration: none; cursor: pointer; transition: all 0.3s ease;">
+              {{ keyword.word|format_italics }}
+            </a>
           {% empty %}
             <span class="text-muted">No keywords</span>
           {% endfor %}
