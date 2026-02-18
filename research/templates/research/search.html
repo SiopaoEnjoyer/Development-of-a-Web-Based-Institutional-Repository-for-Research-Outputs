@@ -51,7 +51,6 @@
                         Filters are applied automatically as you make selections. Active filters will appear below.
                     </p>
                     
-                    <!-- Filter rows - same as before -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-3">
                             <label class="form-label">School Year</label>
@@ -164,34 +163,34 @@
     <div class="row g-4 justify-content-center">
         {% for paper in papers %}
         <div class="col-lg-10 paper-wrapper">
-            <div class="paper-card">
-                <!-- Paper content - same as before -->
+            <div class="paper-card" style="position: relative;">
+
                 <div class="mb-2">
                     {% if paper.strand %}
-                        <a href="{% url 'research:search' %}?strand={{ paper.strand }}" 
-                        class="badge strand-badge" 
-                        style="text-decoration: none; cursor: pointer;">
+                        <a href="{% url 'research:search' %}?strand={{ paper.strand %}"
+                           class="badge strand-badge"
+                           style="text-decoration: none; cursor: pointer; position: relative; z-index: 2;">
                             {{ paper.strand }}
                         </a>
                     {% endif %}
                     {% if paper.research_design %}
-                        <a href="{% url 'research:search' %}?research_design={{ paper.research_design }}" 
-                        class="badge spec-badge" 
-                        style="text-decoration: none; cursor: pointer;">
+                        <a href="{% url 'research:search' %}?research_design={{ paper.research_design }}"
+                           class="badge spec-badge"
+                           style="text-decoration: none; cursor: pointer; position: relative; z-index: 2;">
                             {{ paper.get_research_design_display }}
                         </a>
                     {% endif %}
                     {% for award in paper.awards.all %}
-                        <a href="{% url 'research:search' %}?award={{ award.id }}" 
-                        class="badge award-badge" 
-                        style="text-decoration: none; cursor: pointer;">
+                        <a href="{% url 'research:search' %}?award={{ award.id }}"
+                           class="badge award-badge"
+                           style="text-decoration: none; cursor: pointer; position: relative; z-index: 2;">
                             {{ award.name }}
                         </a>
                     {% endfor %}
                 </div>
 
                 <h5 class="paper-title">
-                    <a href="{% url 'research:detail' paper.id %}">
+                    <a href="{% url 'research:detail' paper.id %}" style="position: relative; z-index: 2;">
                         {{ paper.title|format_italics }}
                     </a>
                 </h5>
@@ -221,18 +220,19 @@
                         <i class="bi bi-tags-fill"></i> Keywords:
                     </strong>
                     {% for keyword in paper.keywords.all %}
-                        <a href="{% url 'research:search' %}?keywords={{ keyword.id }}" 
-                            class="badge keyword-badge" 
-                            style="text-decoration: none; cursor: pointer;">
-                                {{ keyword.word|format_italics }}
+                        <a href="{% url 'research:search' %}?keywords={{ keyword.id }}"
+                           class="badge keyword-badge"
+                           style="text-decoration: none; cursor: pointer; position: relative; z-index: 2;">
+                            {{ keyword.word|format_italics }}
                         </a>
                     {% endfor %}
                 </div>
                 {% endif %}
 
-                <a class="read-more" href="{% url 'research:detail' paper.id %}">
+                <a class="read-more stretched-link" href="{% url 'research:detail' paper.id %}">
                     Read full paper
                 </a>
+
             </div>
         </div>
         {% endfor %}
@@ -295,7 +295,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Load shared filter logic first, then page-specific init -->
 <script src="{% static 'research/js/search-filters-shared.js' %}"></script>
 <script src="{% static 'research/js/search-init.js' %}"></script>
 {% endblock %}

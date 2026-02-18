@@ -65,7 +65,7 @@ nav.nav-main {
 }
 
 .nav-main .navbar-collapse {
-    background: transparent;  /* Remove the !important */
+    background: transparent;
 }
 
 .nav-main .navbar-nav {
@@ -95,7 +95,7 @@ nav.nav-main {
     transform: scale(1.03);
 }
 
-/* Active nav link styling - HIGH SPECIFICITY */
+/* Active nav link styling */
 .nav-main .nav-link.active,
 .nav-main a.nav-link.active,
 .navbar-nav .nav-link.active,
@@ -212,6 +212,8 @@ nav.nav-main {
     border-radius: 12px;
     padding: 8px;
     min-width: 180px;
+    background: white;
+    color: #333;
 }
 
 .dropdown-item {
@@ -220,7 +222,7 @@ nav.nav-main {
     padding: 10px 16px;
     border-radius: 8px;
     transition: all 0.2s ease;
-    color: #333;
+    color: #333 !important;
 }
 
 .dropdown-item:hover {
@@ -509,11 +511,462 @@ nav.nav-main {
     opacity: 0.8;
 }
 
+/* ==================== AUTH BUTTONS RESPONSIVE ==================== */
+
+.top-logo-bar > div:last-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.top-logo-bar .dropdown {
+    position: relative;
+}
+
+.top-logo-bar .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* ==================== RESEARCH NAVBAR MEGA DROPDOWN ==================== */
+
+.research-mega-menu {
+    min-width: 220px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    padding: 8px;
+    z-index: 9999;
+    background: white !important;
+}
+
+.research-mega-menu .dropdown-item {
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a1a1a !important;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.research-mega-menu .dropdown-item:hover {
+    background: var(--theme-green) !important;
+    color: white !important;
+    transform: translateX(3px);
+}
+
+.research-all-link {
+    color: var(--theme-green) !important;
+    font-weight: 700 !important;
+}
+
+.research-all-link:hover {
+    color: white !important;
+}
+
+.strand-emoji-sm {
+    font-size: 1rem;
+    margin-right: 4px;
+}
+
+/* ==================== DESKTOP DROPDOWN TEXT COLOR FIX ==================== */
+/* nav-main sets color:white !important on all <a> — these higher-specificity
+   rules restore green text inside the white dropdown panels. */
+
+.nav-main .research-mega-menu .dropdown-item {
+    color: var(--theme-green) !important;
+    font-weight: 600 !important;
+}
+
+.nav-main .research-mega-menu .dropdown-item:hover {
+    color: white !important;
+}
+
+.nav-main .research-mega-menu .research-all-link {
+    color: var(--theme-green) !important;
+    font-weight: 700 !important;
+}
+
+.nav-main .research-mega-menu .research-all-link:hover {
+    color: white !important;
+}
+
+.nav-main .dropdown-submenu-menu .dropdown-item {
+    color: var(--theme-green) !important;
+    font-weight: 500 !important;
+}
+
+.nav-main .dropdown-submenu-menu .dropdown-item:hover {
+    color: white !important;
+}
+
+.nav-main .research-mega-menu .strand-toggle {
+    color: var(--theme-green) !important;
+    font-weight: 600 !important;
+}
+
+.nav-main .research-mega-menu .strand-toggle:hover {
+    color: white !important;
+}
+
+/* ==================== NESTED SUBMENU ==================== */
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu .strand-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.submenu-chevron {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    transition: transform 0.2s ease, opacity 0.2s;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+@media (min-width: 992px) {
+    .dropdown-submenu:hover .submenu-chevron {
+        transform: rotate(90deg);
+        opacity: 1;
+    }
+}
+
+.dropdown-submenu.open .submenu-chevron {
+    transform: rotate(90deg);
+    opacity: 1;
+}
+
+.dropdown-submenu-menu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    min-width: 190px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    padding: 8px;
+    z-index: 10000;
+    background: white !important;
+}
+
+.dropdown-submenu-menu .dropdown-item {
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1a1a1a !important;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.dropdown-submenu-menu .dropdown-item:hover {
+    background: var(--theme-green) !important;
+    color: white !important;
+    transform: translateX(3px);
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (min-width: 992px) {
+    .dropdown-submenu:hover > .dropdown-submenu-menu {
+        display: block;
+        animation: fadeInScale 0.15s ease-out;
+    }
+}
+
+/* ==================== NAVBAR SEARCH BAR ==================== */
+
+.navbar-search-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 260px;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-search-wrapper:focus-within {
+    width: 420px;
+}
+
+.navbar-search-container {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    padding: 5px 14px;
+    width: 100%;
+    transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+    overflow: hidden;
+}
+
+.navbar-search-container:focus-within {
+    background: white;
+    border-color: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+.navbar-search-icon {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    pointer-events: none;
+    transition: color 0.25s;
+}
+
+.navbar-search-container:focus-within .navbar-search-icon {
+    color: var(--theme-green) !important;
+}
+
+.navbar-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    padding: 0 8px;
+    transition: color 0.25s;
+}
+
+.navbar-search-container:focus-within .navbar-search-input {
+    color: #1a1a1a !important;
+}
+
+.navbar-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.75) !important;
+    transition: color 0.25s;
+}
+
+.navbar-search-container:focus-within .navbar-search-input::placeholder {
+    color: #bbb !important;
+}
+
+.navbar-search-clear {
+    background: none;
+    border: none;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.navbar-search-container:focus-within .navbar-search-clear {
+    color: #888;
+}
+
+.navbar-search-clear:hover {
+    color: var(--theme-green) !important;
+}
+
+.navbar-search-clear.visible {
+    display: flex;
+}
+
+/* ==================== SEARCH RESULTS DROPDOWN ==================== */
+
+.navbar-search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    min-width: 300px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    z-index: 99999;
+    overflow: hidden;
+    display: none;
+    max-height: 420px;
+    overflow-y: auto;
+    color: #1a1a1a;
+}
+
+.navbar-search-results.visible {
+    display: block;
+    animation: fadeInScale 0.15s ease-out;
+}
+
+.navbar-search-results .search-results-header {
+    padding: 10px 16px 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999 !important;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.navbar-search-results a.search-result-item,
+.navbar-search-results .search-result-item {
+    display: block;
+    padding: 11px 16px;
+    text-decoration: none;
+    color: #1a1a1a !important;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s;
+    background: white;
+    margin-right: 0;
+    border-radius: 0;
+    font-weight: 500;
+    transform: none !important;
+}
+
+.navbar-search-results a.search-result-item:last-of-type {
+    border-bottom: none;
+}
+
+.navbar-search-results a.search-result-item:hover,
+.navbar-search-results .search-result-item:hover {
+    background: #f4faf6 !important;
+    color: var(--theme-green) !important;
+    transform: none !important;
+}
+
+.navbar-search-results .search-result-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-bottom: 3px;
+    color: inherit !important;
+}
+
+.navbar-search-results .search-result-title mark {
+    background: #fffde7;
+    color: var(--theme-green);
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: 700;
+}
+
+.navbar-search-results .search-result-meta {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    color: #666 !important;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.navbar-search-results .search-result-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #e8f5ee;
+    color: var(--theme-green) !important;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+
+.navbar-search-results .search-results-empty {
+    padding: 20px 16px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.875rem;
+    color: #999 !important;
+}
+
+.navbar-search-results .search-results-empty i {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+    opacity: 0.4;
+    color: #999 !important;
+}
+
+.navbar-search-results .search-results-loading {
+    padding: 16px;
+    text-align: center;
+    color: #999 !important;
+}
+
+.navbar-search-results .search-results-loading .spinner-border {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-width: 0.15em;
+    color: var(--theme-green);
+}
+
+.navbar-search-results a.search-result-see-all {
+    display: block;
+    padding: 10px 16px;
+    text-align: center;
+    background: #f8fffe;
+    color: var(--theme-green) !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700 !important;
+    text-decoration: none;
+    border-top: 1px solid #e8f5ee;
+    transition: background 0.15s;
+    margin-right: 0;
+    border-radius: 0;
+    transform: none !important;
+}
+
+.navbar-search-results a.search-result-see-all:hover {
+    background: #e8f5ee !important;
+    color: var(--theme-green) !important;
+    transform: none !important;
+}
+
+/* ── Search result keyword chips ─────────────────────────────
+   Rendered by navbar-search.js when the backend returns
+   a `keywords` array on each paper result object.
+   ---------------------------------------------------------- */
+.navbar-search-results .search-result-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.navbar-search-results .search-result-keyword {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #f0f8f3;
+    border: 1px solid #c4e0cc;
+    color: #2d7a4f !important;
+    font-size: 0.68rem;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, color 0.15s;
+}
+
+/* keyword chips keep their green styling even when the parent row is hovered */
+
 /* ==================== MOBILE RESPONSIVE ==================== */
 
 @media (max-width: 991px) {
     .navbar-collapse {
-        background: white !important;  /* This will override on mobile */
+        background: white !important;
     }
 }
 
@@ -545,7 +998,6 @@ nav.nav-main {
         white-space: nowrap;
     }
     
-    /* Account dropdown button responsive */
     .top-logo-bar .dropdown {
         flex-shrink: 0;
     }
@@ -564,7 +1016,6 @@ nav.nav-main {
         max-width: 140px;
     }
     
-    /* Login/Register buttons */
     .top-logo-bar > div:last-child {
         flex-shrink: 0;
         gap: 0.25rem;
@@ -635,7 +1086,6 @@ nav.nav-main {
         font-size: 0.8rem;
     }
     
-    /* Account dropdown - even more compact */
     .top-logo-bar .btn-success.dropdown-toggle {
         padding: 6px 10px !important;
         font-size: 0.8rem !important;
@@ -651,7 +1101,6 @@ nav.nav-main {
         font-size: 0.75rem;
     }
     
-    /* Login/Register buttons */
     .top-logo-bar .btn {
         padding: 5px 10px !important;
         font-size: 0.75rem !important;
@@ -729,6 +1178,14 @@ nav.nav-main {
         font-size: 0.8rem;
         padding: 0 10px;
     }
+
+    .navbar-search-container {
+        padding: 4px 10px;
+    }
+
+    .navbar-search-input {
+        font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 400px) {
@@ -744,7 +1201,6 @@ nav.nav-main {
         font-size: 0.7rem;
     }
     
-    /* Account dropdown - icon only mode */
     .top-logo-bar .btn-success.dropdown-toggle {
         padding: 5px 8px !important;
         font-size: 0.75rem !important;
@@ -760,7 +1216,6 @@ nav.nav-main {
         display: none !important;
     }
     
-    /* Login/Register buttons */
     .top-logo-bar .btn {
         padding: 4px 8px !important;
         font-size: 0.7rem !important;
@@ -770,10 +1225,19 @@ nav.nav-main {
         padding: 4px 6px !important;
         font-size: 0.75rem !important;
     }
+
+    .dropdown-menu {
+        min-width: 140px;
+        font-size: 0.8rem;
+    }
+    
+    .dropdown-item {
+        padding: 6px 10px;
+    }
 }
 
 @media (max-width: 991px) {
-    .nav-main {
+    nav.nav-main {
         padding: 10px 15px;
     }
     
@@ -782,7 +1246,14 @@ nav.nav-main {
         align-items: stretch;
     }
     
-    .nav-main a {
+    .nav-main > .container-fluid > .navbar-collapse > .navbar-nav > .nav-item > a {
+        margin-right: 0;
+        margin-bottom: 5px;
+        display: block;
+        text-align: center;
+    }
+
+    .nav-main a.nav-link {
         margin-right: 0;
         margin-bottom: 5px;
         display: block;
@@ -800,15 +1271,14 @@ nav.nav-main {
         padding: 10px 0;
     }
     
-    /* Override colors for mobile collapsed menu */
     .navbar-collapse .nav-link {
-        color: var(--theme-green) !important;  /* ✅ Green text on white background */
+        color: var(--theme-green) !important;
     }
 
     .navbar-collapse .nav-link:hover,
     .navbar-collapse .nav-link.active {
         background: var(--theme-green) !important;
-        color: white !important;  /* White text when hovering/active on green background */
+        color: white !important;
     }
 
     .footer-content {
@@ -828,31 +1298,47 @@ nav.nav-main {
     .contact-info {
         text-align: left;
     }
-}
 
-/* ==================== AUTH BUTTONS RESPONSIVE ==================== */
+    /* ── Mobile dropdown: full-width, centered, inline ── */
+    .nav-main .research-nav-dropdown .research-mega-menu {
+        position: static !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-shadow: none !important;
+        border: 1.5px solid #d0ead9 !important;
+        border-radius: 10px !important;
+        margin: 4px 0 8px 0 !important;
+        padding: 6px !important;
+        background: white !important;
+        animation: none !important;
+    }
 
-/* Desktop and larger tablets - default styles already good */
-.top-logo-bar > div:last-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+    .nav-main .research-mega-menu .dropdown-item {
+        width: 100% !important;
+        text-align: left !important;
+        display: flex !important;
+        align-items: center !important;
+    }
 
-/* Dropdown button base styles */
-.top-logo-bar .dropdown {
-    position: relative;
-}
+    .nav-main .research-mega-menu .strand-toggle {
+        justify-content: space-between !important;
+        color: var(--theme-green) !important;
+    }
 
-.top-logo-bar .dropdown-toggle {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
+    .nav-main .research-mega-menu .strand-toggle:hover,
+    .nav-main .research-mega-menu .dropdown-submenu.open > .strand-toggle {
+        background: var(--theme-green) !important;
+        color: white !important;
+    }
+
+    .nav-main .dropdown-submenu-menu {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
 }
 
 /* ==================== GREEN NAVBAR RESPONSIVE ==================== */
 
-/* Reduce navbar height on mobile */
 @media (max-width: 991px) {
     nav.nav-main {
         padding: 4px 12px;
@@ -899,7 +1385,6 @@ nav.nav-main {
     }
 }
 
-/* Dropdown menu responsive improvements */
 @media (max-width: 576px) {
     .dropdown-menu {
         min-width: 160px;
@@ -915,13 +1400,125 @@ nav.nav-main {
     }
 }
 
-@media (max-width: 400px) {
-    .dropdown-menu {
-        min-width: 140px;
-        font-size: 0.8rem;
+/* ==================== MOBILE NAVBAR SEARCH ==================== */
+
+@media (max-width: 991px) {
+    .navbar-search-wrapper {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        transition: none;
     }
-    
-    .dropdown-item {
-        padding: 6px 10px;
+
+    .navbar-search-wrapper:focus-within {
+        width: 100% !important;
+    }
+
+    .navbar-search-container {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .navbar-collapse .navbar-search-container {
+        background: #f0f8f3;
+        border-color: var(--theme-green);
+    }
+
+    .navbar-collapse .navbar-search-container:focus-within {
+        background: white;
+        border-color: var(--theme-green);
+        box-shadow: 0 0 0 3px rgba(1, 87, 38, 0.15);
+    }
+
+    .navbar-collapse .navbar-search-input {
+        color: var(--theme-green) !important;
+    }
+
+    .navbar-collapse .navbar-search-container:focus-within .navbar-search-input {
+        color: #1a1a1a !important;
+    }
+
+    .navbar-collapse .navbar-search-input::placeholder {
+        color: rgba(1, 87, 38, 0.5) !important;
+    }
+
+    .navbar-collapse .navbar-search-icon {
+        color: var(--theme-green) !important;
+    }
+
+    .navbar-collapse .navbar-search-clear {
+        color: #888;
+    }
+
+    .navbar-search-results {
+        left: 0;
+        right: 0;
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* Mobile submenu: expand below instead of flying out to the side */
+    .dropdown-submenu-menu {
+        position: static !important;
+        box-shadow: none !important;
+        border-radius: 8px !important;
+        margin: 4px 0 4px 1rem !important;
+        border-left: 3px solid #e8f5ee !important;
+        padding: 4px 0 !important;
+        background: #fafffe !important;
+        display: none !important;
+    }
+
+    .dropdown-submenu.open > .dropdown-submenu-menu {
+        display: block !important;
+    }
+
+    /* Strand toggle rows */
+    .navbar-collapse .strand-toggle {
+        display: flex !important;
+        align-items: center !important;
+        text-align: left !important;
+        justify-content: space-between !important;
+        color: var(--theme-green) !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+
+    .navbar-collapse .strand-toggle:hover,
+    .dropdown-submenu.open > .strand-toggle {
+        background: var(--theme-green) !important;
+        color: white !important;
+    }
+
+    .navbar-collapse .strand-toggle:hover .submenu-chevron,
+    .dropdown-submenu.open > .strand-toggle .submenu-chevron {
+        color: white !important;
+    }
+
+    .dropdown-submenu.open > .strand-toggle {
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    /* Submenu items inside mobile expanded menu */
+    .dropdown-submenu-menu .dropdown-item {
+        color: var(--theme-green) !important;
+        padding: 7px 14px !important;
+        font-size: 0.85rem !important;
+    }
+
+    .dropdown-submenu-menu .dropdown-item:hover {
+        background: var(--theme-green) !important;
+        color: white !important;
+        transform: none !important;
+    }
+
+    /* Chevron rotation on open */
+    .dropdown-submenu.open .submenu-chevron {
+        transform: rotate(90deg) !important;
+        opacity: 1 !important;
     }
 }

@@ -308,7 +308,7 @@ class SearchView(generic.ListView):
                 queryset=Award.objects.only('id', 'name')
             )
         ).defer("pdf_file")
-        
+
         request = self.request
 
         q = request.GET.get("q")
@@ -324,8 +324,8 @@ class SearchView(generic.ListView):
             qs = qs.filter(
                 Q(title__icontains=q) |
                 Q(keywords__word__icontains=q) |
-                Q(author__last_name__icontains=q) |  
-                Q(  
+                Q(author__last_name__icontains=q) |
+                Q(
                     author__first_name__icontains=q,
                     author__user__userprofile__consent_status='consented'
                 ) |
@@ -340,43 +340,61 @@ class SearchView(generic.ListView):
             ).distinct()
         if school_year:
             qs = qs.filter(school_year=school_year)
-
         if strand:
             qs = qs.filter(strand=strand)
-
         if research_design:
             qs = qs.filter(research_design=research_design)
-
         if grade_level:
             qs = qs.filter(grade_level=grade_level)
-
         if award:
             qs = qs.filter(awards__id=award)
-
         if author_ids:
-            qs = qs.filter(author__id__in=author_ids).distinct() 
-
+            qs = qs.filter(author__id__in=author_ids).distinct()
         if keyword_ids:
             qs = qs.filter(keywords__id__in=keyword_ids).distinct()
 
         return qs
 
+    # ── Ajax quick-search for the navbar search bar ──────────────────────
+    def get(self, request, *args, **kwargs):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            queryset = self.get_queryset()
+            total = queryset.count()
+
+            results = []
+            for paper in queryset[:8]:          # cap at 8 quick results
+                authors = [
+                    a.display_name_public()
+                    for a in paper.get_authors_alphabetically()
+                ]
+                results.append({
+                    'id':       paper.id,
+                    'title':    paper.title,
+                    'strand':   paper.strand or '',
+                    'design':   paper.get_research_design_display() if paper.research_design else '',
+                    'authors':  authors,
+                    'keywords': [kw.word for kw in paper.keywords.all()[:6]],
+                })
+
+            return JsonResponse({'results': results, 'total': total})
+
+        # Normal HTML render
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context.update({
-            "query": self.request.GET.get("q", ""),
-            "school_year": self.request.GET.get("school_year", ""),
-            "strand": self.request.GET.get("strand", ""),
+            "query":           self.request.GET.get("q", ""),
+            "school_year":     self.request.GET.get("school_year", ""),
+            "strand":          self.request.GET.get("strand", ""),
             "research_design": self.request.GET.get("research_design", ""),
-            "grade_level": self.request.GET.get("grade_level", ""),
-            "selected_award": self.request.GET.get("award", ""),
-            "awards": get_cached_awards(),
-            "authors": [],  
-            "school_years": get_cached_school_years(),
+            "grade_level":     self.request.GET.get("grade_level", ""),
+            "selected_award":  self.request.GET.get("award", ""),
+            "awards":          get_cached_awards(),
+            "authors":         [],
+            "school_years":    get_cached_school_years(),
             "research_designs": ResearchPaper.RESEARCH_DESIGN_CHOICES,
         })
-        
         return context
     
 class StrandFilteredView(generic.ListView):

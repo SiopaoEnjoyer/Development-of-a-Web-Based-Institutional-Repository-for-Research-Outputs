@@ -26,7 +26,8 @@
     color: white;
 }
 
-/* Paper Cards */
+/* ==================== PAPER CARDS ==================== */
+
 .paper-wrapper {
     margin-bottom: 1.5rem;
     background: transparent !important;
@@ -35,21 +36,24 @@
 }
 
 .paper-card {
-    background: white; /* Changed from rgba(255, 255, 255, 0.95) to solid white */
+    background: white;
     border-radius: 16px;
     padding: 1.75rem;
-    box-shadow: 
+    box-shadow:
         0 0 0 1px rgba(1, 87, 38, 0.08),
         0 2px 4px rgba(0, 0, 0, 0.04),
         0 4px 8px rgba(0, 0, 0, 0.04),
         0 8px 16px rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(1, 87, 38, 0.12);
     transition: all 0.3s ease;
+    /* position:relative is required for Bootstrap stretched-link */
     position: relative;
-    z-index: 10; /* Increased from 1 to 10 */
+    overflow: hidden;
     cursor: pointer;
 }
 
+/* Decorative gradient border on hover — uses ::before.
+   pointer-events:none keeps it from blocking clicks. */
 .paper-card::before {
     content: '';
     position: absolute;
@@ -57,22 +61,24 @@
     border-radius: 16px;
     padding: 1px;
     background: linear-gradient(135deg, rgba(1, 87, 38, 0.1), rgba(16, 185, 129, 0.1));
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
-    mask: 
-        linear-gradient(#fff 0 0) content-box, 
+    mask:
+        linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     mask-composite: exclude;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
+    /* Keep it purely decorative — no text content */
+    z-index: 0;
 }
 
 .paper-card:hover {
     transform: translateY(-4px);
-    box-shadow: 
+    box-shadow:
         0 0 0 1px rgba(1, 87, 38, 0.15),
         0 4px 8px rgba(1, 87, 38, 0.08),
         0 8px 16px rgba(1, 87, 38, 0.08),
@@ -84,6 +90,7 @@
     opacity: 1;
 }
 
+/* ── Title ── */
 .paper-title {
     font-size: 1.3rem;
     font-weight: 700;
@@ -95,6 +102,9 @@
     color: var(--theme-green);
     text-decoration: none;
     transition: color 0.3s ease;
+    /* Sit above the stretched-link overlay so it stays independently clickable */
+    position: relative;
+    z-index: 2;
 }
 
 .paper-title a:hover {
@@ -102,6 +112,7 @@
     text-decoration: underline;
 }
 
+/* ── Meta ── */
 .pub-date {
     color: #64748b;
     font-size: 0.85rem;
@@ -122,7 +133,8 @@
     margin-bottom: 1rem;
 }
 
-/* Badges */
+/* ==================== BADGES ==================== */
+
 .badge {
     padding: 0.4rem 0.9rem;
     border-radius: 50px;
@@ -131,21 +143,48 @@
     margin-right: 0.4rem;
     margin-bottom: 0.4rem;
     display: inline-block;
+    /* Sit above stretched-link so badge clicks still filter */
+    position: relative;
+    z-index: 2;
 }
 
 .strand-badge {
     background: linear-gradient(135deg, var(--theme-green), #059669);
     color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.strand-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(1, 87, 38, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
 }
 
 .spec-badge {
     background: linear-gradient(135deg, #0ea5e9, #06b6d4);
     color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.spec-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.4);
+    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
 }
 
 .award-badge {
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.award-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4);
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
 }
 
 .keyword-badge {
@@ -162,6 +201,9 @@
     box-shadow: 0 2px 4px rgba(1, 87, 38, 0.2);
     cursor: pointer;
     transition: all 0.3s ease;
+    /* Sit above stretched-link */
+    position: relative;
+    z-index: 2;
 }
 
 .keyword-badge:hover {
@@ -172,6 +214,8 @@
     color: white;
 }
 
+/* ==================== READ MORE / STRETCHED-LINK ==================== */
+
 .read-more {
     display: inline-flex;
     align-items: center;
@@ -180,7 +224,7 @@
     font-weight: 600;
     font-size: 0.9rem;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: color 0.3s ease, gap 0.3s ease;
     cursor: pointer;
 }
 
@@ -190,16 +234,26 @@
     text-decoration: none;
 }
 
-.read-more::after {
+/* Arrow lives on ::before — stretched-link only uses ::after, so this
+   is safe regardless of whether .stretched-link is also applied. */
+.read-more::before {
     content: '→';
+    order: 1;          /* push it after the text (flexbox) */
     transition: transform 0.3s ease;
+    display: inline-block;
 }
 
-.read-more:hover::after {
+.read-more:hover::before {
     transform: translateX(4px);
 }
 
-/* Pagination */
+/* Ensure Bootstrap's stretched-link ::after overlay is invisible */
+.read-more.stretched-link::after {
+    content: '' !important;
+}
+
+/* ==================== PAGINATION ==================== */
+
 .pagination-green {
     display: flex;
     gap: 0.75rem;
@@ -252,7 +306,8 @@
     transform: none !important;
 }
 
-/* Animations */
+/* ==================== ANIMATIONS ==================== */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -265,11 +320,12 @@
 }
 
 .fade-up {
-    animation: fadeInUp 0.6s ease-out forwards; /* Added 'forwards' */
-    opacity: 1; /* Ensure final state */
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 1;
 }
 
-/* Ensure transparent backgrounds */
+/* ==================== TRANSPARENT BACKGROUNDS ==================== */
+
 .container {
     background: transparent !important;
 }
@@ -279,16 +335,14 @@
     background: transparent !important;
 }
 
-.row {
-    background: transparent !important;
-}
-
+.row,
 .row.g-4,
 .row.g-3 {
     background: transparent !important;
 }
 
-/* Responsive Media Queries */
+/* ==================== RESPONSIVE ==================== */
+
 @media (max-width: 1200px) {
     .paper-card {
         padding: 1.5rem;
@@ -449,45 +503,4 @@
         padding: 0.35rem 0.75rem !important;
         font-size: 0.75rem;
     }
-}
-
-/* Make the card NOT look clickable */
-.paper-card {
-  cursor: default !important;
-}
-
-/* Make title look clickable */
-.paper-title a {
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.paper-title a:hover {
-  color: #015726;
-}
-
-/* Make badges look clickable */
-.strand-badge,
-.spec-badge,
-.award-badge {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.strand-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(1, 87, 38, 0.4);
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-}
-
-.spec-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.4);
-    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
-}
-
-.award-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4);
-    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
 }
