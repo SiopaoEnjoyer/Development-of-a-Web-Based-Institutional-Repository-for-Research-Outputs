@@ -75,9 +75,3 @@ proc_name = 'django_app'
 raw_env = [
     'DJANGO_SETTINGS_MODULE=G12Research.settings',
 ]
-
-print("\n📊 Gunicorn configured for Render Free Tier (512MB limit)")
-print("✅ Using threaded workers for better concurrency")
-print("✅ Memory will be monitored by MemoryLimiterMiddleware")
-print("✅ Workers restart every 50-60 requests to prevent memory leaks")
-print("✅ Can handle 2 concurrent requests with 1 worker + 2 threads\n")

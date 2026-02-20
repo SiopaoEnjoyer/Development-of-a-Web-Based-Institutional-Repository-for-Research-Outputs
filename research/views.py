@@ -641,23 +641,23 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
     template_name = "research/keyword_form.html"
     context_object_name = "keywords"
     paginate_by = 10
-    
-    def get_queryset(self):        
+
+    def get_queryset(self):
         qs = Keyword.objects.annotate(
-            usage_count=models.Count('researchpaper')
+            usage_count=models.Count('researchpaper', distinct=True)
         ).prefetch_related(
             Prefetch(
                 'researchpaper_set',
                 queryset=ResearchPaper.objects.only('id', 'title')
             )
         )
-        
+
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(word__icontains=q)
-        
+
         sort_by = self.request.GET.get("sort_by", "alphabetical")
-        
+
         if sort_by == "alphabetical":
             qs = qs.annotate(
                 clean_word=Replace('word', Value('*'), Value(''))
@@ -672,119 +672,89 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
             qs = qs.order_by("usage_count")
         else:
             qs = qs.order_by("word")
-        
-        return qs
-    
-    def get_queryset(self):
-        qs = Keyword.objects.annotate(
-            usage_count=models.Count('researchpaper')
-        ).only('id', 'word')  
-        
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            qs = qs.filter(word__icontains=q)
-        
-        sort_by = self.request.GET.get("sort_by", "alphabetical")
-        
-        if sort_by == "alphabetical":
-            qs = qs.order_by("word")
-        elif sort_by == "reverse_alphabetical":
-            qs = qs.order_by("-word")
-        elif sort_by == "most_used":
-            qs = qs.order_by("-usage_count")
-        elif sort_by == "least_used":
-            qs = qs.order_by("usage_count")
-        else:
-            qs = qs.order_by("word")
-        
+
         return qs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+        return super().get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action", "").strip()
-        
+
         if action == "add" or "add_keyword" in request.POST:
             keyword_name = request.POST.get("keyword_name", "").strip()
-            
             is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-            
+
             if not keyword_name:
                 if is_ajax:
                     return JsonResponse({"success": False, "error": "Keyword name is required."}, status=400)
                 messages.error(request, "Keyword name is required.")
                 return redirect("research:manage_keywords")
-            
+
             if len(keyword_name) < 2:
                 if is_ajax:
                     return JsonResponse({"success": False, "error": "Keyword must be at least 2 characters long."}, status=400)
                 messages.error(request, "Keyword must be at least 2 characters long.")
                 return redirect("research:manage_keywords")
-            
+
             if Keyword.objects.filter(word__iexact=keyword_name).exists():
                 if is_ajax:
                     return JsonResponse({"success": False, "error": f"The keyword '{keyword_name}' already exists."}, status=400)
                 messages.error(request, f"The keyword '{keyword_name}' already exists.")
                 return redirect("research:manage_keywords")
-            
+
             Keyword.objects.create(word=keyword_name)
-            
             invalidate_keyword_caches()
-            
+
             if is_ajax:
                 return JsonResponse({"success": True, "message": f"Keyword '{keyword_name}' added successfully."})
-            
+
             messages.success(request, f"Keyword '{keyword_name}' added successfully.")
             return redirect("research:manage_keywords")
-        
+
         elif action == "edit" or "edit_keyword" in request.POST:
-            keyword_id = request.POST.get("keyword_id")
+            keyword_id   = request.POST.get("keyword_id")
             keyword_name = request.POST.get("keyword_name", "").strip()
-            
             is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-            
+
             if not keyword_name:
                 if is_ajax:
                     return JsonResponse({"success": False, "error": "Keyword name is required."}, status=400)
                 messages.error(request, "Keyword name is required.")
                 return redirect("research:manage_keywords")
-            
+
             if len(keyword_name) < 2:
                 if is_ajax:
                     return JsonResponse({"success": False, "error": "Keyword must be at least 2 characters long."}, status=400)
                 messages.error(request, "Keyword must be at least 2 characters long.")
                 return redirect("research:manage_keywords")
-            
+
             try:
                 keyword = Keyword.objects.get(id=keyword_id)
-                
+
                 if Keyword.objects.filter(word__iexact=keyword_name).exclude(id=keyword_id).exists():
                     if is_ajax:
                         return JsonResponse({"success": False, "error": f"The keyword '{keyword_name}' already exists."}, status=400)
                     messages.error(request, f"The keyword '{keyword_name}' already exists.")
                     return redirect("research:manage_keywords")
-                
+
                 old_name = keyword.word
                 keyword.word = keyword_name
                 keyword.save()
-                
                 invalidate_keyword_caches()
-                
+
                 if is_ajax:
                     return JsonResponse({"success": True, "message": f"Keyword updated from '{old_name}' to '{keyword_name}'."})
-                
+
                 messages.success(request, f"Keyword updated from '{old_name}' to '{keyword_name}'.")
             except Keyword.DoesNotExist:
                 if is_ajax:
                     return JsonResponse({"success": False, "error": "Keyword not found."}, status=404)
                 messages.error(request, "Keyword not found.")
-            
-            return redirect("research:manage_keywords")
-        
-        return redirect("research:manage_keywords")
 
+            return redirect("research:manage_keywords")
+
+        return redirect("research:manage_keywords")
 
     def get(self, request, *args, **kwargs):
         delete_id = request.GET.get("delete")
@@ -794,19 +764,18 @@ class KeywordManageView(TeacherRequiredMixin, generic.ListView):
                 usage_count = keyword.researchpaper_set.count()
                 keyword_name = keyword.word
                 keyword.delete()
-                
                 invalidate_keyword_caches()
-                
+
                 if usage_count > 0:
                     messages.warning(
-                        request, 
-                        f"Keyword '{keyword_name}' deleted successfully. It was removed from {usage_count} paper(s)."
+                        request,
+                        f"Keyword '{keyword_name}' deleted. It was removed from {usage_count} paper(s)."
                     )
                 else:
                     messages.success(request, f"Keyword '{keyword_name}' deleted successfully.")
             except Keyword.DoesNotExist:
                 messages.error(request, "Keyword not found.")
-            
+
             return redirect("research:manage_keywords")
 
         return super().get(request, *args, **kwargs)

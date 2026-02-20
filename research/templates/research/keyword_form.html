@@ -11,7 +11,6 @@
 {% endblock %}
 
 {% block messages %}
-<!-- Override base template messages - use toast notifications instead -->
 <div class="django-messages" style="display: none;">
     {% if messages %}
         {% for message in messages %}
@@ -23,7 +22,6 @@
 
 {% block content %}
 
-<!-- CSRF Token for AJAX requests -->
 {% csrf_token %}
 
 <!-- Dashboard Header -->
@@ -74,7 +72,8 @@
             </div>
 
             <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-secondary w-100" type="button" id="resetAllBtn" style="background: #dc3545; border: none; border-radius: 50px; font-weight: 600; padding: 0.7rem 1.5rem;">
+                <button class="btn btn-secondary w-100" type="button" id="resetAllBtn"
+                    style="background: #dc3545; border: none; border-radius: 50px; font-weight: 600; padding: 0.7rem 1.5rem;">
                     <i class="bi bi-arrow-counterclockwise"></i> Reset
                 </button>
             </div>
@@ -100,6 +99,7 @@
       Browse and manage all research paper keywords
     </small>
   </div>
+
   <div class="card-body p-0">
     <table class="table table-hover mb-0 align-middle">
       <thead>
@@ -112,30 +112,42 @@
       <tbody id="keywordTableBody">
         {% for keyword in keywords %}
         <tr>
+
+          <!-- Keyword word — clicking filters search by this keyword -->
           <td>
-            <span class="data-pill keyword">
+            <a href="{% url 'research:search' %}?keywords={{ keyword.id }}"
+               class="data-pill keyword text-decoration-none">
               {{ keyword.word|format_italics|safe }}
-            </span>
+            </a>
           </td>
+
+          <!-- Usage count — sticky hoverable tooltip listing papers -->
           <td>
-            <span class="data-pill count" 
-                  data-bs-toggle="tooltip" 
-                  data-bs-placement="top" 
-                  data-bs-html="true"
-                  title="<strong>Used in:</strong><ul>{% for paper in keyword.papers %}<li>{{ paper.title }}</li>{% empty %}<li>No papers yet</li>{% endfor %}</ul>">
-              {{ keyword.usage_count }} paper{{ keyword.usage_count|pluralize }}
-            </span>
+            {% if keyword.usage_count > 0 %}
+              {% with papers=keyword.researchpaper_set.all %}
+              <span class="data-pill count paper-tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                    title="<strong>Used in:</strong><ul style='margin:6px 0 0;padding-left:18px;text-align:left;'>{% for paper in papers %}<li style='margin-bottom:6px;'><a href='{% url 'research:detail' paper.pk %}' class='tooltip-paper-link' target='_blank'>{{ paper.title|truncatechars:60 }}</a></li>{% endfor %}</ul>">
+                {{ keyword.usage_count }} paper{{ keyword.usage_count|pluralize }}
+              </span>
+              {% endwith %}
+            {% else %}
+              <span class="data-pill count">0 papers</span>
+            {% endif %}
           </td>
+
+          <!-- Actions -->
           <td>
             <div class="action-buttons">
-              <button class="btn btn-warning edit-keyword-btn" 
-                      data-id="{{ keyword.id }}" 
+              <button class="btn btn-warning edit-keyword-btn"
+                      data-id="{{ keyword.id }}"
                       data-name="{{ keyword.word }}"
                       data-count="{{ keyword.usage_count }}">
                 <i class="bi bi-pencil"></i> Edit
               </button>
-              <a href="?delete={{ keyword.id }}" 
-                 class="btn btn-danger" 
+              <a href="?delete={{ keyword.id }}"
+                 class="btn btn-danger"
                  onclick="return confirm('Delete this keyword? It is used in {{ keyword.usage_count }} paper(s).')">
                 <i class="bi bi-trash"></i> Delete
               </a>
@@ -150,7 +162,7 @@
       </tbody>
     </table>
   </div>
-    
+
   <!-- Pagination -->
   {% if is_paginated %}
   <div class="card-footer bg-white border-0 py-3">
@@ -193,7 +205,7 @@
         {% endif %}
       </ul>
     </nav>
-    
+
     <p class="text-center text-muted mt-2 mb-0" style="font-size: 0.9rem;">
       Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} keywords
     </p>

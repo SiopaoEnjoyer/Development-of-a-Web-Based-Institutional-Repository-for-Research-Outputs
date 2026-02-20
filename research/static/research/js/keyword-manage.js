@@ -19,6 +19,46 @@ function debounce(func, wait) {
     };
 }
 
+// ── Sticky tooltips with clickable links ─────────────────────────────────────
+function initStickyTooltips() {
+    document.querySelectorAll('.paper-tooltip').forEach(trigger => {
+        // Destroy any existing tooltip instance first to avoid duplicates
+        const existing = bootstrap.Tooltip.getInstance(trigger);
+        if (existing) existing.dispose();
+
+        const tt = new bootstrap.Tooltip(trigger, {
+            html: true,
+            sanitize: false,
+            trigger: 'manual',
+            delay: { show: 0, hide: 150 },
+        });
+
+        let hideTimer = null;
+
+        const cancelHide = () => {
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+                hideTimer = null;
+            }
+        };
+
+        const scheduleHide = () => {
+            hideTimer = setTimeout(() => tt.hide(), 150);
+        };
+
+        trigger.addEventListener('mouseenter', () => { cancelHide(); tt.show(); });
+        trigger.addEventListener('mouseleave', scheduleHide);
+
+        // Once the tooltip DOM element is inserted, attach hover listeners to it
+        trigger.addEventListener('shown.bs.tooltip', () => {
+            const tooltipEl = document.getElementById(trigger.getAttribute('aria-describedby'));
+            if (!tooltipEl) return;
+            tooltipEl.addEventListener('mouseenter', cancelHide);
+            tooltipEl.addEventListener('mouseleave', scheduleHide);
+        });
+    });
+}
+
 // Update results via AJAX
 async function updateResults() {
     const params = new URLSearchParams();
@@ -48,12 +88,9 @@ async function updateResults() {
 
     history.replaceState(null, "", `?${params.toString()}`);
     renderAppliedFilters();
-    
-    // Reinitialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+
+    // Reinit sticky tooltips after DOM swap
+    initStickyTooltips();
 }
 
 // Add change listeners
@@ -82,7 +119,7 @@ function renderAppliedFilters() {
         if (url.has(key) && url.get(key)) {
             hasFilters = true;
             let displayValue = url.get(key);
-            
+
             if (key === "sort_by") {
                 const sortMap = {
                     "alphabetical": "A-Z",
@@ -102,7 +139,7 @@ function renderAppliedFilters() {
             tokens.appendChild(token);
         }
     }
-    
+
     if (hasFilters) {
         activeFiltersSection.style.display = 'block';
     } else {
@@ -128,16 +165,18 @@ function removeFilter(key) {
             if (newTableBody) {
                 document.querySelector("#keywordTableBody").innerHTML = newTableBody.innerHTML;
             }
-            
-            // Update pagination if it exists
+
             const newPagination = temp.querySelector(".card-footer");
             const currentPagination = document.querySelector(".card-footer");
             if (newPagination && currentPagination) {
                 currentPagination.innerHTML = newPagination.innerHTML;
             }
-            
+
             history.replaceState(null, "", `?${url.toString()}`);
             renderAppliedFilters();
+
+            // Reinit sticky tooltips after DOM swap
+            initStickyTooltips();
         });
 }
 
@@ -190,14 +229,14 @@ const keywordModalErrors = document.getElementById('keywordModalErrors');
 if (saveKeywordBtn) {
     saveKeywordBtn.addEventListener('click', async function(e) {
         e.preventDefault();
-        
+
         if (keywordModalErrors) {
             keywordModalErrors.style.display = 'none';
             keywordModalErrors.innerHTML = '';
         }
-        
+
         const keywordName = document.getElementById('keyword_name')?.value.trim();
-        
+
         if (!keywordName) {
             if (keywordModalErrors) {
                 keywordModalErrors.innerHTML = 'Keyword is required.';
@@ -205,7 +244,7 @@ if (saveKeywordBtn) {
             }
             return;
         }
-        
+
         if (keywordName.length < 2) {
             if (keywordModalErrors) {
                 keywordModalErrors.innerHTML = 'Keyword must be at least 2 characters long.';
@@ -213,45 +252,39 @@ if (saveKeywordBtn) {
             }
             return;
         }
-        
+
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-        
+
         try {
             const formData = new FormData();
             formData.append('keyword_name', keywordName);
             formData.append('add_keyword', '1');
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
             if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
-            
+
             const response = await fetch(window.location.href, {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
-            
+
             if (response.ok) {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addKeywordModal'));
                 if (modal) modal.hide();
-                
+
                 document.getElementById('keyword_name').value = '';
                 const preview = document.getElementById('keyword_preview');
                 if (preview) preview.style.display = 'none';
-                
-                // Show success toast if available, otherwise alert
+
                 if (typeof showSuccess === 'function') {
                     showSuccess(`Keyword "${keywordName}" added successfully!`);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
                     alert(`✓ Keyword "${keywordName}" added successfully!`);
                     window.location.reload();
                 }
             } else {
-                const text = await response.text();
                 if (keywordModalErrors) {
                     keywordModalErrors.innerHTML = 'An error occurred while adding the keyword.';
                     keywordModalErrors.style.display = 'block';
@@ -274,32 +307,31 @@ if (saveKeywordBtn) {
 const updateKeywordBtn = document.getElementById('updateKeywordBtn');
 const editModalErrors = document.getElementById('editModalErrors');
 
-// Use event delegation for edit buttons
+// Event delegation for edit buttons
 document.addEventListener('click', function(e) {
     const editBtn = e.target.closest('.edit-keyword-btn');
     if (!editBtn) return;
-    
+
     e.preventDefault();
     e.stopPropagation();
-    
-    const keywordId = editBtn.dataset.id;
+
+    const keywordId   = editBtn.dataset.id;
     const keywordName = editBtn.dataset.name;
-    const usageCount = editBtn.dataset.count;
-    
+    const usageCount  = editBtn.dataset.count;
+
     if (editModalErrors) {
         editModalErrors.style.display = 'none';
         editModalErrors.innerHTML = '';
     }
-    
+
     document.getElementById('edit_keyword_id').value = keywordId;
     document.getElementById('edit_keyword_name').value = keywordName;
     document.getElementById('edit_usage_count').textContent = usageCount;
-    
+
     if (editPreviewContent) {
-        const formattedText = formatKeyword(keywordName);
-        editPreviewContent.innerHTML = formattedText;
+        editPreviewContent.innerHTML = formatKeyword(keywordName);
     }
-    
+
     const modalElement = document.getElementById('editKeywordModal');
     const bsModal = new bootstrap.Modal(modalElement);
     bsModal.show();
@@ -308,15 +340,15 @@ document.addEventListener('click', function(e) {
 if (updateKeywordBtn) {
     updateKeywordBtn.addEventListener('click', async function(e) {
         e.preventDefault();
-        
+
         if (editModalErrors) {
             editModalErrors.style.display = 'none';
             editModalErrors.innerHTML = '';
         }
-        
-        const keywordId = document.getElementById('edit_keyword_id')?.value;
+
+        const keywordId   = document.getElementById('edit_keyword_id')?.value;
         const keywordName = document.getElementById('edit_keyword_name')?.value.trim();
-        
+
         if (!keywordName) {
             if (editModalErrors) {
                 editModalErrors.innerHTML = 'Keyword is required.';
@@ -324,7 +356,7 @@ if (updateKeywordBtn) {
             }
             return;
         }
-        
+
         if (keywordName.length < 2) {
             if (editModalErrors) {
                 editModalErrors.innerHTML = 'Keyword must be at least 2 characters long.';
@@ -332,10 +364,10 @@ if (updateKeywordBtn) {
             }
             return;
         }
-        
+
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
-        
+
         try {
             const formData = new FormData();
             formData.append('keyword_id', keywordId);
@@ -343,24 +375,20 @@ if (updateKeywordBtn) {
             formData.append('edit_keyword', '1');
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
             if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken);
-            
+
             const response = await fetch(window.location.href, {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
-            
+
             if (response.ok) {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editKeywordModal'));
                 if (modal) modal.hide();
-                
+
                 if (typeof showSuccess === 'function') {
                     showSuccess(`Keyword "${keywordName}" updated successfully!`);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
                     alert(`✓ Keyword "${keywordName}" updated successfully!`);
                     window.location.reload();
@@ -387,7 +415,7 @@ if (updateKeywordBtn) {
 // Reset modals when closed
 const addKeywordModal = document.getElementById('addKeywordModal');
 if (addKeywordModal) {
-    addKeywordModal.addEventListener('hidden.bs.modal', function () {
+    addKeywordModal.addEventListener('hidden.bs.modal', function() {
         document.getElementById('keyword_name').value = '';
         if (keywordModalErrors) {
             keywordModalErrors.style.display = 'none';
@@ -403,7 +431,7 @@ if (addKeywordModal) {
 
 const editKeywordModal = document.getElementById('editKeywordModal');
 if (editKeywordModal) {
-    editKeywordModal.addEventListener('hidden.bs.modal', function () {
+    editKeywordModal.addEventListener('hidden.bs.modal', function() {
         document.getElementById('edit_keyword_name').value = '';
         if (editModalErrors) {
             editModalErrors.style.display = 'none';
@@ -415,13 +443,9 @@ if (editKeywordModal) {
     });
 }
 
-// Initialize Bootstrap tooltips and filters
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
+    initStickyTooltips();
     renderAppliedFilters();
 });
 

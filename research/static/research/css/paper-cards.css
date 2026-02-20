@@ -44,9 +44,8 @@
         0 2px 4px rgba(0, 0, 0, 0.04),
         0 4px 8px rgba(0, 0, 0, 0.04),
         0 8px 16px rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(1, 87, 38, 0.12);
+    border: 1px solid rgba(1, 87, 38, 0.22);
     transition: all 0.3s ease;
-    /* position:relative is required for Bootstrap stretched-link */
     position: relative;
     overflow: hidden;
     cursor: pointer;
