@@ -234,7 +234,6 @@ BTCSI Research Team
                         <tr>
                             <td style="background: #dc3545; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
                                 <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
-                                <div style="font-size: 40px; margin-bottom: 10px;">🔐</div>
                                 <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
                                     Password Reset
                                 </h1>
@@ -385,7 +384,6 @@ BTCSI Research Team
                         <tr>
                             <td style="background: #28a745; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
                                 <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
-                                <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
                                 <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
                                     Account Approved!
                                 </h1>
@@ -556,7 +554,6 @@ BTCSI Research Team
                         <tr>
                             <td style="background: #6c757d; padding: 35px 40px; text-align: center; border-radius: 20px 20px 0 0;">
                                 <img src="{SITE_URL}/static/accounts/img/logo.png" alt="BTCSI Logo" style="width: 80px; height: 80px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
-                                <div style="font-size: 50px; margin-bottom: 10px;">📋</div>
                                 <h1 style="color: white; margin: 0 0 8px 0; font-size: 32px; font-weight: 700; font-family: 'Montserrat', Arial, sans-serif;">
                                     Registration Update
                                 </h1>
