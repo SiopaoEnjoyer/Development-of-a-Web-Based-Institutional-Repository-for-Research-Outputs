@@ -47,6 +47,8 @@ sitemaps = {
     'research': ResearchPaperSitemap,
 }
 
+handler403 = 'research.views.ratelimit_blocked'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('research.urls')),

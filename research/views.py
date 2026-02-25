@@ -25,7 +25,7 @@ import mimetypes
 from datetime import datetime
 from django.core.cache import cache
 from django.db import connection, models
-from django_ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit, Ratelimited
 from django.views.decorators.vary import vary_on_cookie
 
 @method_decorator(vary_on_cookie, name='dispatch')
@@ -206,6 +206,31 @@ def healthcheck(request):
     
     return HttpResponse("OK", content_type="text/plain")
 
+# Rate → seconds map (match whatever rates you use in your decorators)
+RATE_SECONDS = {
+    'h': 3600,
+    'm': 60,
+    's': 1,
+    'd': 86400,
+}
+
+def ratelimit_blocked(request, exception=None):
+    wait_seconds = 3600  # default: 1 hour
+
+    if isinstance(exception, Ratelimited):
+        rate = getattr(exception, 'rate', None)  # e.g. "1/h", "60/m"
+        if rate:
+            try:
+                _, period = rate.split('/')
+                period = period.strip()
+                unit = period[-1]          # h, m, s, d
+                count = int(period[:-1]) if len(period) > 1 else 1
+                wait_seconds = RATE_SECONDS.get(unit, 3600) * count
+            except Exception:
+                pass
+
+    return render(request, 'research/429.html', {'wait_seconds': wait_seconds}, status=429)
+
 class LoginRequiredMessageMixin(LoginRequiredMixin):
     redirect_field_name = None
 
@@ -284,7 +309,7 @@ class DetailView(generic.DetailView):
         
         return context
 
-@method_decorator(ratelimit(key='ip', rate='60/h', method='GET'), name='dispatch')
+@method_decorator(ratelimit(key='ip', rate='100/h', method='GET'), name='dispatch')
 class SearchView(generic.ListView):
     model = ResearchPaper
     template_name = "research/search.html"

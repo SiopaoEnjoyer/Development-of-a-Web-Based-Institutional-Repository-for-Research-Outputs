@@ -1,0 +1,308 @@
+{% extends "research/base_no_header.html" %}
+{% load static %}
+
+{% block title %}Too Many Requests – BTCSI Research Repository{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── rate-limit page ── */
+    .ratelimit-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 68vh;
+        padding: 3rem 1rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .ratelimit-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 40px rgba(1, 87, 38, 0.13);
+        padding: 3rem 2.5rem;
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+        border-top: 5px solid var(--theme-green);
+        animation: cardEntrance 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes cardEntrance {
+        from { opacity: 0; transform: translateY(28px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+
+    /* icon circle */
+    .ratelimit-icon-wrap {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e8f5ee 0%, #d0ead9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.75rem;
+        position: relative;
+        animation: pulse-ring 2.2s ease-out infinite;
+    }
+
+    @keyframes pulse-ring {
+        0%   { box-shadow: 0 0 0 0   rgba(1, 87, 38, 0.25); }
+        60%  { box-shadow: 0 0 0 18px rgba(1, 87, 38, 0);   }
+        100% { box-shadow: 0 0 0 0   rgba(1, 87, 38, 0);    }
+    }
+
+    .ratelimit-icon-wrap i {
+        font-size: 2.8rem;
+        color: var(--theme-green);
+    }
+
+    /* code badge */
+    .ratelimit-code {
+        display: inline-block;
+        background: #f0f8f3;
+        color: var(--theme-green);
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 4px 14px;
+        border-radius: 50px;
+        border: 1.5px solid #c4e0cc;
+        margin-bottom: 1rem;
+    }
+
+    .ratelimit-heading {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 1.75rem;
+        color: #111;
+        margin-bottom: 0.75rem;
+        line-height: 1.25;
+    }
+
+    .ratelimit-sub {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.95rem;
+        color: #666;
+        line-height: 1.65;
+        margin-bottom: 2rem;
+    }
+
+    /* countdown */
+    .ratelimit-countdown {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 2rem;
+    }
+
+    .ratelimit-countdown i { color: var(--theme-green); font-size: 1rem; }
+
+    .ratelimit-countdown #countdown-timer {
+        font-weight: 700;
+        color: var(--theme-green);
+        font-size: 1rem;
+        min-width: 28px;
+        text-align: center;
+    }
+
+    /* divider */
+    .ratelimit-divider {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 0 0 1.75rem;
+    }
+
+    /* action buttons */
+    .ratelimit-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .ratelimit-btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 1.5rem;
+        background: var(--theme-green);
+        color: white !important;
+        border: 2px solid var(--theme-green);
+        border-radius: 50px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .ratelimit-btn-primary:hover {
+        background: #013d1c;
+        border-color: #013d1c;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(1, 87, 38, 0.25);
+    }
+
+    .ratelimit-btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 1.5rem;
+        background: white;
+        color: var(--theme-green) !important;
+        border: 2px solid var(--theme-green);
+        border-radius: 50px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .ratelimit-btn-secondary:hover {
+        background: #f0f8f3;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(1, 87, 38, 0.12);
+    }
+
+    /* tip row at bottom of card */
+    .ratelimit-tip {
+        margin-top: 1.75rem;
+        padding: 0.85rem 1.1rem;
+        background: #f8fffe;
+        border-radius: 10px;
+        border-left: 3px solid var(--theme-green);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.8rem;
+        color: #555;
+        text-align: left;
+        line-height: 1.55;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .ratelimit-tip i {
+        color: var(--theme-green);
+        font-size: 1rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    @media (max-width: 480px) {
+        .ratelimit-card { padding: 2rem 1.25rem; }
+        .ratelimit-heading { font-size: 1.4rem; }
+        .ratelimit-actions { flex-direction: column; align-items: stretch; }
+        .ratelimit-btn-primary,
+        .ratelimit-btn-secondary { justify-content: center; }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="ratelimit-wrapper">
+    <div class="ratelimit-card">
+
+        <div class="ratelimit-icon-wrap">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+
+        <div class="ratelimit-code">429 · Too Many Requests</div>
+
+        <h1 class="ratelimit-heading">Slow down a little!</h1>
+
+        <p class="ratelimit-sub">
+            You've made too many requests in a short period.<br>
+            Please wait before browsing the repository again.
+        </p>
+
+        <div class="ratelimit-countdown">
+            <i class="bi bi-clock"></i>
+            <span>You can try again in</span>
+            <span id="countdown-timer">60</span>
+            <span>seconds</span>
+        </div>
+
+        <hr class="ratelimit-divider">
+
+        <div class="ratelimit-actions">
+            <a href="/" class="ratelimit-btn-primary">
+                <i class="bi bi-house-fill"></i> Go Home
+            </a>
+            <a href="{% url 'research:search' %}" class="ratelimit-btn-secondary">
+                <i class="bi bi-search"></i> Search Papers
+            </a>
+        </div>
+
+        <div class="ratelimit-tip">
+            <i class="bi bi-lightbulb-fill"></i>
+            <span>
+                Rate limiting helps keep the repository fast and fair for everyone.
+                If you believe this is a mistake, try refreshing after the timer ends.
+            </span>
+        </div>
+
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const el = document.getElementById('countdown-timer');
+    if (!el) return;
+
+    const expirationTime = Date.now() + ({{ wait_seconds }} * 1000);
+    let timerInterval = null;
+
+    function updateTimer() {
+        const timeRemaining = Math.max(0, Math.floor((expirationTime - Date.now()) / 1000));
+        el.textContent = timeRemaining;
+
+        if (timeRemaining <= 0) {
+            stopTimer();
+            el.closest('.ratelimit-countdown').innerHTML =
+                '<i class="bi bi-check-circle-fill" style="color:var(--theme-green)"></i>' +
+                '<span style="color:var(--theme-green);font-weight:600">You can try again now!</span>';
+        }
+    }
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // immediate first tick
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    // Page Visibility API — same pattern as verification modal
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+            stopTimer();
+        } else {
+            updateTimer(); // sync immediately on return
+            startTimer();
+        }
+    });
+
+    window.addEventListener('focus', function () {
+        if (!document.hidden && !timerInterval) startTimer();
+    });
+
+    startTimer();
+})();
+</script>
+{% endblock extra_js %}
