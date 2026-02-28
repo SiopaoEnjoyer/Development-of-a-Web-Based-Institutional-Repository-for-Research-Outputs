@@ -2,7 +2,7 @@
 
 A web-based Institutional Repository (IR) system developed for **Bacolod Trinity Christian School, Inc. (BTCSI)**, designed to centralize, preserve, and provide organized access to Senior High School student research outputs.
 
-> Developed as a Final Capstone Research Paper for Practical Research 2 (March 2026) by Lanz Arthur B. Gaurana, Sean David F. Lelis, Stephanie Joy P. Nemenzo, Lloyd Ruzel G. Pabon, J Ryl M. Sorbito, and Charles Lebron C. Sta. Ana.
+> Developed as a Final Capstone Research Paper as a requirement for Inquiries, Investigations, and Immersion (3I's) on March 2026 by Lanz Arthur B. Gaurana, Sean David F. Lelis, Stephanie Joy P. Nemenzo, Lloyd Ruzel G. Pabon, J Ryl M. Sorbito, and Charles Lebron C. Sta. Ana.
 
 ---
 
@@ -12,6 +12,7 @@ Prior to this system, BTCSI had no centralized digital archive for SHS research 
 
 This IR addresses that gap by providing a publicly accessible, searchable, role-differentiated repository that protects student privacy while making completed research outputs available to the BTCSI academic community.
 
+Production URL: https://btcsirepository.onrender.com/
 ---
 
 ## Features
@@ -64,7 +65,7 @@ The system features five role-differentiated dashboards:
 
 | Layer | Technology |
 |---|---|
-| **Backend** | Python, Django 5.x (MVT architecture) |
+| **Backend** | Python, Django 5.2.6 (MVT architecture) |
 | **Frontend** | Bootstrap 5, JavaScript, AJAX |
 | **Database** | SQLite (development), PostgreSQL via Neon (production) |
 | **File Storage** | Supabase (PDF research documents and consent forms) |
