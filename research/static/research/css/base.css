@@ -1464,7 +1464,7 @@ nav.nav-main {
         position: static !important;
         box-shadow: none !important;
         border-radius: 8px !important;
-        margin: 4px 0 4px 1rem !important;
+        margin: 4px 0 !important;
         border-left: 3px solid #e8f5ee !important;
         padding: 4px 0 !important;
         background: #fafffe !important;
