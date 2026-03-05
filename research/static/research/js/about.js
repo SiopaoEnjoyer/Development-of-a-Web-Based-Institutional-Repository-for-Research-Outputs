@@ -53,7 +53,7 @@ if (window.aboutPageCleanup) {
                     stat.textContent = Math.floor(current);
                     requestAnimationFrame(tick);
                 } else {
-                    stat.textContent = target;
+                    stat.textContent = target + (stat.getAttribute('data-suffix') || '');
                 }
             };
             requestAnimationFrame(tick);

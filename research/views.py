@@ -33,18 +33,30 @@ from django.views.decorators.vary import vary_on_cookie
 class StaticPageView(generic.TemplateView):
     pass
 
-class HomeView(StaticPageView):
+class HomeView(generic.TemplateView):
     template_name = "research/home.html"
 
-class AboutView(StaticPageView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['paper_count'] = ResearchPaper.objects.count()
+        context['keyword_count'] = Keyword.objects.count()
+        return context
+
+class AboutView(generic.TemplateView):
     template_name = "research/about.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['paper_count'] = ResearchPaper.objects.count()
+        context['keyword_count'] = Keyword.objects.count()
+        return context
 
 class TermsView(StaticPageView):
     template_name = "research/terms.html"
 
 class PrivacyPolicyView(StaticPageView):
     template_name = "research/privacy_policy.html"
-
+    
 @login_required
 def serve_pdf(request, path):
     """Serve PDF files from Supabase storage with authentication"""

@@ -67,7 +67,7 @@ if (window.__homeState) {
                 if (!state.isActive) { clearInterval(timer); return; }
                 current += increment;
                 if (current >= targetVal) {
-                    stat.textContent = targetVal + '+';
+                    stat.textContent = targetVal + (stat.getAttribute('data-suffix') || '');
                     clearInterval(timer);
                     const idx = state.intervals.indexOf(timer);
                     if (idx > -1) state.intervals.splice(idx, 1);

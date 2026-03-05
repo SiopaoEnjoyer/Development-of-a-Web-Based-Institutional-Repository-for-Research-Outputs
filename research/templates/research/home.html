@@ -62,14 +62,23 @@
 <!-- STATS SECTION -->
 <section class="stats-section" id="stats">
     <div class="container" style="max-width: 1200px;">
-        <div class="row g-4">
+        <div class="row g-4 justify-content-center">
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="bi bi-journal-text" style="font-size: 3rem;"></i>
                     </div>
-                    <div class="stat-value" data-target="100">0</div>
+                    <div class="stat-value" data-target="{{ paper_count }}">0</div>
                     <div class="stat-label">Research Papers</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-tags-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="stat-value" data-target="{{ keyword_count }}">0</div>
+                    <div class="stat-label">Keywords &amp; Topics</div>
                 </div>
             </div>
             <div class="col-md-4">
@@ -77,20 +86,10 @@
                     <div class="stat-icon">
                         <i class="bi bi-people-fill" style="font-size: 3rem;"></i>
                     </div>
-                    <div class="stat-value" data-target="200">0</div>
+                    <div class="stat-value" data-target="200" data-suffix="+">0</div>
                     <div class="stat-label">Students Served</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
-                    </div>
-                    <div class="stat-value" data-target="6">0</div>
-                    <div class="stat-label">Strands and Specializations</div>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
 
