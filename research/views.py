@@ -27,6 +27,8 @@ from django.core.cache import cache
 from django.db import connection, models
 from django_ratelimit.decorators import ratelimit, Ratelimited
 from django.views.decorators.vary import vary_on_cookie
+from django.template.loader import render_to_string
+from .utils import get_real_ip, is_disallowed_bot
 
 @method_decorator(vary_on_cookie, name='dispatch')
 @method_decorator(cache_page(60 * 60 * 24), name='dispatch')
@@ -259,14 +261,14 @@ class TeacherRequiredMixin:
         view = super().as_view(**initkwargs)
         return is_research_teacher_only(view)
 
-@method_decorator(ratelimit(key='ip', rate='100/h', method='GET'), name='dispatch')
+@method_decorator(ratelimit(key=get_real_ip, rate='100/h', method='GET', block=True), name='dispatch')
 class IndexView(generic.ListView):
     model = ResearchPaper
     template_name = "research/index.html"
     context_object_name = "latest_research_list"
     ordering = ["-publication_date"]
     paginate_by = 6
-    
+ 
     def get_queryset(self):
         return ResearchPaper.objects.prefetch_related(
             Prefetch(
@@ -277,17 +279,17 @@ class IndexView(generic.ListView):
                 'keywords',
                 queryset=Keyword.objects.only('id', 'word')
             )
-        ).defer('pdf_file').order_by('-publication_date')  
-    
+        ).defer('pdf_file').order_by('-publication_date')
+ 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
-@method_decorator(ratelimit(key='ip', rate='60/h', method='GET'), name='dispatch')
+@method_decorator(ratelimit(key=get_real_ip, rate='60/h', method='GET', block=True), name='dispatch')
 class DetailView(generic.DetailView):
     model = ResearchPaper
     template_name = "research/detail.html"
-    
+ 
     def get_queryset(self):
         return ResearchPaper.objects.prefetch_related(
             Prefetch(
@@ -305,29 +307,37 @@ class DetailView(generic.DetailView):
                 queryset=Award.objects.only('id', 'name')
             )
         )
-    
+ 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         paper = self.get_object()
-        
         citation_count = paper.get_citation_count()
-        
         context.update({
             'citation_count': citation_count,
             'authors': list(paper.author.all()),
             'keywords': list(paper.keywords.all()),
             'awards': list(paper.awards.all()),
         })
-        
         return context
 
-@method_decorator(ratelimit(key='ip', rate='100/h', method='GET'), name='dispatch')
+@method_decorator(ratelimit(key=get_real_ip, rate='60/h', method='GET', block=True), name='dispatch')
 class SearchView(generic.ListView):
     model = ResearchPaper
     template_name = "research/search.html"
     context_object_name = "papers"
     paginate_by = 6
-
+ 
+    # ── Bot guard ─────────────────────────────────────────────────
+    def dispatch(self, request, *args, **kwargs):
+        if is_disallowed_bot(request):
+            return HttpResponse(
+                "Search is not available for automated crawlers.",
+                status=403,
+                content_type="text/plain",
+            )
+        return super().dispatch(request, *args, **kwargs)
+ 
+    # ── Queryset ──────────────────────────────────────────────────
     def get_queryset(self):
         qs = ResearchPaper.objects.prefetch_related(
             Prefetch(
@@ -345,18 +355,18 @@ class SearchView(generic.ListView):
                 queryset=Award.objects.only('id', 'name')
             )
         ).defer("pdf_file")
-
+ 
         request = self.request
-
-        q = request.GET.get("q")
-        school_year = request.GET.get("school_year")
-        strand = request.GET.get("strand")
+ 
+        q               = request.GET.get("q")
+        school_year     = request.GET.get("school_year")
+        strand          = request.GET.get("strand")
         research_design = request.GET.get("research_design")
-        grade_level = request.GET.get("grade_level")
-        award = request.GET.get("award")
-        author_ids = request.GET.getlist("authors")
-        keyword_ids = request.GET.getlist("keywords")
-
+        grade_level     = request.GET.get("grade_level")
+        award           = request.GET.get("award")
+        author_ids      = request.GET.getlist("authors")
+        keyword_ids     = request.GET.getlist("keywords")
+ 
         if q:
             qs = qs.filter(
                 Q(title__icontains=q) |
@@ -389,17 +399,32 @@ class SearchView(generic.ListView):
             qs = qs.filter(author__id__in=author_ids).distinct()
         if keyword_ids:
             qs = qs.filter(keywords__id__in=keyword_ids).distinct()
-
+ 
         return qs
-
-    # ── Ajax quick-search for the navbar search bar ──────────────────────
+ 
+    # ── GET handler ───────────────────────────────────────────────
     def get(self, request, *args, **kwargs):
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        is_ajax         = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        is_filter_update = request.headers.get('X-Filter-Update') == 'true'
+ 
+        if is_ajax and is_filter_update:
+            # Called by updateResults() / removeFilter() in the JS.
+            # Return a rendered HTML partial so the JS can swap #search-results.
+            self.object_list = self.get_queryset()
+            context = self.get_context_data()
+            html = render_to_string(
+                'research/partials/search_results.html',
+                context,
+                request=request,
+            )
+            return HttpResponse(html)
+ 
+        if is_ajax:
+            # Called by the navbar quick-search bar — return JSON as before.
             queryset = self.get_queryset()
-            total = queryset.count()
-
-            results = []
-            for paper in queryset[:8]:          # cap at 8 quick results
+            total    = queryset.count()
+            results  = []
+            for paper in queryset[:8]:
                 authors = [
                     a.display_name_public()
                     for a in paper.get_authors_alphabetically()
@@ -412,24 +437,24 @@ class SearchView(generic.ListView):
                     'authors':  authors,
                     'keywords': [kw.word for kw in paper.keywords.all()[:6]],
                 })
-
             return JsonResponse({'results': results, 'total': total})
-
-        # Normal HTML render
+ 
+        # Normal full-page render
         return super().get(request, *args, **kwargs)
-
+ 
+    # ── Context ───────────────────────────────────────────────────
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            "query":           self.request.GET.get("q", ""),
-            "school_year":     self.request.GET.get("school_year", ""),
-            "strand":          self.request.GET.get("strand", ""),
-            "research_design": self.request.GET.get("research_design", ""),
-            "grade_level":     self.request.GET.get("grade_level", ""),
-            "selected_award":  self.request.GET.get("award", ""),
-            "awards":          get_cached_awards(),
-            "authors":         [],
-            "school_years":    get_cached_school_years(),
+            "query":            self.request.GET.get("q", ""),
+            "school_year":      self.request.GET.get("school_year", ""),
+            "strand":           self.request.GET.get("strand", ""),
+            "research_design":  self.request.GET.get("research_design", ""),
+            "grade_level":      self.request.GET.get("grade_level", ""),
+            "selected_award":   self.request.GET.get("award", ""),
+            "awards":           get_cached_awards(),
+            "authors":          [],
+            "school_years":     get_cached_school_years(),
             "research_designs": ResearchPaper.RESEARCH_DESIGN_CHOICES,
         })
         return context

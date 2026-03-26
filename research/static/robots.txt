@@ -1,22 +1,10 @@
-# Main access - allow discovery
-User-agent: *
-Allow: /
-
-# Specific rules for AI crawlers
-User-agent: ChatGPT-User
-User-agent: OAI-SearchBot
-User-agent: GPTBot
-Allow: /
-Allow: /research/
+# Allow Googlebot full access including /search/
+User-agent: Googlebot
 Allow: /search/
+Allow: /research/
 Allow: /about/
 Allow: /terms/
 Allow: /privacy-policy/
-Allow: /favicon.ico
-Allow: /apple-touch-icon.png
-
-# Block all bots from these endpoints
-User-agent: *
 Disallow: /admin/
 Disallow: /accounts/
 Disallow: /ajax/
@@ -29,17 +17,52 @@ Disallow: /update_consent/
 Disallow: /forgot-password/
 Disallow: /verify-password-reset/
 Disallow: /resend-password-reset/
-
-# Block PDF serving endpoints (auth required anyway)
 Disallow: /media/research_papers/
 Disallow: /media/parental_consents/
 
-# Allow public research pages
-Allow: /research/$
-Allow: /research/*/
-Allow: /search/$
+# Allow other AI crawlers but block /search/
+User-agent: ChatGPT-User
+User-agent: OAI-SearchBot
+User-agent: GPTBot
+Disallow: /search/
+Allow: /research/
+Allow: /about/
+Allow: /terms/
+Allow: /privacy-policy/
 
-# Crawl rate to be nice to your server
-Crawl-delay: 1
+# Block Amazonbot from /search/ and everything sensitive
+User-agent: Amazonbot
+Disallow: /search/
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /ajax/
+Disallow: /api/
+Disallow: /media/
+
+# All other bots — block /search/ and sensitive endpoints
+User-agent: *
+Disallow: /search/
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /ajax/
+Disallow: /api/
+Disallow: /research-dashboard/
+Disallow: /healthcheck/
+Disallow: /verify-email-ajax/
+Disallow: /resend-verification/
+Disallow: /update_consent/
+Disallow: /forgot-password/
+Disallow: /verify-password-reset/
+Disallow: /resend-password-reset/
+Disallow: /media/research_papers/
+Disallow: /media/parental_consents/
+Allow: /research/
+Allow: /about/
+Allow: /terms/
+Allow: /privacy-policy/
+Allow: /favicon.ico
+Allow: /apple-touch-icon.png
+
+Crawl-delay: 5
 
 Sitemap: https://btcsirepository.onrender.com/sitemap.xml
