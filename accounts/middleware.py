@@ -450,3 +450,14 @@ class BotBlockerMiddleware:
             return HttpResponseForbidden("Access denied for bots")
         
         return self.get_response(request)
+
+class AmazonbotBlockerMiddleware:
+    """Block Amazonbot before it touches anything."""
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        ua = request.META.get('HTTP_USER_AGENT', '').lower()
+        if 'amazonbot' in ua:
+            return HttpResponse("Forbidden", status=403)
+        return self.get_response(request)
