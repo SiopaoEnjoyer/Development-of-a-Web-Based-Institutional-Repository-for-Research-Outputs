@@ -212,12 +212,6 @@ def invalidate_author_caches():
 
 @csrf_exempt
 def healthcheck(request):
-    user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
-    
-    allowed = ['uptimerobot', 'pingdom', 'statuspage']
-    if not any(service in user_agent for service in allowed):
-        return HttpResponse("Forbidden", status=403)
-    
     return HttpResponse("OK", content_type="text/plain")
 
 # Rate → seconds map (match whatever rates you use in your decorators)
